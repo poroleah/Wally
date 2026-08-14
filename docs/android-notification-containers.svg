@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="690" viewBox="0 0 1600 690" role="img" aria-labelledby="title desc">
+  <title id="title">Wally Android 알림 흐름 컨테이너 및 역할</title>
+  <desc id="desc">User, Wally Server, Wally Frontend, Notify, Android Phone 컨테이너의 알림 흐름상 역할</desc>
+  <style>
+    text { font-family: 'Segoe UI', 'Malgun Gothic', Arial, sans-serif; fill: #16131a; }
+    .title { font-size: 30px; font-weight: 700; }
+    .header { font-size: 23px; font-weight: 700; }
+    .name { font-size: 23px; font-weight: 600; }
+    .role { font-size: 20px; }
+    .sub { font-size: 17px; fill: #504a58; }
+    .border { fill: #fff; stroke: #17131a; stroke-width: 2; }
+    .headcell { fill: #f4f1ff; stroke: #17131a; stroke-width: 2; }
+  </style>
+  <rect width="1600" height="690" fill="#fff"/>
+  <text x="800" y="64" text-anchor="middle" class="title">Wally Android 알림 흐름 — 컨테이너 및 역할</text>
+
+  <rect x="60" y="110" width="1480" height="510" class="border"/>
+  <rect x="60" y="110" width="430" height="72" class="headcell"/>
+  <rect x="490" y="110" width="1050" height="72" class="headcell"/>
+  <text x="84" y="155" class="header">컨테이너</text>
+  <text x="514" y="155" class="header">역할</text>
+
+  <rect x="60" y="182" width="430" height="84" class="border"/>
+  <rect x="490" y="182" width="1050" height="84" class="border"/>
+  <text x="84" y="234" class="name">User</text>
+  <text x="514" y="225" class="role">일정 생성 및 알림 확인 담당 — 일정 알림 옵션 설정, 휴대폰 알림 탭</text>
+  <text x="514" y="251" class="sub">알림 탭 후 해당 일정 또는 Footprint 화면으로 이동</text>
+
+  <rect x="60" y="266" width="430" height="104" class="border"/>
+  <rect x="490" y="266" width="1050" height="104" class="border"/>
+  <text x="84" y="326" class="name">Wally Server</text>
+  <text x="514" y="308" class="role">카메라 및 이상 감지 이벤트 제공 담당 — 카메라 스트림, VLM 분석 결과 제공</text>
+  <text x="514" y="336" class="sub">이상 감지 이벤트의 SSE 실시간 전달</text>
+
+  <rect x="60" y="370" width="430" height="104" class="border"/>
+  <rect x="490" y="370" width="1050" height="104" class="border"/>
+  <text x="84" y="430" class="name">Wally Frontend</text>
+  <text x="514" y="412" class="role">일정 및 알림 흐름 관리 — localStorage 일정 관리, 일정 알림 시각 계산</text>
+  <text x="514" y="440" class="sub">SSE 이상 이벤트 수신, 알림 설정 확인, 알림 생성 요청 및 화면 라우팅</text>
+
+  <rect x="60" y="474" width="430" height="104" class="border"/>
+  <rect x="490" y="474" width="1050" height="104" class="border"/>
+  <text x="84" y="534" class="name">Notify</text>
+  <text x="514" y="516" class="role">Android 알림 생성·예약 담당 — Capacitor LocalNotifications, WallyNotification Native</text>
+  <text x="514" y="544" class="sub">일정 알림 예약, 이상 감지 알림 생성, 알림 탭 데이터의 앱 전달</text>
+
+  <rect x="60" y="578" width="430" height="42" class="border"/>
+  <rect x="490" y="578" width="1050" height="42" class="border"/>
+  <text x="84" y="606" class="name">Android Phone</text>
+  <text x="514" y="606" class="role">시스템 알림 표시 담당 — Android OS 알림 표시 및 사용자 탭 이벤트 전달</text>
+</svg>

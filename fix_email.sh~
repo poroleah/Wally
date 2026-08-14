@@ -1,0 +1,8 @@
+
+if [ "$GIT_AUTHOR_EMAIL" = "poroleah@gamil.com" ]; then
+    export GIT_AUTHOR_EMAIL="poroleah@gmail.com"
+fi
+if [ "$GIT_COMMITTER_EMAIL" = "poroleah@gamil.com" ]; then
+    export GIT_COMMITTER_EMAIL="poroleah@gmail.com"
+fi
+

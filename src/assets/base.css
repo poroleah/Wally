@@ -1,0 +1,439 @@
+/* Wally theme tokens */
+:root {
+  --app-bg: #fffbf5;
+  --app-surface: #fffbf5;
+  --app-surface-muted: #f5f0e9;
+  --app-primary: #ffb085;
+  --app-primary-strong: #ff8f64;
+  --app-text: #2d2926;
+  --app-text-muted: #84776e;
+  --app-border: #eee8de;
+  --app-toggle-bg: #eee8de;
+  --app-toggle-thumb: #fffbf5;
+  --app-shadow: rgba(0, 0, 0, 0.2);
+  --color-text-2: #5c5148;
+  --color-faded-copper: #8e735b;
+  --color-lemon-chiffon: #fffacc;
+  --color-vanilla-custard: #ffefbd;
+  --color-blue-gray: #9bbcc3;
+  --splash-bg: #fffbf5;
+  --splash-logo-shadow: none;
+
+
+  --login-bg: #fffbf5;
+  --login-surface: #fffbf5;
+  --login-text: #2d2926;
+  --login-muted: #84776e;
+  --login-border: #eee8de;
+  --login-primary: #ffb085;
+  --login-secondary: #84776e;
+  --login-button-text: #fffbf5;
+  --login-error: #c65f4a;
+  --login-success: #84776e;
+  --login-icon-filter: none;
+  --login-shadow: none;
+
+  --settings-page-bg: #f5f0e9;
+  --settings-card-bg: #fffbf5;
+  --settings-header-bg: #ffb085;
+  --settings-text: #2d2926;
+  --settings-muted: #84776e;
+  --settings-border: #eee8de;
+  --settings-danger: #ff8f64;
+  --settings-toggle-bg: #eee8de;
+  --settings-toggle-on: #ffb085;
+  --settings-toggle-thumb: #fffbf5;
+  --settings-toggle-border: #d9cec4;
+  --settings-toggle-shadow: inset 0 0 0.2rem rgba(45, 41, 38, 0.08);
+  --settings-toggle-thumb-shadow: 0 0.12rem 0.35rem rgba(45, 41, 38, 0.28);
+  --settings-button-text: #fffbf5;
+  --settings-delete: #e05c5c;
+  --settings-backdrop: rgba(0, 0, 0, 0.4);
+  --settings-icon-filter: none;
+  --settings-close-icon-filter: none;
+  --settings-close-icon-shadow: drop-shadow(0 0.08rem 0.12rem rgba(45, 41, 38, 0.08));
+
+  --calendar-bg: #f5f0e9;
+  --calendar-surface: #fffbf5;
+  --calendar-surface-soft: #f5f0e9;
+  --calendar-text: #2d2926;
+  --calendar-muted: #84776e;
+  --calendar-border: #eee8de;
+  --calendar-accent: #ffb085;
+  --calendar-accent-soft: #ffddcb;
+  --calendar-saturday: #82a2b1;
+  --calendar-shadow: 0 0.18rem 0.7rem rgba(45, 41, 38, 0.06);
+  --calendar-hover: rgba(45, 41, 38, 0.04);
+  --calendar-toggle-bg: var(--settings-toggle-bg);
+  --calendar-toggle-on: var(--settings-toggle-on);
+  --calendar-toggle-thumb: var(--settings-toggle-thumb);
+  --calendar-toggle-thumb-on: var(--settings-toggle-thumb);
+  --calendar-toggle-border: var(--settings-toggle-border);
+  --calendar-toggle-shadow: var(--settings-toggle-shadow);
+  --calendar-toggle-thumb-shadow: var(--settings-toggle-thumb-shadow);
+  --calendar-icon-filter: none;
+  --calendar-close-icon-filter: none;
+  --calendar-close-icon-shadow: drop-shadow(0 0.08rem 0.12rem rgba(45, 41, 38, 0.08));
+
+
+
+  --chat-bg: #f5f0e9;
+  --chat-page-bg: #fffbf5;
+  --chat-surface: #fffbf5;
+  --chat-surface-soft: #f5f0e9;
+  --chat-text: #2d2926;
+  --chat-muted: #84776e;
+  --chat-user-bg: #84776e;
+  --chat-user-text: #fffbf5;
+  --chat-accent: #ffb085;
+  --chat-accent-soft: #ffddcb;
+  --chat-border: #eee8de;
+  --chat-shadow: 0 0.18rem 0.7rem rgba(45, 41, 38, 0.06);
+  --chat-input-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.25);
+  --chat-icon-filter: none;
+
+  --log-bg: #f5f0e9;
+  --log-surface: #fffbf5;
+  --log-surface-soft: #eee8de;
+  --log-text: #2d2926;
+  --log-muted: #84776e;
+  --log-border: #eee8de;
+  --log-accent: #ffb085;
+  --log-accent-soft: rgba(255, 176, 133, 0.18);
+  --log-shadow: 0 0.18rem 0.7rem rgba(45, 41, 38, 0.06);
+  --log-icon-filter: none;
+  --log-close-icon-filter: none;
+  --log-close-icon-shadow: drop-shadow(0 0.08rem 0.12rem rgba(45, 41, 38, 0.08));
+
+  --home-bg: #f5f0e9;
+  --home-panel-bg: #fffbf5;
+  --home-panel-border: #eee8de;
+  --home-text: #2d2926;
+  --home-muted: #84776e;
+  --home-accent: #ffb085;
+  --home-accent-strong: #ff8f64;
+  --home-shadow: 0 0.22rem 0.9rem rgba(45, 41, 38, 0.07);
+  --home-camera-border: rgba(238, 232, 222, 0.9);
+  --home-control-bg: #fffbf5;
+  --home-control-hover: #f5f0e9;
+  --home-icon-filter: none;
+  --home-icon-active-filter: none;
+  --home-protocol-bg: #fffbf5;
+  --home-protocol-text: #2d2926;
+  --home-protocol-active-bg: #2d2926;
+  --home-protocol-active-text: #fffbf5;
+
+  --nav-bg: #fffbf5;
+  --nav-text: #2d2926;
+  --nav-active: #3a2d28;
+  --nav-border: #eee8de;
+  --nav-icon-filter: none;
+
+  --color-background: var(--app-bg);
+  --color-background-soft: var(--app-surface);
+  --color-background-mute: var(--app-surface-muted);
+  --color-border: var(--app-border);
+  --color-border-hover: var(--app-text-muted);
+  --color-heading: var(--app-text);
+  --color-text: var(--app-text);
+  --section-gap: 16rem;
+}
+
+:root.theme-dark,
+body.theme-dark,
+#app.theme-dark {
+  --app-bg: #1c1918;
+  --app-surface: #1c1918;
+  --app-surface-muted: #181513;
+  --app-primary: #ffb38a;
+  --app-primary-strong: #ffb085;
+  --app-text: #fff9f3;
+  --app-text-muted: #b0a59a;
+  --app-border: #12100f;
+  --app-toggle-bg: #12100f;
+  --app-toggle-thumb: #1c1918;
+  --app-shadow: rgba(0, 0, 0, 0.45);
+  --color-text-2: #d8cec4;
+  --color-faded-copper: #b79274;
+  --color-lemon-chiffon: #d9c982;
+  --color-vanilla-custard: #fad586;
+  --color-blue-gray: #6a8a93;
+  --splash-bg: #1c1918;
+  --splash-logo-shadow: drop-shadow(0 0.28rem 0.8rem rgba(0, 0, 0, 0.28));
+
+
+  --login-bg: #1c1918;
+  --login-surface: #1c1918;
+  --login-text: #fff9f3;
+  --login-muted: #b0a59a;
+  --login-border: #12100f;
+  --login-primary: #ffb38a;
+  --login-secondary: #b0a59a;
+  --login-button-text: #1c1918;
+  --login-error: #ff9f70;
+  --login-success: #b0a59a;
+  --login-icon-filter: brightness(0) invert(0.94);
+  --login-shadow: inset 0 0 0 0.06rem #12100f, 0 0.18rem 0.7rem rgba(0, 0, 0, 0.22);
+
+  --settings-page-bg: #181513;
+  --settings-card-bg: #1c1918;
+  --settings-header-bg: #ffb38a;
+  --settings-text: #fff9f3;
+  --settings-muted: #b0a59a;
+  --settings-border: #12100f;
+  --settings-danger: #ffb085;
+  --settings-toggle-bg: #12100f;
+  --settings-toggle-on: #ffb38a;
+  --settings-toggle-thumb: #1c1918;
+  --settings-toggle-border: #5f5f6b;
+  --settings-toggle-shadow: inset 0 0 0.2rem rgba(0, 0, 0, 0.35), 0 0 0 0.05rem rgba(244, 244, 245, 0.05);
+  --settings-toggle-thumb-shadow: 0 0.14rem 0.45rem rgba(0, 0, 0, 0.55);
+  --settings-button-text: #1c1918;
+  --settings-delete: #ff8b8b;
+  --settings-backdrop: rgba(0, 0, 0, 0.55);
+  --settings-icon-filter: brightness(0) invert(0.94);
+  --settings-close-icon-filter: brightness(0) invert(1) sepia(0.14) saturate(1.4) hue-rotate(335deg);
+  --settings-close-icon-shadow: drop-shadow(0 0.1rem 0.2rem rgba(0, 0, 0, 0.65)) drop-shadow(0 0 0.18rem rgba(244, 244, 245, 0.18));
+
+  --calendar-bg: #181513;
+  --calendar-surface: #1c1918;
+  --calendar-surface-soft: #181513;
+  --calendar-text: #fff9f3;
+  --calendar-muted: #b0a59a;
+  --calendar-border: #12100f;
+  --calendar-accent: #ffb38a;
+  --calendar-accent-soft: rgba(255, 179, 138, 0.18);
+  --calendar-saturday: #8fb8c8;
+  --calendar-shadow: 0 0.22rem 0.9rem rgba(0, 0, 0, 0.28);
+  --calendar-hover: rgba(255, 179, 138, 0.12);
+  --calendar-toggle-bg: var(--settings-toggle-bg);
+  --calendar-toggle-on: var(--settings-toggle-on);
+  --calendar-toggle-thumb: #b0a59a;
+  --calendar-toggle-thumb-on: #1c1918;
+  --calendar-toggle-border: var(--settings-toggle-border);
+  --calendar-toggle-shadow: var(--settings-toggle-shadow);
+  --calendar-toggle-thumb-shadow: var(--settings-toggle-thumb-shadow);
+  --calendar-icon-filter: brightness(0) invert(0.94);
+  --calendar-close-icon-filter: brightness(0) invert(1) sepia(0.14) saturate(1.4) hue-rotate(335deg);
+  --calendar-close-icon-shadow: drop-shadow(0 0.1rem 0.2rem rgba(0, 0, 0, 0.65)) drop-shadow(0 0 0.18rem rgba(244, 244, 245, 0.18));
+
+
+
+  --chat-bg: #181513;
+  --chat-page-bg: #1c1918;
+  --chat-surface: #1c1918;
+  --chat-surface-soft: #181513;
+  --chat-text: #fff9f3;
+  --chat-muted: #b0a59a;
+  --chat-user-bg: #b0a59a;
+  --chat-user-text: #1c1918;
+  --chat-accent: #ffb38a;
+  --chat-accent-soft: rgba(255, 179, 138, 0.18);
+  --chat-border: #12100f;
+  --chat-shadow: 0 0.22rem 0.9rem rgba(0, 0, 0, 0.28);
+  --chat-input-shadow: inset 0 0 0 0.06rem #12100f, 0 0.22rem 0.9rem rgba(0, 0, 0, 0.28);
+  --chat-icon-filter: brightness(0) invert(0.94);
+
+  --log-bg: #181513;
+  --log-surface: #1c1918;
+  --log-surface-soft: #12100f;
+  --log-text: #fff9f3;
+  --log-muted: #b0a59a;
+  --log-border: #12100f;
+  --log-accent: #ffb38a;
+  --log-accent-soft: rgba(255, 179, 138, 0.16);
+  --log-shadow: 0 0.22rem 0.9rem rgba(0, 0, 0, 0.28);
+  --log-icon-filter: brightness(0) invert(0.94);
+  --log-close-icon-filter: brightness(0) invert(1) sepia(0.14) saturate(1.4) hue-rotate(335deg);
+  --log-close-icon-shadow: drop-shadow(0 0.1rem 0.2rem rgba(0, 0, 0, 0.65)) drop-shadow(0 0 0.18rem rgba(244, 244, 245, 0.18));
+
+  --home-bg: #181513;
+  --home-panel-bg: #1c1918;
+  --home-panel-border: #12100f;
+  --home-text: #fff9f3;
+  --home-muted: #b0a59a;
+  --home-accent: #ffb38a;
+  --home-accent-strong: #ffb085;
+  --home-shadow: 0 0.24rem 1rem rgba(0, 0, 0, 0.3);
+  --home-camera-border: rgba(18, 16, 15, 0.9);
+  --home-control-bg: #1c1918;
+  --home-control-hover: #181513;
+  --home-icon-filter: brightness(0) invert(0.92) sepia(0.16) saturate(1.6) hue-rotate(338deg);
+  --home-icon-active-filter: brightness(0) invert(0.77) sepia(0.34) saturate(1.7) hue-rotate(336deg);
+  --home-protocol-bg: #1c1918;
+  --home-protocol-text: #fff9f3;
+  --home-protocol-active-bg: #fff9f3;
+  --home-protocol-active-text: #1c1918;
+
+  --nav-bg: #1c1918;
+  --nav-text: #fff9f3;
+  --nav-active: #f7f2ec;
+  --nav-border: #12100f;
+  --nav-icon-filter: brightness(0) invert(0.94);
+}
+
+:root.theme-light,
+body.theme-light,
+#app.theme-light {
+  --app-bg: #fffbf5;
+  --app-surface: #fffbf5;
+  --app-surface-muted: #f5f0e9;
+  --app-primary: #ffb085;
+  --app-primary-strong: #ff8f64;
+  --app-text: #2d2926;
+  --app-text-muted: #84776e;
+  --app-border: #eee8de;
+  --app-toggle-bg: #eee8de;
+  --app-toggle-thumb: #fffbf5;
+  --app-shadow: rgba(0, 0, 0, 0.2);
+  --color-text-2: #5c5148;
+  --color-faded-copper: #8e735b;
+  --color-lemon-chiffon: #fffacc;
+  --color-vanilla-custard: #ffefbd;
+  --color-blue-gray: #9bbcc3;
+
+
+  --login-bg: #fffbf5;
+  --login-surface: #fffbf5;
+  --login-text: #2d2926;
+  --login-muted: #84776e;
+  --login-border: #eee8de;
+  --login-primary: #ffb085;
+  --login-secondary: #84776e;
+  --login-button-text: #fffbf5;
+  --login-error: #c65f4a;
+  --login-success: #84776e;
+  --login-icon-filter: none;
+  --login-shadow: none;
+
+  --settings-page-bg: #f5f0e9;
+  --settings-card-bg: #fffbf5;
+  --settings-header-bg: #ffb085;
+  --settings-text: #2d2926;
+  --settings-muted: #84776e;
+  --settings-border: #eee8de;
+  --settings-danger: #ff8f64;
+  --settings-toggle-bg: #eee8de;
+  --settings-toggle-on: #ffb085;
+  --settings-toggle-thumb: #fffbf5;
+  --settings-toggle-border: #d9cec4;
+  --settings-toggle-shadow: inset 0 0 0.2rem rgba(45, 41, 38, 0.08);
+  --settings-toggle-thumb-shadow: 0 0.12rem 0.35rem rgba(45, 41, 38, 0.28);
+  --settings-button-text: #fffbf5;
+  --settings-delete: #e05c5c;
+  --settings-backdrop: rgba(0, 0, 0, 0.4);
+  --settings-icon-filter: none;
+  --settings-close-icon-filter: none;
+  --settings-close-icon-shadow: drop-shadow(0 0.08rem 0.12rem rgba(45, 41, 38, 0.08));
+
+  --calendar-bg: #f5f0e9;
+  --calendar-surface: #fffbf5;
+  --calendar-surface-soft: #f5f0e9;
+  --calendar-text: #2d2926;
+  --calendar-muted: #84776e;
+  --calendar-border: #eee8de;
+  --calendar-accent: #ffb085;
+  --calendar-accent-soft: #ffddcb;
+  --calendar-saturday: #82a2b1;
+  --calendar-shadow: 0 0.18rem 0.7rem rgba(45, 41, 38, 0.06);
+  --calendar-hover: rgba(45, 41, 38, 0.04);
+  --calendar-toggle-bg: var(--settings-toggle-bg);
+  --calendar-toggle-on: var(--settings-toggle-on);
+  --calendar-toggle-thumb: var(--settings-toggle-thumb);
+  --calendar-toggle-thumb-on: var(--settings-toggle-thumb);
+  --calendar-toggle-border: var(--settings-toggle-border);
+  --calendar-toggle-shadow: var(--settings-toggle-shadow);
+  --calendar-toggle-thumb-shadow: var(--settings-toggle-thumb-shadow);
+  --calendar-icon-filter: none;
+  --calendar-close-icon-filter: none;
+  --calendar-close-icon-shadow: drop-shadow(0 0.08rem 0.12rem rgba(45, 41, 38, 0.08));
+
+
+
+  --chat-bg: #f5f0e9;
+  --chat-page-bg: #fffbf5;
+  --chat-surface: #fffbf5;
+  --chat-surface-soft: #f5f0e9;
+  --chat-text: #2d2926;
+  --chat-muted: #84776e;
+  --chat-user-bg: #84776e;
+  --chat-user-text: #fffbf5;
+  --chat-accent: #ffb085;
+  --chat-accent-soft: #ffddcb;
+  --chat-border: #eee8de;
+  --chat-shadow: 0 0.18rem 0.7rem rgba(45, 41, 38, 0.06);
+  --chat-input-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.25);
+  --chat-icon-filter: none;
+
+  --log-bg: #f5f0e9;
+  --log-surface: #fffbf5;
+  --log-surface-soft: #eee8de;
+  --log-text: #2d2926;
+  --log-muted: #84776e;
+  --log-border: #eee8de;
+  --log-accent: #ffb085;
+  --log-accent-soft: rgba(255, 176, 133, 0.18);
+  --log-shadow: 0 0.18rem 0.7rem rgba(45, 41, 38, 0.06);
+  --log-icon-filter: none;
+  --log-close-icon-filter: none;
+  --log-close-icon-shadow: drop-shadow(0 0.08rem 0.12rem rgba(45, 41, 38, 0.08));
+
+  --home-bg: #f5f0e9;
+  --home-panel-bg: #fffbf5;
+  --home-panel-border: #eee8de;
+  --home-text: #2d2926;
+  --home-muted: #84776e;
+  --home-accent: #ffb085;
+  --home-accent-strong: #ff8f64;
+  --home-shadow: 0 0.22rem 0.9rem rgba(45, 41, 38, 0.07);
+  --home-camera-border: rgba(238, 232, 222, 0.9);
+  --home-control-bg: #fffbf5;
+  --home-control-hover: #f5f0e9;
+  --home-icon-filter: none;
+  --home-icon-active-filter: none;
+  --home-protocol-bg: #fffbf5;
+  --home-protocol-text: #2d2926;
+  --home-protocol-active-bg: #2d2926;
+  --home-protocol-active-text: #fffbf5;
+
+  --nav-bg: #fffbf5;
+  --nav-text: #2d2926;
+  --nav-active: #3a2d28;
+  --nav-border: #eee8de;
+  --nav-icon-filter: none;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  font-weight: normal;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--app-text);
+  background: var(--app-bg);
+  transition:
+    color 0.25s,
+    background-color 0.25s;
+  line-height: 1.6;
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    'Fira Sans',
+    'Droid Sans',
+    'Helvetica Neue',
+    sans-serif;
+  font-size: 1.5rem;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

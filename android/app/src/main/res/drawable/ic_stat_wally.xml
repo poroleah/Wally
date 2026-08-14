@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- Android notification icons are rendered as a single-colour mask. -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M4,23 L24,7 L41,20 M41,20 L45,23 M41,20 L41,11" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M14,25 A2,2 0,1 0,18 25 A2,2 0,1 0,14 25 M30,25 A2,2 0,1 0,34 25 A2,2 0,1 0,30 25 M22,29 L26,29 L24,33 Z" />
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M24,33 C22,40 16,41 15,34 M24,33 C26,40 32,41 33,34" />
+</vector>

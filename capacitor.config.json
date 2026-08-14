@@ -1,0 +1,21 @@
+{
+  "appId": "com.wally.app",
+  "appName": "wally205",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "http"
+  },
+  "android": {
+    "allowMixedContent": true
+  },
+   "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0,
+      "backgroundColor": "#FFFBF5",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "FIT_CENTER",
+      "layoutName": "splash_screen",
+      "showSpinner": false
+    }
+  }
+}

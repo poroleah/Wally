@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>wally205</title>
+    <link rel="icon" type="image/svg+xml" href="/icons/App_Icon.svg" />
+    <link rel="apple-touch-icon" href="/icons/App_Icon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+    <script>
+      (() => {
+        const stored = window.localStorage.getItem('wally:theme')
+        const prefersDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)').matches : false
+        const theme = stored === 'dark' || stored === 'light' ? stored : prefersDark ? 'dark' : 'light'
+
+        document.documentElement.classList.add(`theme-${theme}`)
+        document.documentElement.dataset.theme = theme
+        document.documentElement.style.colorScheme = theme
+      })()
+    </script>
+    <style>
+      #splash-init {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: grid;
+        place-items: center;
+        background: #fffbf5;
+      }
+
+      #splash-init .splash-init-logo {
+        display: block;
+        width: clamp(165px, 49vw, 205px);
+        height: auto;
+        transform: translateY(20px);
+        filter: none;
+      }
+
+      html.theme-dark #splash-init {
+        background: #202024;
+      }
+
+      html.theme-dark #splash-init .splash-init-logo {
+        filter: drop-shadow(0 0.28rem 0.8rem rgba(0, 0, 0, 0.28));
+      }
+    </style>
+  </head>
+  <body>
+    <div id="splash-init">
+      <img src="/icons/Logo.svg" class="splash-init-logo" alt="" />
+    </div>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

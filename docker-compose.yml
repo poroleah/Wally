@@ -1,0 +1,16 @@
+services:
+  wally-web:
+    build:
+      context: .
+      dockerfile: docker/dev/Dockerfile
+    image: wally-web
+    container_name: wally-web
+    restart: unless-stopped
+    ports:
+      - "5176:5176"
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - .:/app
+      - /app/node_modules

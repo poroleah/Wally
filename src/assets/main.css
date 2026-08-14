@@ -1,0 +1,16 @@
+@import './base.css';
+
+@font-face {
+  font-family: 'Malang';
+  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'MalangBold';
+  src: url('@/assets/Fonts/Malang_Bold.ttf') format('truetype');
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+  font-weight: normal;
+}
