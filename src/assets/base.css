@@ -55,7 +55,7 @@
 
   --calendar-bg: #f5f0e9;
   --calendar-surface: #fffbf5;
-  --calendar-surface-soft: #f5f0e9;
+  --calendar-surface-soft: #efe8df;
   --calendar-text: #2d2926;
   --calendar-muted: #84776e;
   --calendar-border: #eee8de;
@@ -197,7 +197,7 @@ body.theme-dark,
 
   --calendar-bg: #181513;
   --calendar-surface: #1c1918;
-  --calendar-surface-soft: #181513;
+  --calendar-surface-soft: #463b36;
   --calendar-text: #fff9f3;
   --calendar-muted: #b0a59a;
   --calendar-border: #12100f;
@@ -328,7 +328,7 @@ body.theme-light,
 
   --calendar-bg: #f5f0e9;
   --calendar-surface: #fffbf5;
-  --calendar-surface-soft: #f5f0e9;
+  --calendar-surface-soft: #efe8df;
   --calendar-text: #2d2926;
   --calendar-muted: #84776e;
   --calendar-border: #eee8de;

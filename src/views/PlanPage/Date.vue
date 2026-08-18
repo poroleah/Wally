@@ -1,7 +1,7 @@
 <template>
   <div :class="$style.calenderDate">
     <div :class="$style.date">{{ today }}</div>
-    <img :class="$style.iconPaw" src="/icons/Paw.svg" alt="발자국" @click="router.push({ path: ROUTES.FOOTPRINT, query: { date: dateParam } })" />
+    <img :class="$style.iconPaw" src="/icons/Calender/Plan/Bone.svg" alt="타임라인 보기" @click="router.push({ path: ROUTES.FOOTPRINT, query: { date: dateParam } })" />
   </div>
 </template>
 

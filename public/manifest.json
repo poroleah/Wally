@@ -1,6 +1,6 @@
 {
-  "name": "wally205",
-  "short_name": "wally205",
+  "name": "Wally",
+  "short_name": "Wally",
   "description": "AI 기반 반려견 건강관리를 위한 스마트 펫 하우스",
   "start_url": "/",
   "display": "standalone",

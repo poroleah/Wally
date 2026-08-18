@@ -259,7 +259,7 @@ const nextMonth = () => {
   height: 3.2rem;
   justify-self: center;
   border-radius: 50%;
-  border: 0.1rem solid var(--calendar-border);
+  border: 0.1rem solid var(--calendar-surface-soft);
   box-sizing: border-box;
   font-size: 1.8rem;
   color: var(--calendar-text);

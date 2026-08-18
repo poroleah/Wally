@@ -1,6 +1,6 @@
 {
-  "appId": "com.wally.app",
-  "appName": "wally205",
+  "appId": "com.wally.app2",
+  "appName": "Wally2",
   "webDir": "dist",
   "server": {
     "androidScheme": "http"

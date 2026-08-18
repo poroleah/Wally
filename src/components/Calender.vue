@@ -37,9 +37,8 @@
             >
               <img
                 v-if="hasLogDate(day)"
-                v-theme-src="getLogPrintSources(day)"
                 :class="$style.fluentanimalPawPrint48FilIcon"
-                :src="hasPlanDate(day) ? '/icons/Log/logprint.svg?v=3' : '/icons/Log/logprint_mono.svg?v=1'"
+                :src="isSelected(day) ? '/icons/Calender/Plan/Bone_Selected.svg' : '/icons/Calender/Plan/Bone_Fill.svg'"
                 alt=""
                 aria-hidden="true"
               />
@@ -121,9 +120,6 @@ const planDateKeys = computed(() => new Set(
 
 const hasPlanDate = (day) => planDateKeys.value.has(getDateKey(day))
 const hasLogDate = (day) => logDateKeys.value.has(getDateKey(day))
-const getLogPrintSources = (day) => hasPlanDate(day)
-  ? { light: '/icons/Log/logprint.svg?v=3', dark: '/icons/Log/logprint_Dark.svg?v=2' }
-  : { light: '/icons/Log/logprint_mono.svg?v=1', dark: '/icons/Log/logprint_mono_Dark.svg?v=1' }
 
 async function loadLogDateKeys() {
   const requestId = ++logDateRequestId
@@ -393,8 +389,9 @@ function handleClickCapture(event) {
 }
 .planDot {
   position: absolute;
-  top: 0.25rem;
-  right: 0.22rem;
+  z-index: 3;
+  top: 0.33rem;
+  right: 0.33rem;
   width: 0.42rem;
   height: 0.42rem;
   border-radius: 50%;
@@ -464,7 +461,7 @@ function handleClickCapture(event) {
   position: absolute;
   inset: 0;
   z-index: 2;
-  border: 1px solid var(--calendar-border);
+  border: 1px solid var(--calendar-surface-soft);
   border-radius: 50%;
   box-sizing: border-box;
   pointer-events: none;

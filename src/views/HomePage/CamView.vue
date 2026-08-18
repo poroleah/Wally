@@ -1182,9 +1182,9 @@ watch(isExpanded, async (expanded) => {
   position: absolute;
   z-index: 4;
   display: flex;
-  width: 80px;
+  width: 82px;
   height: 23px;
-  padding: 2px 0 2px 2px;
+  padding: 2px;
   border-radius: 20px;
   background-color: var(--home-protocol-bg);
   box-sizing: border-box;

@@ -12,7 +12,7 @@
         <div v-if="!hasStateCard" :class="$style.timelineDot" />
         <div v-if="loading" :class="$style.stateText">기록을 불러오는 중</div>
         <div v-else-if="error" :class="$style.stateText">{{ error }}</div>
-        <div v-else-if="isEmpty" :class="$style.stateText">기록이 없습니다.</div>
+        <div v-else-if="isEmpty" :class="$style.stateText">기록된 행동이 없습니다.</div>
         <LogItem
           v-else
           v-for="(item, index) in logs"
@@ -165,6 +165,7 @@ watch(activeClipId, () => {
   position: relative;
   flex: 1;
   min-height: 0;
+  display: flex;
   padding-left: 2rem;
   overflow-y: auto;
   padding-bottom: 8rem;
@@ -190,6 +191,8 @@ watch(activeClipId, () => {
 }
 .logList {
   position: relative;
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
 }
@@ -209,7 +212,7 @@ watch(activeClipId, () => {
   align-items: center;
   justify-content: center;
   font-family: 'Malang', sans-serif;
-  font-size: 1rem;
+  font-size: 1.6rem;
   text-align: center;
 }
 @media (min-width: 48rem) and (orientation: portrait) {
@@ -250,7 +253,7 @@ watch(activeClipId, () => {
   }
 
   .stateText {
-    font-size: 1.28rem;
+    font-size: 1.6rem;
   }
 }
 

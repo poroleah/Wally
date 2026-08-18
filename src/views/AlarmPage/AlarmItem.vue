@@ -1,6 +1,6 @@
 <template>
   <div :class="$style.alarm" role="button" tabindex="0">
-    <span v-if="isFootprintIcon" :class="[$style.icon, $style.footprintIcon]" aria-hidden="true" />
+    <span v-if="isFootprintIcon" :class="[$style.icon, $style.boneIcon]" aria-hidden="true" />
     <img v-else v-theme-src="themeIconSources" :class="[$style.icon, isThemeIcon ? $style.themeIcon : null]" :src="alarm.icon" alt="" />
     <div :class="$style.body">
       <b :class="$style.title">{{ alarm.title }}</b>
@@ -70,11 +70,11 @@ const themeIconSources = computed(() => ({
   filter: var(--log-icon-filter);
 }
 
-.footprintIcon {
+.boneIcon {
   border-radius: 0;
   background-color: var(--log-text);
-  -webkit-mask: url('/icons/Paw.svg') center / contain no-repeat;
-  mask: url('/icons/Paw.svg') center / contain no-repeat;
+  -webkit-mask: url('/icons/Calender/Plan/Bone.svg') center / contain no-repeat;
+  mask: url('/icons/Calender/Plan/Bone.svg') center / contain no-repeat;
 }
 
 .body {
