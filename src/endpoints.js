@@ -102,30 +102,6 @@ export const API_ENDPOINTS = {
   get eventHistory() {
     return getApiUrl('/events')
   },
-
-  // Temporary compatibility aliases for Wally code that will be migrated next.
-  get cameras() {
-    return getApiUrl('/camera')
-  },
-  cameraStream() {
-    return getHlsUrl()
-  },
-
-  // NOT IN MEWLY BACKEND: the four routes below (petProfile, homeStatus,
-  // homeAlerts, anomalies) have no mewly gateway counterpart. Kept for now;
-  // removal happens in the next migration step.
-  get petProfile() {
-    return getApiUrl('/api/pet/profile')
-  },
-  get homeStatus() {
-    return getApiUrl('/api/home/status')
-  },
-  get homeAlerts() {
-    return getApiUrl('/api/home/alerts')
-  },
-  get anomalies() {
-    return getApiUrl('/api/anomalies')
-  },
 }
 
 export const APP_ENDPOINTS = {
@@ -181,8 +157,4 @@ export function getEventsUrl(token) {
 
 export function getClipUrl(name, size, token) {
   return `${API_ENDPOINTS.clipFile(name)}?s=${size}&token=${encodeURIComponent(token)}`
-}
-
-export function getCameraStreamUrl() {
-  return getHlsUrl()
 }
