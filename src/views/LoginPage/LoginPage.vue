@@ -1,9 +1,8 @@
 <template>
   <section :class="$style.loginPage" aria-label="로그인">
-    <img v-theme-src="{ light: '/icons/Logo.svg', dark: '/icons/Logo_Dark.svg' }" :class="$style.logo" src="/icons/Logo.svg" alt="ally" />
+    <img v-theme-src="{ light: '/icons/Brand/Logo.svg', dark: '/icons/Brand/Logo_Dark.svg' }" :class="$style.logo" src="/icons/Brand/Logo.svg" alt="ally" />
 
     <form :class="$style.form" @submit.prevent="handleLogin">
-      <p v-if="notice" :class="$style.notice">{{ notice }}</p>
       <label :class="$style.label" for="login-id">아이디</label>
       <input
         id="login-id"
@@ -55,20 +54,23 @@
         </div>
       </div>
       <button :class="$style.button" type="submit" :disabled="loading">{{ loading ? '로그인 중' : '로그인' }}</button>
-      <p v-if="error" :class="$style.error">{{ error }}</p>
+      <p v-if="feedbackMessage" :class="$style.error">{{ feedbackMessage }}</p>
+      <button :class="$style.changeServerButton" type="button" @click="changeServerAddress">서버 주소 변경</button>
     </form>
   </section>
 </template>
 
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ROUTES } from '@/constants'
-import { useAuth } from '@/composables/useAuth'
+import { LOGIN_NOTICE_STORAGE_KEY, ROUTES } from '@/constants'
+import { LoginRateLimitError, useAuth } from '@/composables/useAuth'
+import { useServerAuth } from '@/composables/useServerAuth'
 
 const router = useRouter()
-const { login, mustChangePassword, consumeLoginNotice } = useAuth()
+const { login, logout } = useAuth()
+const { clearServerAuthentication } = useServerAuth()
 
 const username = ref('')
 const password = ref('')
@@ -76,7 +78,10 @@ const keepLogin = ref(false)
 const loading = ref(false)
 const showLoginPassword = ref(false)
 const error = ref('')
-const notice = ref(consumeLoginNotice())
+const notice = ref(window.sessionStorage.getItem(LOGIN_NOTICE_STORAGE_KEY) || '')
+const feedbackMessage = computed(() => error.value || notice.value)
+
+window.sessionStorage.removeItem(LOGIN_NOTICE_STORAGE_KEY)
 
 const toggleKeepLogin = () => {
   keepLogin.value = !keepLogin.value
@@ -86,19 +91,37 @@ const showUnsupported = () => {
   error.value = '아직 지원되지 않습니다.'
 }
 
+const changeServerAddress = () => {
+  logout({ revoke: false })
+  clearServerAuthentication()
+  router.replace(ROUTES.LOGIN_ADDRESS)
+}
+
+function formatRateLimitMessage(retryAfterSeconds) {
+  if (!retryAfterSeconds) {
+    return '로그인 시도가 너무 많습니다. 잠시 후 다시 시도해주세요.'
+  }
+
+  if (retryAfterSeconds >= 60) {
+    return `로그인 시도가 너무 많습니다. ${Math.ceil(retryAfterSeconds / 60)}분 후 다시 시도해주세요.`
+  }
+
+  return `로그인 시도가 너무 많습니다. ${retryAfterSeconds}초 후 다시 시도해주세요.`
+}
+
 const handleLogin = async () => {
-  error.value = ''
   notice.value = ''
+  error.value = ''
   loading.value = true
 
   try {
     await login(username.value, password.value, keepLogin.value)
-    // FR-006: the initial password must be changed on the first login —
-    // steer to the settings page, where the password sheet opens itself.
-    router.push(mustChangePassword.value ? ROUTES.SETTINGS : ROUTES.HOME)
+    router.push(ROUTES.HOME)
   } catch (e) {
     const message = e?.message || ''
-    if (message.startsWith('network failed')) {
+    if (e instanceof LoginRateLimitError) {
+      error.value = formatRateLimitMessage(e.retryAfterSeconds)
+    } else if (message.startsWith('network failed')) {
       error.value = '서버에 연결할 수 없습니다.'
     } else if (message.startsWith('server error')) {
       error.value = '서버 오류가 발생했습니다.'
@@ -137,7 +160,6 @@ const handleLogin = async () => {
   font-family: 'Hancom MalangMalang', 'Malang', sans-serif;
   font-size: 12px;
 }
-
 
 .logo {
   display: block;
@@ -310,12 +332,22 @@ const handleLogin = async () => {
   line-height: 18px;
 }
 
-.notice {
-  margin-bottom: 4px;
-  color: var(--secondary);
-  text-align: center;
-  font-size: 12px;
-  line-height: 18px;
+.changeServerButton {
+  align-self: center;
+  border: 0;
+  padding: 2px 6px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  opacity: 0.8;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.changeServerButton:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 @media (min-width: 700px) {
@@ -381,11 +413,6 @@ const handleLogin = async () => {
   }
 
   .error {
-    font-size: clamp(14px, 1.8dvw, 16px);
-    line-height: 1.5;
-  }
-
-  .notice {
     font-size: clamp(14px, 1.8dvw, 16px);
     line-height: 1.5;
   }

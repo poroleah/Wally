@@ -1,6 +1,6 @@
 <template>
   <section :class="$style.loginAddress" aria-label="서버 주소 인증">
-    <img v-theme-src="{ light: '/icons/Logo.svg', dark: '/icons/Logo_Dark.svg' }" :class="$style.logo" src="/icons/Logo.svg" alt="ally" />
+    <img v-theme-src="{ light: '/icons/Brand/Logo.svg', dark: '/icons/Brand/Logo_Dark.svg' }" :class="$style.logo" src="/icons/Brand/Logo.svg" alt="ally" />
 
     <form :class="$style.form" @submit.prevent="authenticateServer">
       <label :class="$style.label" for="server-address">서버주소</label>

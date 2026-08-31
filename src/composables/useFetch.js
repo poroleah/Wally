@@ -67,20 +67,6 @@ export async function authFetch(url, options = {}) {
     return res
   }
 
-  let detail = ''
-  try {
-    detail = (await res.clone().json())?.detail || ''
-  } catch {
-    // Non-JSON 401 body — treated as an ordinary expiry.
-  }
-  if (detail === 'token revoked') {
-    // Epoch mismatch: a newer login replaced this session (FR-047).
-    // No refresh attempt — the refresh token is revoked with it, and a
-    // logout call with these credentials must not touch the new session.
-    logout({ revoke: false })
-    return res
-  }
-
   const refreshed = isPersistentSession.value ? await refreshAccessToken() : false
   if (refreshed) {
     return fetch(resolveUrl(url), createRequestOptions(options, getToken()))

@@ -48,8 +48,8 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import AppLogo from '@/components/AppLogo.vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import AppLogo from '@/components/Brand/AppLogo.vue'
 import { useHomeData } from '@/composables/useHomeData'
 import StateBar from './StateBar.vue'
 import CamView from './CamView.vue'
@@ -58,6 +58,7 @@ import HomeDirectionDrawer from './HomeDirectionDrawer.vue'
 import HomeLightDrawer from './HomeLightDrawer.vue'
 import HomeTemperatureDrawer from './HomeTemperatureDrawer.vue'
 import HomeTalkDrawer from './HomeTalkDrawer.vue'
+import { getReliableLandscape, ORIENTATION_DEBOUNCE_MS } from '@/utils/viewportOrientation'
 
 const { loadHomeData } = useHomeData()
 const camView = ref(null)
@@ -69,6 +70,7 @@ const isRefreshing = ref(false)
 let pullStartX = 0
 let pullStartY = 0
 let pullEligible = false
+let wasLandscape = false
 const PULL_THRESHOLD = 72
 const MAX_PULL_DISTANCE = 112
 
@@ -177,13 +179,44 @@ function handleAndroidBack(event) {
   closeActiveHomeControl()
 }
 
+function resetPortraitScroll() {
+  if (window.innerHeight >= window.innerWidth && page.value?.scrollTop) {
+    page.value.scrollTop = 0
+  }
+}
+
+let layoutChangeTimer = null
+
+function handleLayoutChange() {
+  window.clearTimeout(layoutChangeTimer)
+  layoutChangeTimer = window.setTimeout(() => {
+    layoutChangeTimer = null
+    const isLandscape = getReliableLandscape(wasLandscape)
+    if (isLandscape !== wasLandscape) {
+      wasLandscape = isLandscape
+      cancelPull()
+      closeActiveHomeControl()
+    }
+    resetPortraitScroll()
+  }, ORIENTATION_DEBOUNCE_MS)
+}
+
 onMounted(() => {
+  wasLandscape = getReliableLandscape(false)
   window.addEventListener('wally:android-back', handleAndroidBack)
+  window.visualViewport?.addEventListener('resize', handleLayoutChange)
+  window.addEventListener('orientationchange', handleLayoutChange)
+  window.addEventListener('resize', handleLayoutChange)
+  nextTick(resetPortraitScroll)
   loadHomeData()
 })
 
 onBeforeUnmount(() => {
+  window.clearTimeout(layoutChangeTimer)
   window.removeEventListener('wally:android-back', handleAndroidBack)
+  window.visualViewport?.removeEventListener('resize', handleLayoutChange)
+  window.removeEventListener('orientationchange', handleLayoutChange)
+  window.removeEventListener('resize', handleLayoutChange)
 })
 </script>
 
@@ -340,6 +373,16 @@ onBeforeUnmount(() => {
   display: block;
   flex: 0 0 auto;
   width: 100%;
+}
+
+@media (orientation: portrait) {
+  .page {
+    scroll-padding-top: 0;
+  }
+
+  .pageContent {
+    min-height: min-content;
+  }
 }
 
 .videoArea {

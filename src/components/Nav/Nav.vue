@@ -21,7 +21,7 @@ const route = useRoute()
 
 const tabs = [
   { label: '홈',     path: ROUTES.HOME,     iconOn: '/icons/Nav/Home_On.svg',     iconOff: '/icons/Nav/Home_Off.svg' },
-  { label: '캘린더', path: ROUTES.SCHEDULE, iconOn: '/icons/Nav/Calender_On.svg', iconOff: '/icons/Nav/Calender_Off.svg' },
+  { label: '캘린더', path: ROUTES.SCHEDULE, iconOn: '/icons/Nav/Calendar_On.svg', iconOff: '/icons/Nav/Calendar_Off.svg' },
   { label: '챗봇',   path: ROUTES.CHAT,     iconOn: '/icons/Nav/Chatting_On.svg', iconOff: '/icons/Nav/Chatting_Off.svg' },
   { label: '설정',   path: ROUTES.SETTINGS, iconOn: '/icons/Nav/Setting_On.svg',  iconOff: '/icons/Nav/Setting_Off.svg' },
 ]

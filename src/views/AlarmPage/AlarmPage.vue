@@ -31,10 +31,6 @@ const stackRef = ref(null)
 </script>
 
 <style module>
-@font-face {
-  font-family: 'Malang';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
 
 .page {
   position: fixed;
@@ -51,7 +47,7 @@ const stackRef = ref(null)
   z-index: 202;
   --alarm-card-title-font: 1.2rem;
   --alarm-card-body-font: 1rem;
-  --alarm-state-font: 1.6rem;
+  --alarm-state-font: 1rem;
   --alarm-card-time-font: max(0.7rem, 7px);
 }
 
@@ -59,7 +55,7 @@ const stackRef = ref(null)
   .page {
     --alarm-card-title-font: clamp(15px, 4.4dvw, 30px);
     --alarm-card-body-font: clamp(14px, 3.8dvw, 25px);
-    --alarm-state-font: 1.6rem;
+    --alarm-state-font: clamp(15px, 4dvw, 28px);
     --alarm-card-time-font: clamp(9px, 1.85dvw, 14px);
   }
 }

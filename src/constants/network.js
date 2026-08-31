@@ -1,0 +1,1 @@
+export const SERVER_REQUEST_TIMEOUT_MS = 5000

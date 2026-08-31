@@ -17,8 +17,9 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import Nav from '@/components/Nav/Nav.vue'
-import SplashScreen from '@/components/SplashScreen.vue'
+import SplashScreen from '@/components/App/SplashScreen.vue'
 import { ROUTES } from '@/constants'
+import { getReliableLandscape, isEditableElement, ORIENTATION_DEBOUNCE_MS } from '@/utils/viewportOrientation'
 
 const route = useRoute()
 const isLandscape = ref(false)
@@ -27,10 +28,32 @@ const themeClass = ref('theme-light')
 const toastMessage = ref('')
 let unsubscribeTheme = null
 let toastTimer = null
+let orientationTimer = null
+let focusedElementTimer = null
 
 const updateOrientation = () => {
-  isLandscape.value = window.innerWidth > window.innerHeight
-  if (!isLandscape.value) forceHomePortrait.value = false
+  window.clearTimeout(orientationTimer)
+  orientationTimer = window.setTimeout(() => {
+    orientationTimer = null
+    isLandscape.value = getReliableLandscape(isLandscape.value)
+    if (!isLandscape.value) forceHomePortrait.value = false
+  }, ORIENTATION_DEBOUNCE_MS)
+}
+
+const keepFocusedElementVisible = () => {
+  const element = document.activeElement
+  if (!isEditableElement(element)) return
+
+  window.clearTimeout(focusedElementTimer)
+  focusedElementTimer = window.setTimeout(() => {
+    focusedElementTimer = null
+    if (document.activeElement === element) element.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+  }, ORIENTATION_DEBOUNCE_MS)
+}
+
+const handleViewportChange = () => {
+  updateOrientation()
+  keepFocusedElementVisible()
 }
 
 const updateForceHomePortrait = (event) => {
@@ -50,7 +73,10 @@ const showToast = (event) => {
 
 onMounted(() => {
   updateOrientation()
-  window.addEventListener('resize', updateOrientation)
+  window.addEventListener('resize', handleViewportChange)
+  window.addEventListener('orientationchange', handleViewportChange)
+  window.visualViewport?.addEventListener('resize', handleViewportChange)
+  document.addEventListener('focusin', keepFocusedElementVisible)
   window.addEventListener('wally:home-force-portrait', updateForceHomePortrait)
   window.addEventListener('wally:show-toast', showToast)
   forceHomePortrait.value = document.documentElement.classList.contains('home-force-portrait')
@@ -60,10 +86,15 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', updateOrientation)
+  window.removeEventListener('resize', handleViewportChange)
+  window.removeEventListener('orientationchange', handleViewportChange)
+  window.visualViewport?.removeEventListener('resize', handleViewportChange)
+  document.removeEventListener('focusin', keepFocusedElementVisible)
   window.removeEventListener('wally:home-force-portrait', updateForceHomePortrait)
   window.removeEventListener('wally:show-toast', showToast)
   window.clearTimeout(toastTimer)
+  window.clearTimeout(orientationTimer)
+  window.clearTimeout(focusedElementTimer)
   unsubscribeTheme?.()
 })
 
@@ -75,19 +106,26 @@ const showNav = computed(() => !isHomeLandscape.value && !isAuthRoute.value)
 </script>
 
 <style>
-@font-face {
-  font-family: 'Malang';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
-@font-face {
-  font-family: 'MalangBold';
-  src: url('@/assets/Fonts/Malang_Bold.ttf') format('truetype');
-}
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+img,
+video,
+canvas {
+  max-width: 100%;
+}
+
+input,
+textarea,
+select,
+button {
+  min-width: 0;
+  max-width: 100%;
 }
 
 html {
@@ -132,6 +170,50 @@ html, body {
 
 * {
   scrollbar-width: none;
+}
+
+/* Remove Chromium/WebView's blue touch flash from every interactive control. */
+a,
+button,
+[role='button'],
+[tabindex]:not([tabindex='-1']),
+input[type='button'],
+input[type='submit'],
+input[type='reset'],
+label,
+select,
+summary {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Android taps can leave controls focused and draw the browser's blue box. */
+a:focus,
+button:focus,
+[role='button']:focus,
+[tabindex]:not([tabindex='-1']):focus,
+input[type='button']:focus,
+input[type='submit']:focus,
+input[type='reset']:focus,
+label:focus,
+select:focus,
+summary:focus {
+  outline: none;
+}
+
+/* Preserve a clear focus indicator for desktop keyboard navigation. */
+@media (hover: hover) and (pointer: fine) {
+  a:focus-visible,
+  button:focus-visible,
+  [role='button']:focus-visible,
+  [tabindex]:not([tabindex='-1']):focus-visible,
+  input[type='button']:focus-visible,
+  input[type='submit']:focus-visible,
+  input[type='reset']:focus-visible,
+  select:focus-visible,
+  summary:focus-visible {
+    outline: 0.15rem solid var(--app-primary-strong);
+    outline-offset: 0.15rem;
+  }
 }
 
 #app {

@@ -2,6 +2,7 @@ import { computed, reactive, readonly, ref, watch } from 'vue'
 import { API_ENDPOINTS, getClipUrl, getEventsUrl } from '@/endpoints'
 import { authJson } from './useFetch'
 import { useAuth } from './useAuth'
+import { captureDetectionThumbnail, getDetectionThumbnail } from '@/utils/detectionThumbnails'
 
 const MAX_RECONNECT_DELAY = 30000
 const DEFAULT_LIMIT = 20
@@ -179,6 +180,7 @@ function trackDetectedKeywordEvent(payload = {}) {
   rememberSavedEventKey(eventKey)
 
   const detectedAt = resolvePayloadTimestamp(payload)
+  const immediateThumbnail = captureDetectionThumbnail(clipCount)
   detectedKeywordEvent.value = {
     key: eventKey,
     keywords: matchedKeywords,
@@ -186,6 +188,7 @@ function trackDetectedKeywordEvent(payload = {}) {
     vlmText,
     detectedAt,
     clipCount,
+    thumbnail: resolveThumbnailUrl(payload) || immediateThumbnail,
     raw: payload,
   }
   console.info(`[WallyNotification] detection accepted clip_count=${clipCount} event_triggered=true`)
@@ -197,15 +200,6 @@ function toDate(value) {
   if (typeof value === 'number') return new Date(value > 10_000_000_000 ? value : value * 1000)
   const date = new Date(value)
   return Number.isNaN(date.getTime()) ? null : date
-}
-
-function pad2(value) {
-  return String(value).padStart(2, '0')
-}
-
-function formatDateQuery(date) {
-  if (!date) return ''
-  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`
 }
 
 function formatTime(date) {
@@ -256,7 +250,7 @@ function resolveClipUrl(item = {}) {
   return getClipUrl(item.name, item.size || 0, getToken())
 }
 
-export function normalizeRealtimeEvent(item = {}, index = 0) {
+export function normalizeRealtimeEvent(item = {}, index = 0, clipCount = null) {
   const date = resolveEventDate(item)
   const keywords = Array.isArray(item.keywords) ? item.keywords : splitTriggerKeywords(firstValue(item.keywords, item.trigger_keywords, item.triggerKeywords))
   const behavior = firstValue(item.behavior_type, item.behaviorType, item.type, item.category, keywords[0], '이상행동')
@@ -274,7 +268,7 @@ export function normalizeRealtimeEvent(item = {}, index = 0) {
     recap,
     detail: recap,
     clip: resolveClipUrl(item),
-    thumbnail: resolveThumbnailUrl(item),
+    thumbnail: resolveThumbnailUrl(item) || getDetectionThumbnail(item.clip_count ?? clipCount),
     mediaType: firstValue(item.media_type, item.mediaType, item.content_type, item.contentType, item.name?.split('.').pop()),
     raw: item,
   }
@@ -319,9 +313,13 @@ export async function fetchRealtimeEventPage(options = {}) {
     params.set('_', String(Date.now()))
     const data = await authJson(`${API_ENDPOINTS.clips}?${params}`, { cache: 'no-store' })
     const targetDateQuery = resolveDateFilterQuery(options.date)
-    const items = asArray(data).map(normalizeRealtimeEvent)
-    const filteredItems = targetDateQuery ? items.filter((item) => item.dateQuery === targetDateQuery) : items
     const total = Number(data?.total)
+    const offset = Number(options.offset) || 0
+    const items = asArray(data).map((item, index) => {
+      const inferredClipCount = Number.isFinite(total) ? total - offset - index : null
+      return normalizeRealtimeEvent(item, index, inferredClipCount)
+    })
+    const filteredItems = targetDateQuery ? items.filter((item) => item.dateQuery === targetDateQuery) : items
     return {
       items: filteredItems,
       total: Number.isFinite(total) ? total : filteredItems.length,
@@ -504,3 +502,4 @@ export function useRealtimeEvents() {
     trackDetectedKeywordEvent,
   }
 }
+import { formatDateQuery, pad2 } from '@/utils/date'

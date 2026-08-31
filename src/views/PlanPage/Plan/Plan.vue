@@ -2,7 +2,7 @@
   <div :class="$style.planList">
     <div
       v-if="plans.length === 0"
-      :class="[$style.calenderPlan, $style.clickable]"
+      :class="[$style.calendarPlan, $style.clickable]"
       @click="isOpen = true"
     >
       <div :class="$style.div">일정없음. 일정을 추가하려면 클릭하세요.</div>
@@ -11,7 +11,7 @@
     <div
       v-for="(plan, index) in plans"
       :key="index"
-      :class="$style.calenderPlan"
+      :class="$style.calendarPlan"
     >
       <div :class="[$style.div, $style.editText]" @click="openEdit(index)">
         <span :class="$style.title">{{ plan.title }}</span>
@@ -19,7 +19,7 @@
       </div>
     </div>
 
-    <div v-if="plans.length > 0" :class="[$style.calenderPlan, $style.clickable]" @click="openNew">
+    <div v-if="plans.length > 0" :class="[$style.calendarPlan, $style.clickable]" @click="openNew">
       <div :class="$style.div">일정없음. 일정을 추가하려면 클릭하세요.</div>
     </div>
   </div>
@@ -29,8 +29,9 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import PlanAdd from './Plan_Add.vue'
+import PlanAdd from './PlanAdd.vue'
 import { usePlans } from '@/composables/usePlans'
+import { dateObjectToKey } from '@/utils/date'
 
 const props = defineProps({ selectedDate: Object })
 
@@ -38,11 +39,6 @@ const { addPlan, deletePlan, getPlans } = usePlans()
 const isOpen = ref(false)
 const editIndex = ref(null)
 const editValue = ref(null)
-
-function dateObjectToKey(d) {
-  if (!d) return ''
-  return d.year + '-' + String(d.month).padStart(2, '0') + '-' + String(d.day).padStart(2, '0')
-}
 
 const dateKey = computed(() => dateObjectToKey(props.selectedDate))
 
@@ -87,17 +83,13 @@ const onDelete = () => {
 </script>
 
 <style module>
-@font-face {
-  font-family: 'Malang';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
 .planList {
   display: flex;
   flex-direction: column;
   gap: 0;
   padding-bottom: clamp(1.2rem, 3vw, 2.4rem);
 }
-.calenderPlan {
+.calendarPlan {
   width: calc(100% - 4rem);
   margin: 1rem 2rem 0;
   height: 4.8rem;
@@ -136,6 +128,11 @@ const onDelete = () => {
 }
 .title {
   color: var(--calendar-text);
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .meta {
   font-size: 0.95rem;
@@ -147,18 +144,6 @@ const onDelete = () => {
 .editText {
   cursor: pointer;
   color: var(--calendar-text);
-}
-.addBtn {
-  width: calc(100% - 4rem);
-  margin: 0.8rem 2rem 0;
-  height: 3.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Malang', sans-serif;
-  font-size: 1.2rem;
-  color: var(--calendar-accent);
-  cursor: pointer;
 }
 @media (min-width: 48rem) and (orientation: portrait) {
   .div {

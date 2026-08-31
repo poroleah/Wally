@@ -1,6 +1,7 @@
 import { computed, readonly, ref, watch } from 'vue'
 import { useProfile } from './useProfile'
 import { fetchRealtimeEventList, fetchRealtimeEventListAll, useRealtimeEvents } from './useRealtimeEvents'
+import { pad2 } from '@/utils/date'
 
 const logs = ref([])
 const recentAlerts = ref([])
@@ -10,10 +11,6 @@ const loaded = ref(false)
 const realtimeConnected = ref(false)
 let lastLoadOptions = { limit: 20 }
 let realtimeStarted = false
-
-function pad2(value) {
-  return String(value).padStart(2, '0')
-}
 
 function formatDayAmpm(date) {
   if (!date) return '오늘'

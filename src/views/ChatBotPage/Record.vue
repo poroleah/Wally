@@ -48,14 +48,6 @@ const onPress = (id) => {
 </script>
 
 <style module>
-@font-face {
-  font-family: 'Malang';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
-@font-face {
-  font-family: 'MalangBold';
-  src: url('@/assets/Fonts/Malang_Bold.ttf') format('truetype');
-}
 
 .drawer {
   position: fixed;
@@ -119,6 +111,7 @@ const onPress = (id) => {
   transition: transform 0.15s ease;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  min-width: 0;
 }
 
 .recordItemHighlight {
@@ -129,10 +122,13 @@ const onPress = (id) => {
 
 .content {
   width: 100%;
+  min-width: 0;
   font-size: 1.2rem;
   line-height: 2.2rem;
   font-family: 'Malang', sans-serif;
   color: var(--chat-text);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 </style>
 

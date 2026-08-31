@@ -203,7 +203,7 @@ function toggleMode() {
 }
 
 .heatGaugeCool .heatValue {
-  stroke: #82a2b1;
+  stroke: var(--home-cool);
 }
 
 .temperatureChild {
@@ -221,7 +221,7 @@ function toggleMode() {
 :global(:root.theme-dark) .temperatureChild,
 :global(body.theme-dark) .temperatureChild,
 :global(#app.theme-dark) .temperatureChild {
-  background-color: #eee8de;
+  background-color: var(--home-panel-border);
   box-shadow: 0 0.12rem 0.26rem rgba(0, 0, 0, 0.24);
 }
 
@@ -374,8 +374,8 @@ function toggleMode() {
 }
 
 .toggleCool .toggleChild {
-  border-color: #82a2b1;
-  background-color: #82a2b1;
+  border-color: var(--home-cool);
+  background-color: var(--home-cool);
 }
 
 .toggleItem {

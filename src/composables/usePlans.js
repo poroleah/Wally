@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { pad2 } from '@/utils/date'
 
 const PLANS_STORAGE_KEY = 'wally:plans'
 
@@ -20,10 +21,6 @@ function loadStoredPlans() {
 function savePlans() {
   if (!hasWindow()) return
   window.localStorage.setItem(PLANS_STORAGE_KEY, JSON.stringify(plansByDate.value))
-}
-
-function pad2(value) {
-  return String(value).padStart(2, '0')
 }
 
 function todayDateObject() {
@@ -85,14 +82,6 @@ function normalizeStoredPlans(plansByDate) {
 }
 
 const plansByDate = ref(normalizeStoredPlans(loadStoredPlans()))
-
-const categoryIcons = {
-  '목욕': '/icons/Alarm/Soap.svg',
-  '미용': '/icons/Alarm/Scissors.svg',
-  '심장 사상충': '/icons/Alarm/Pill.svg',
-  '예방 접종': '/icons/Alarm/Injection.svg',
-  '병원': '/icons/Alarm/hospital.svg',
-}
 
 function dateObjectToLabel(dateObject, fallbackDateKey) {
   const date = dateObject || dateKeyToDateObject(fallbackDateKey)
@@ -164,7 +153,7 @@ export function usePlans() {
           content: meta ? `${meta} ${plan.title} 일정이 있습니다.` : `'${plan.title}' 일정이 있습니다.`,
           dayAmpm: formatPlanDayAmpm(plan, dateKey),
           time: getPlanTimeLabel(plan),
-          icon: categoryIcons[plan.category] ?? categoryIcons[plan.title] ?? '/icons/Paw.svg',
+          icon: '/icons/Calendar/Bone.svg',
         })
       }
     }

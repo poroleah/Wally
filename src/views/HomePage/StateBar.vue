@@ -38,10 +38,6 @@ onUnmounted(() => clearInterval(timer))
 </script>
 
 <style module>
-@font-face {
-  font-family: 'MalangBold';
-  src: url('@/assets/Fonts/Malang_Bold.ttf') format('truetype');
-}
 
 .stateBar {
   width: 100%;

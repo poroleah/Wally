@@ -3,7 +3,7 @@
     <Transition name="ip-slide">
       <div v-if="modelValue" :class="$style.settingIp">
         <div :class="$style.head">
-          <img :class="$style.iconArrowRight" src="/icons/Calender/chevron.svg" alt="" @click="emit('update:modelValue', false)" />
+          <img :class="$style.iconArrowRight" src="/icons/Calendar/chevron.svg" alt="" @click="emit('update:modelValue', false)" />
           <b :class="$style.title">카메라 프로필</b>
         </div>
         <div :class="$style.frame">
@@ -97,14 +97,6 @@ async function handleSave() {
 </script>
 
 <style module>
-@font-face {
-  font-family: 'Malang';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
-@font-face {
-  font-family: 'MalangBold';
-  src: url('@/assets/Fonts/Malang_Bold.ttf') format('truetype');
-}
 
 .settingIp {
   position: fixed;
@@ -161,7 +153,7 @@ async function handleSave() {
 
 .inputRow {
   width: 100%;
-  border-bottom: 0.03rem solid #84776e;
+  border-bottom: 0.03rem solid var(--settings-muted);
   display: flex;
   align-items: center;
 }

@@ -1,7 +1,7 @@
 <template>
-  <div :class="$style.calenderDate">
+  <div :class="$style.calendarDate">
     <div :class="$style.date">{{ today }}</div>
-    <img :class="$style.iconPaw" src="/icons/Calender/Plan/Bone.svg" alt="타임라인 보기" @click="router.push({ path: ROUTES.FOOTPRINT, query: { date: dateParam } })" />
+    <img :class="$style.iconBone" src="/icons/Calendar/Bone.svg?v=7" alt="로그 보기" @click="router.push({ path: ROUTES.FOOTPRINT, query: { date: dateParam } })" />
   </div>
 </template>
 
@@ -9,6 +9,7 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { DAY_NAMES, ROUTES } from '@/constants'
+import { dateObjectToKey } from '@/utils/date'
 
 const props = defineProps({ selectedDate: Object })
 const router = useRouter()
@@ -21,19 +22,11 @@ const today = computed(() => {
   return `${d.year}년 ${d.month}월 ${d.day}일 (${days[dow]})`
 })
 
-const dateParam = computed(() => {
-  const d = props.selectedDate
-  if (!d) return ''
-  return `${d.year}-${String(d.month).padStart(2, '0')}-${String(d.day).padStart(2, '0')}`
-})
+const dateParam = computed(() => dateObjectToKey(props.selectedDate))
 </script>
 
 <style module>
-@font-face {
-  font-family: 'Malang';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
-.calenderDate {
+.calendarDate {
   width: calc(100% - 4rem);
   margin: 0 2rem;
   height: 2.4rem;
@@ -49,8 +42,8 @@ const dateParam = computed(() => {
 .date {
   line-height: 2.2rem;
 }
-.iconPaw {
-  filter: var(--calendar-icon-filter);
+.iconBone {
+  filter: brightness(0) var(--calendar-icon-filter);
   width: 24px;
   height: 24px;
   position: relative;
@@ -59,7 +52,7 @@ const dateParam = computed(() => {
   cursor: pointer;
 }
 @media (min-width: 48rem) and (orientation: portrait) {
-  .calenderDate {
+  .calendarDate {
     width: calc(100% - 4rem);
     margin: 0 2rem;
     height: 3.2rem;
@@ -70,7 +63,7 @@ const dateParam = computed(() => {
     line-height: 2.8rem;
   }
 
-  .iconPaw {
+  .iconBone {
     width: 24px;
     height: 24px;
   }

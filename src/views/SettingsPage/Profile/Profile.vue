@@ -50,7 +50,7 @@
             </div>
             <Transition name="cal-drop">
               <div v-if="showCalendar" :class="$style.calendarInline" @click.stop>
-                <Calender @selectDate="onSelectDate" />
+                <Calendar @selectDate="onSelectDate" />
               </div>
             </Transition>
           </div>
@@ -84,7 +84,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import Head from './Head.vue'
-import Calender from '@/components/Calender.vue'
+import Calendar from '@/components/Calendar/Calendar.vue'
 import { useProfile } from '@/composables/useProfile'
 import Select from './Select.vue'
 import { ActionSheet, ActionSheetButtonStyle } from '@capacitor/action-sheet'
@@ -268,6 +268,7 @@ function save() {
 }
 .content2 {
   flex: 1;
+  min-width: 0;
   height: 3rem;
   font-size: 1.5rem;
   line-height: 2.2rem;
@@ -279,6 +280,9 @@ function save() {
   width: 100%;
   display: flex;
   align-items: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .content2::placeholder {
   color: var(--settings-muted);
@@ -325,10 +329,6 @@ function save() {
 </style>
 
 <style>
-@font-face {
-  font-family: 'Malang';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
 .profile-slide-enter-active,
 .profile-slide-leave-active {
   transition: transform 0.25s ease;

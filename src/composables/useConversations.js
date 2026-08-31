@@ -14,7 +14,7 @@ const conversations = ref([
       { type: 'bot', text: '현재 펫하우스 내부 온도는 24°C 입니다.' },
       { type: 'user', text: '지금 콩돌이 상태는 어때?' },
       { type: 'bot', text: '오전 9시 3분경 콩돌이에게서 평소와 다른 헐떡거림이 포착되었습니다. 당시 펫하우스 주변 소음이 컸거나 실내 습도가 높았던 것이 원인으로 보입니다.' },
-      { type: 'bot-link', text: '영상보러가기', path: `${ROUTES.FOOTPRINT}?date=2026-03-26`, clip: '/images/Log/1.png' },
+      { type: 'bot-link', text: '영상보러가기', path: `${ROUTES.FOOTPRINT}?date=2026-03-26` },
     ],
   },
   {

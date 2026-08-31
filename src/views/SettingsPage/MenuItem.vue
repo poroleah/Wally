@@ -33,8 +33,21 @@ const router = useRouter()
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  gap: 1rem;
+  min-width: 0;
+}
+.menuItem > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .value {
+  min-width: 0;
+  max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: var(--settings-muted);
   font-size: var(--fluid-text-lg);
   line-height: 1;
@@ -46,5 +59,6 @@ const router = useRouter()
   height: var(--fluid-icon-lg);
   cursor: pointer;
   filter: var(--settings-icon-filter);
+  flex-shrink: 0;
 }
 </style>

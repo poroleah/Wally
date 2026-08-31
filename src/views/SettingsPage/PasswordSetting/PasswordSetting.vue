@@ -3,7 +3,7 @@
     <Transition name="password-slide">
       <div v-if="modelValue" :class="$style.page">
         <div :class="$style.head">
-          <img :class="$style.iconBack" src="/icons/Calender/chevron.svg" alt="" @click="close" />
+          <img :class="$style.iconBack" src="/icons/Calendar/chevron.svg" alt="" @click="close" />
           <b :class="$style.title">비밀번호 변경</b>
         </div>
 
@@ -44,14 +44,14 @@
 import { reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { API_ENDPOINTS } from '@/endpoints'
-import { ROUTES } from '@/constants'
-import { useAuth } from '@/composables/useAuth'
 import { authFetch } from '@/composables/useFetch'
+import { useAuth } from '@/composables/useAuth'
+import { LOGIN_NOTICE_STORAGE_KEY, PASSWORD_CHANGED_NOTICE, ROUTES } from '@/constants'
 
 const props = defineProps({ modelValue: Boolean })
 const emit = defineEmits(['update:modelValue'])
-
 const router = useRouter()
+const { logout } = useAuth()
 
 const fields = [
   { key: 'currentPassword', placeholder: '현재 비밀번호', autocomplete: 'current-password' },
@@ -129,16 +129,10 @@ async function handleSave() {
       return
     }
 
-    // FR-006: the change satisfies a pending initial-password requirement.
-    const { clearMustChangePassword, logout } = useAuth()
-    clearMustChangePassword()
-    // FR-005: the backend revokes every token of the account on a password
-    // change, this session included — move straight to re-login. The notice
-    // rides the logout reason and is shown on the login page; the server
-    // address is untouched, so the login page is reached directly.
+    window.sessionStorage.setItem(LOGIN_NOTICE_STORAGE_KEY, PASSWORD_CHANGED_NOTICE)
     close()
-    logout({ revoke: false, reason: '비밀번호가 변경되었습니다. 새 비밀번호로 로그인해주세요.' })
-    router.push(ROUTES.LOGIN)
+    logout({ revoke: false })
+    await router.replace(ROUTES.LOGIN)
   } catch {
     message.value = '서버에 연결할 수 없습니다.'
   } finally {
@@ -152,14 +146,6 @@ watch(() => props.modelValue, (open) => {
 </script>
 
 <style module>
-@font-face {
-  font-family: 'Malang';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
-@font-face {
-  font-family: 'MalangBold';
-  src: url('@/assets/Fonts/Malang_Bold.ttf') format('truetype');
-}
 
 .page {
   position: fixed;

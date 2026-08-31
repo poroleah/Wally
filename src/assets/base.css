@@ -16,6 +16,7 @@
   --color-lemon-chiffon: #fffacc;
   --color-vanilla-custard: #ffefbd;
   --color-blue-gray: #9bbcc3;
+  --color-warm-neutral: #efe8df;
   --splash-bg: #fffbf5;
   --splash-logo-shadow: none;
 
@@ -55,7 +56,7 @@
 
   --calendar-bg: #f5f0e9;
   --calendar-surface: #fffbf5;
-  --calendar-surface-soft: #efe8df;
+  --calendar-surface-soft: #f5f0e9;
   --calendar-text: #2d2926;
   --calendar-muted: #84776e;
   --calendar-border: #eee8de;
@@ -112,6 +113,7 @@
   --home-muted: #84776e;
   --home-accent: #ffb085;
   --home-accent-strong: #ff8f64;
+  --home-cool: #82a2b1;
   --home-shadow: 0 0.22rem 0.9rem rgba(45, 41, 38, 0.07);
   --home-camera-border: rgba(238, 232, 222, 0.9);
   --home-control-bg: #fffbf5;
@@ -122,6 +124,9 @@
   --home-protocol-text: #2d2926;
   --home-protocol-active-bg: #2d2926;
   --home-protocol-active-text: #fffbf5;
+  --home-stream-overlay-bg: rgba(45, 41, 38, 0.88);
+  --home-stream-overlay-text: #fffbf5;
+  --home-stream-overlay-border: rgba(255, 251, 245, 0.16);
 
   --nav-bg: #fffbf5;
   --nav-text: #2d2926;
@@ -146,7 +151,7 @@ body.theme-dark,
   --app-surface: #1c1918;
   --app-surface-muted: #181513;
   --app-primary: #ffb38a;
-  --app-primary-strong: #ffb085;
+  --app-primary-strong: #ffb38a;
   --app-text: #fff9f3;
   --app-text-muted: #b0a59a;
   --app-border: #12100f;
@@ -158,6 +163,7 @@ body.theme-dark,
   --color-lemon-chiffon: #d9c982;
   --color-vanilla-custard: #fad586;
   --color-blue-gray: #6a8a93;
+  --color-warm-neutral: #463b36;
   --splash-bg: #1c1918;
   --splash-logo-shadow: drop-shadow(0 0.28rem 0.8rem rgba(0, 0, 0, 0.28));
 
@@ -181,7 +187,7 @@ body.theme-dark,
   --settings-text: #fff9f3;
   --settings-muted: #b0a59a;
   --settings-border: #12100f;
-  --settings-danger: #ffb085;
+  --settings-danger: #ffb38a;
   --settings-toggle-bg: #12100f;
   --settings-toggle-on: #ffb38a;
   --settings-toggle-thumb: #1c1918;
@@ -197,7 +203,7 @@ body.theme-dark,
 
   --calendar-bg: #181513;
   --calendar-surface: #1c1918;
-  --calendar-surface-soft: #463b36;
+  --calendar-surface-soft: #181513;
   --calendar-text: #fff9f3;
   --calendar-muted: #b0a59a;
   --calendar-border: #12100f;
@@ -253,7 +259,8 @@ body.theme-dark,
   --home-text: #fff9f3;
   --home-muted: #b0a59a;
   --home-accent: #ffb38a;
-  --home-accent-strong: #ffb085;
+  --home-accent-strong: #ffb38a;
+  --home-cool: #8fb8c8;
   --home-shadow: 0 0.24rem 1rem rgba(0, 0, 0, 0.3);
   --home-camera-border: rgba(18, 16, 15, 0.9);
   --home-control-bg: #1c1918;
@@ -264,6 +271,9 @@ body.theme-dark,
   --home-protocol-text: #fff9f3;
   --home-protocol-active-bg: #fff9f3;
   --home-protocol-active-text: #1c1918;
+  --home-stream-overlay-bg: rgba(18, 16, 15, 0.9);
+  --home-stream-overlay-text: #fff9f3;
+  --home-stream-overlay-border: rgba(255, 249, 243, 0.22);
 
   --nav-bg: #1c1918;
   --nav-text: #fff9f3;
@@ -291,6 +301,7 @@ body.theme-light,
   --color-lemon-chiffon: #fffacc;
   --color-vanilla-custard: #ffefbd;
   --color-blue-gray: #9bbcc3;
+  --color-warm-neutral: #efe8df;
 
 
   --login-bg: #fffbf5;
@@ -328,7 +339,7 @@ body.theme-light,
 
   --calendar-bg: #f5f0e9;
   --calendar-surface: #fffbf5;
-  --calendar-surface-soft: #efe8df;
+  --calendar-surface-soft: #f5f0e9;
   --calendar-text: #2d2926;
   --calendar-muted: #84776e;
   --calendar-border: #eee8de;
@@ -385,6 +396,7 @@ body.theme-light,
   --home-muted: #84776e;
   --home-accent: #ffb085;
   --home-accent-strong: #ff8f64;
+  --home-cool: #82a2b1;
   --home-shadow: 0 0.22rem 0.9rem rgba(45, 41, 38, 0.07);
   --home-camera-border: rgba(238, 232, 222, 0.9);
   --home-control-bg: #fffbf5;
@@ -395,6 +407,9 @@ body.theme-light,
   --home-protocol-text: #2d2926;
   --home-protocol-active-bg: #2d2926;
   --home-protocol-active-text: #fffbf5;
+  --home-stream-overlay-bg: rgba(45, 41, 38, 0.88);
+  --home-stream-overlay-text: #fffbf5;
+  --home-stream-overlay-border: rgba(255, 251, 245, 0.16);
 
   --nav-bg: #fffbf5;
   --nav-text: #2d2926;

@@ -11,10 +11,6 @@ defineProps({ message: String })
 </script>
 
 <style module>
-@font-face {
-  font-family: 'Malang';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
 
 .wrap {
   display: flex;
@@ -35,6 +31,7 @@ defineProps({ message: String })
   padding: 1.2rem;
   box-sizing: border-box;
   max-width: 32rem;
+  min-width: 0;
   text-align: left;
   font-size: 1.2rem;
   color: var(--chat-text);
@@ -43,7 +40,10 @@ defineProps({ message: String })
 
 .content {
   flex: 1;
+  min-width: 0;
   position: relative;
   line-height: 2.2rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 </style>

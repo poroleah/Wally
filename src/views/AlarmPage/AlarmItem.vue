@@ -1,6 +1,6 @@
 <template>
   <div :class="$style.alarm" role="button" tabindex="0">
-    <span v-if="isFootprintIcon" :class="[$style.icon, $style.boneIcon]" aria-hidden="true" />
+    <span v-if="isBoneIcon" :class="[$style.icon, $style.boneIcon]" aria-hidden="true" />
     <img v-else v-theme-src="themeIconSources" :class="[$style.icon, isThemeIcon ? $style.themeIcon : null]" :src="alarm.icon" alt="" />
     <div :class="$style.body">
       <b :class="$style.title">{{ alarm.title }}</b>
@@ -17,9 +17,8 @@
 import { computed } from 'vue'
 
 const props = defineProps({ alarm: Object })
-const pawIconPaths = ['/icons/Paw.svg', '/icons/Calender/Footprint.svg']
-const isFootprintIcon = computed(() => pawIconPaths.includes(props.alarm?.icon))
-const isThemeIcon = computed(() => props.alarm?.icon?.startsWith('/icons/Alarm/') || isFootprintIcon.value)
+const isBoneIcon = computed(() => props.alarm?.icon === '/icons/Calendar/Bone.svg')
+const isThemeIcon = computed(() => props.alarm?.icon?.startsWith('/icons/Alarm/') || isBoneIcon.value)
 const themeIconSources = computed(() => ({
   light: props.alarm?.icon,
   dark: props.alarm?.icon,
@@ -27,10 +26,6 @@ const themeIconSources = computed(() => ({
 </script>
 
 <style module>
-@font-face {
-  font-family: 'Malang';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
 
 .alarm {
   position: relative;
@@ -73,8 +68,8 @@ const themeIconSources = computed(() => ({
 .boneIcon {
   border-radius: 0;
   background-color: var(--log-text);
-  -webkit-mask: url('/icons/Calender/Plan/Bone.svg') center / contain no-repeat;
-  mask: url('/icons/Calender/Plan/Bone.svg') center / contain no-repeat;
+  -webkit-mask: url('/icons/Calendar/Bone.svg') center / contain no-repeat;
+  mask: url('/icons/Calendar/Bone.svg') center / contain no-repeat;
 }
 
 .body {

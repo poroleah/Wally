@@ -4,7 +4,7 @@
       <img :class="$style.backIcon" src="/icons/Setting/Arrow.svg" alt="뒤로가기" @click="emit('close')" />
       <b :class="$style.title">알림</b>
       <button :class="$style.trashButton" type="button" aria-label="알림 삭제" @click="!clearing && emit('clear')">
-        <img :class="$style.trashIcon" src="/icons/Calender/Plan/Trash.svg" alt="" />
+        <img :class="$style.trashIcon" src="/icons/Calendar/Plan/Trash.svg" alt="" />
       </button>
     </div>
     <div :class="$style.tabs">
@@ -35,15 +35,7 @@ const selectTab = (tab) => {
 </script>
 
 <style module>
-@font-face {
-  font-family: 'MalangBold';
-  src: url('@/assets/Fonts/Malang_Bold.ttf') format('truetype');
-}
 
-@font-face {
-  font-family: 'MalangRegular';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
 
 .head {
   width: 100%;
@@ -118,7 +110,8 @@ const selectTab = (tab) => {
   align-items: center;
   justify-content: center;
   padding: 0 1.2rem;
-  font-family: 'MalangRegular', sans-serif;
+  font-family: 'Malang', sans-serif;
+  font-weight: 400;
   font-size: 1.8rem;
   line-height: 2.2rem;
   color: var(--log-text);

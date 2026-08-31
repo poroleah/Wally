@@ -16,10 +16,6 @@ const onClick = () => {
 </script>
 
 <style module>
-@font-face {
-  font-family: 'Malang';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
 
 .wrap {
   display: flex;
@@ -40,10 +36,12 @@ const onClick = () => {
   padding: 1.2rem;
   box-sizing: border-box;
   max-width: 32rem;
+  min-width: 0;
 }
 
 .content {
   flex: 1;
+  min-width: 0;
   width: 100%;
   position: relative;
   font-size: 1.2rem;
@@ -52,5 +50,7 @@ const onClick = () => {
   color: var(--chat-accent);
   text-align: left;
   display: inline-block;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 </style>

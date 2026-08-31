@@ -5,7 +5,6 @@ const DEFAULT_RETRY_DELAY = 3_000
 
 export function useWebRtcStream({
   getUrl,
-  getHeaders,
   connectTimeout = DEFAULT_CONNECT_TIMEOUT,
   retryDelay = DEFAULT_RETRY_DELAY,
   onTerminalFailure,
@@ -125,11 +124,9 @@ export function useWebRtcStream({
     )
     let response
     try {
-      // WHEP signaling passes the router relay and needs the token;
-      // the WebRTC media itself then flows directly (UDP 8189).
       response = await fetch(getUrl(), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/sdp', ...(getHeaders?.() || {}) },
+        headers: { 'Content-Type': 'application/sdp' },
         body: pc.localDescription.sdp,
         signal: requestController.signal,
       })

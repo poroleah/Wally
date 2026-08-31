@@ -3,7 +3,7 @@
     <Transition name="prompt-setting-slide">
       <div v-if="modelValue" :class="$style.page">
         <div :class="$style.head">
-          <img :class="$style.iconBack" src="/icons/Calender/chevron.svg" alt="" @click="close" />
+          <img :class="$style.iconBack" src="/icons/Calendar/chevron.svg" alt="" @click="close" />
           <b :class="$style.title">프롬프트 설정</b>
         </div>
 
@@ -86,14 +86,6 @@ watch(() => props.modelValue, (open) => {
 </script>
 
 <style module>
-@font-face {
-  font-family: 'Malang';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
-@font-face {
-  font-family: 'MalangBold';
-  src: url('@/assets/Fonts/Malang_Bold.ttf') format('truetype');
-}
 
 .page {
   position: fixed;

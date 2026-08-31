@@ -51,7 +51,7 @@ import PromptSetting from './PromptSetting/PromptSetting.vue'
 
 const router = useRouter()
 const route = useRoute()
-const { logout, mustChangePassword } = useAuth()
+const { logout } = useAuth()
 
 const showAlarm = ref(false)
 const showIp = ref(false)
@@ -67,12 +67,6 @@ watch(
   },
   { immediate: true },
 )
-
-// FR-006: a pending initial-password change opens the password sheet on
-// arrival. Enforcement UX beyond this is left to the app's own design.
-watch(mustChangePassword, (pending) => {
-  if (pending) showPasswordSetting.value = true
-}, { immediate: true })
 
 function closeOpenPanel() {
   if (showPromptSetting.value) {
@@ -109,7 +103,7 @@ function handleAndroidBack(event) {
 
 function handleLogout() {
   logout()
-  router.replace(ROUTES.LOGIN_ADDRESS)
+  router.replace(ROUTES.LOGIN)
 }
 
 onMounted(() => {
@@ -122,10 +116,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style module>
-@font-face {
-  font-family: 'Malang';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
 
 .page {
   width: 100%;
@@ -183,29 +173,6 @@ onBeforeUnmount(() => {
   margin-top: clamp(-17rem, -30vw, -12rem);
   margin-left: 2rem;
   padding: 2.4rem 1.6rem;
-}
-
-.section {
-  margin-top: 1.6rem;
-}
-
-.sectionLabel {
-  font-size: 1.4rem;
-  color: var(--settings-muted);
-  margin-bottom: 0.8rem;
-}
-
-.menuItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.6rem 0;
-  border-bottom: 0.05rem solid var(--settings-border);
-}
-
-.icon {
-  width: 2.4rem;
-  height: 2.4rem;
 }
 
 .profileLine {

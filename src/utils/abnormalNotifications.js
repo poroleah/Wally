@@ -6,6 +6,8 @@ import { fetchRealtimeEventPage, useRealtimeEvents } from '@/composables/useReal
 import { useAuth } from '@/composables/useAuth'
 import { ROUTES } from '@/constants'
 import { createApiUrl, getClipUrl } from '@/endpoints'
+import { captureDetectionThumbnail, getDetectionThumbnail } from '@/utils/detectionThumbnails'
+import { formatDateQuery } from '@/utils/date'
 import {
   createNotificationId,
   ensureNotificationPermission,
@@ -16,15 +18,6 @@ let initialized = false
 const CLIP_LOOKUP_TIMEOUT_MS = 120_000
 const CLIP_LOOKUP_INTERVAL_MS = 2_000
 const pendingClipCounts = new Set()
-
-function pad2(value) {
-  return String(value).padStart(2, '0')
-}
-
-function formatDateQuery(date) {
-  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return ''
-  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`
-}
 
 function firstValue(...values) {
   return values.find((value) => value !== undefined && value !== null && value !== '')
@@ -148,12 +141,15 @@ async function showAbnormalNotification(event) {
     const { getToken } = useAuth()
     const authToken = getToken() || ''
     const initialMetadata = notificationMetadata(event)
-    console.info(`[WallyNotification] posting immediate alert clip_count=${initialMetadata.clipCount}`)
+    const immediateThumbnail = thumbnailUrl(event, authToken)
+      || getDetectionThumbnail(initialMetadata.clipCount)
+      || captureDetectionThumbnail(initialMetadata.clipCount)
+    console.info(`[WallyNotification] posting immediate alert clip_count=${initialMetadata.clipCount} image=${Boolean(immediateThumbnail)}`)
     window.WallyNotification.showAbnormal(
       id,
       `'${keyword}' 이상행동이 감지되었습니다`,
       detail,
-      '',
+      immediateThumbnail,
       authToken,
       initialMetadata.date || '',
       initialMetadata.clip || initialMetadata.logId || '',

@@ -21,11 +21,11 @@
         <defs>
           <linearGradient id="talkWaveTop" x1="180" y1="20" x2="180" y2="0" gradientUnits="userSpaceOnUse">
             <stop stop-color="#FFCBAF" />
-            <stop offset="1" stop-color="#FFB085" />
+            <stop offset="1" stop-color="var(--home-accent)" />
           </linearGradient>
           <linearGradient id="talkWaveBase" x1="180" y1="124" x2="180" y2="25" gradientUnits="userSpaceOnUse">
             <stop stop-color="#FFDECC" />
-            <stop offset="1" stop-color="#FFB085" />
+            <stop offset="1" stop-color="var(--home-accent)" />
           </linearGradient>
         </defs>
       </svg>
@@ -34,12 +34,11 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref } from "vue"
+import { computed, onBeforeUnmount, ref } from 'vue'
 
-const emit = defineEmits(["close"])
+const emit = defineEmits(['close'])
 const isMicOn = ref(false)
 const isMicPending = ref(false)
-const soundLevel = ref(0)
 const targetAmplitude = ref(0)
 const currentAmplitude = ref(0)
 const targetSeparation = ref(0)
@@ -51,8 +50,6 @@ let audioContext
 let analyser
 let timeData
 let mediaStream
-
-const silenceThreshold = 0.034
 
 const toggleMic = async () => {
   if (isMicPending.value) return
@@ -79,7 +76,6 @@ const toggleMic = async () => {
 const rounded = (value) => Number(value.toFixed(2))
 const waveOffset = (time, speed, size, shift = 0) => Math.sin(time * speed + shift) * size
 
-const isSpeaking = computed(() => currentAmplitude.value > 0.006)
 const waveAmplitude = computed(() => currentAmplitude.value)
 const separationAmount = computed(() => currentSeparation.value)
 const waveLineOpacity = computed(() => rounded(Math.min(separationAmount.value * 1.15, 1)))
@@ -138,7 +134,7 @@ const readMicLevel = () => {
 }
 
 const startAudioInput = async () => {
-  if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) return false
+  if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) return false
 
   try {
     mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -178,7 +174,6 @@ const startWaveLoop = () => {
     targetSeparation.value = Math.min(Math.max((level - 0.12) / 0.3, 0), 1)
     currentAmplitude.value += (targetAmplitude.value - currentAmplitude.value) * 0.12
     currentSeparation.value += (targetSeparation.value - currentSeparation.value) * 0.08
-    soundLevel.value = currentAmplitude.value
     animationFrame = requestAnimationFrame(draw)
   }
 
@@ -188,7 +183,6 @@ const startWaveLoop = () => {
 const stopWaveLoop = () => {
   cancelAnimationFrame(animationFrame)
   animationFrame = 0
-  soundLevel.value = 0
   targetAmplitude.value = 0
   currentAmplitude.value = 0
   targetSeparation.value = 0

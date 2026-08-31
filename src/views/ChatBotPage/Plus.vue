@@ -11,10 +11,6 @@ defineProps({ message: String })
 </script>
 
 <style module>
-@font-face {
-  font-family: 'Malang';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
 
 .wrap {
   display: flex;
@@ -23,23 +19,25 @@ defineProps({ message: String })
 }
 
 .messageUserIcon {
-  height: 4.6rem;
+  min-height: 4.6rem;
   position: relative;
   border-radius: 1.9rem 1.9rem 0 1.9rem;
   max-width: 32rem;
-  overflow: hidden;
+  min-width: 0;
   background-color: var(--chat-user-bg);
   display: flex;
   align-items: center;
-  padding: 0 1.4rem;
+  padding: 1.2rem 1.4rem;
   box-sizing: border-box;
 }
 
 .text {
+  min-width: 0;
   font-size: 1.2rem;
   font-family: 'Malang', sans-serif;
   color: var(--chat-user-text);
   line-height: 2.2rem;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 </style>

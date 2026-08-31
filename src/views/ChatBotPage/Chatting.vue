@@ -5,7 +5,7 @@
     </div>
     <div :class="$style.chatbotSend" @pointerdown="onClick">
       <div :class="[isActive ? $style.chatbotSendActive : $style.chatbotSendChild]" />
-      <img :class="$style.iconSendOff" :src="isActive ? '/icons/ChatBot/Send_white.svg' : '/icons/ChatBot/Send_orange.svg'" alt="" />
+      <span :class="[$style.iconSend, isActive ? $style.iconSendActive : '']" aria-hidden="true" />
     </div>
   </div>
 </template>
@@ -27,10 +27,6 @@ const onClick = () => {
 </script>
 
 <style module>
-@font-face {
-  font-family: 'Malang';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
 
 .chatting {
   width: 100%;
@@ -102,11 +98,18 @@ const onClick = () => {
   height: 3.2rem;
 }
 
-.iconSendOff {
+.iconSend {
   position: absolute;
   top: 0.4rem;
   left: 0.5rem;
   width: 2.4rem;
   height: 2.4rem;
+  background-color: var(--chat-accent);
+  -webkit-mask: url('/icons/ChatBot/Send.svg') center / contain no-repeat;
+  mask: url('/icons/ChatBot/Send.svg') center / contain no-repeat;
+}
+
+.iconSendActive {
+  background-color: var(--chat-surface);
 }
 </style>

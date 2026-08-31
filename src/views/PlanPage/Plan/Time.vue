@@ -1,7 +1,7 @@
 <template>
   <div :class="$style.planThreeIcon" ref="rootEl">
     <div :class="$style.row">
-      <img :class="$style.rowIcon" src="/icons/Calender/Plan/Time.svg" alt="" />
+      <img :class="$style.rowIcon" src="/icons/Calendar/Plan/Time.svg" alt="" />
       <div :class="$style.rowLabel">하루 종일</div>
       <div :class="[$style.track, isAllDay ? $style.on : '']" @click="isAllDay = !isAllDay">
         <div :class="$style.thumb" />
@@ -11,7 +11,7 @@
     <div :class="$style.divider" />
 
     <div :class="$style.row" @click="saveAndClose()">
-      <img :class="$style.rowIcon" src="/icons/Calender/Plan/Start.svg" alt="" />
+      <img :class="$style.rowIcon" src="/icons/Calendar/Plan/Start.svg" alt="" />
       <div :class="$style.rowLabel">시작</div>
       <div :class="$style.rowRight" @click.stop>
         <div
@@ -30,7 +30,7 @@
 
     <Transition name="wheelslide">
       <div v-if="activeSection === 'start-date'" :class="$style.pickerWrap" data-picker-content>
-        <Calender @selectDate="selectDateAndClose('start', $event)" />
+        <Calendar @selectDate="selectDateAndClose('start', $event)" />
       </div>
     </Transition>
 
@@ -58,7 +58,7 @@
     <div :class="$style.divider" />
 
     <div :class="$style.row" @click="saveAndClose()">
-      <img :class="$style.rowIcon" src="/icons/Calender/Plan/End.svg" alt="" />
+      <img :class="$style.rowIcon" src="/icons/Calendar/Plan/End.svg" alt="" />
       <div :class="$style.rowLabel">종료</div>
       <div :class="$style.rowRight" @click.stop>
         <div
@@ -77,7 +77,7 @@
 
     <Transition name="wheelslide">
       <div v-if="activeSection === 'end-date'" :class="$style.pickerWrap" data-picker-content>
-        <Calender @selectDate="selectDateAndClose('end', $event)" />
+        <Calendar @selectDate="selectDateAndClose('end', $event)" />
       </div>
     </Transition>
 
@@ -106,7 +106,7 @@
 
 <script setup>
 import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue'
-import Calender from '@/components/Calender.vue'
+import Calendar from '@/components/Calendar/Calendar.vue'
 import { DAY_NAMES } from '@/constants'
 
 const props = defineProps({ selectedDate: Object, initialValue: Object })
@@ -289,10 +289,6 @@ defineExpose({ isAllDay, getValue })
 </script>
 
 <style module>
-@font-face {
-  font-family: 'Malang';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
 .planThreeIcon {
   border-radius: 1rem;
   background-color: var(--calendar-surface);

@@ -1,6 +1,11 @@
 import { computed, reactive, ref } from 'vue'
-import { API_ENDPOINTS, APP_ENDPOINTS, getHlsUrl } from '@/endpoints'
+import { API_ENDPOINTS, getHlsUrl } from '@/endpoints'
 import { authFetch, authJson } from './useFetch'
+import {
+  hasBackendCameraConfigChanged,
+  hasStreamCameraConfigChanged,
+  normalizeCameraConfig,
+} from '@/utils/cameraConfig'
 
 const CAMERA_ID = 'primary'
 const CAMERA_NAME_STORAGE_KEY = 'wally_camera_name'
@@ -160,15 +165,33 @@ async function saveCameraSettings(settings = {}) {
   error.value = ''
   const cameraName = settings.name !== undefined ? String(settings.name || '').trim() : getStoredCameraName()
 
-  const nextPort = settings.rtsp_port ?? settings.port ?? config.rtsp_port ?? 554
-  const body = {
+  const currentConfig = normalizeCameraConfig(config)
+  const nextConfig = normalizeCameraConfig({
     source_type: settings.source_type || config.source_type || 'rtsp_camera',
     ip: settings.ip ?? config.ip,
-    rtsp_port: Number(nextPort || config.rtsp_port || 554),
+    rtsp_port: settings.rtsp_port ?? settings.port ?? config.rtsp_port ?? 554,
     username: settings.username ?? settings.id ?? config.username,
     stream_path: settings.stream_path || config.stream_path || 'stream1',
     onvif_port: settings.onvif_port === '' ? null : (settings.onvif_port ?? config.onvif_port),
+  })
+  const backendConfigChanged = !cameraStatus.configured || hasBackendCameraConfigChanged(currentConfig, nextConfig)
+  const streamConfigChanged = !cameraStatus.configured || hasStreamCameraConfigChanged(currentConfig, nextConfig, settings.password)
+
+  if (!backendConfigChanged && !settings.password) {
+    if (settings.name !== undefined) setStoredCameraName(cameraName)
+    applyCameraConfig({
+      ...(cameras.value[0]?.raw || {}),
+      configured: true,
+      ...config,
+      name: cameraName,
+      password_set: config.password_set,
+    })
+    loaded.value = true
+    saving.value = false
+    return true
   }
+
+  const body = { ...nextConfig }
 
   if (settings.password) {
     body.password = settings.password
@@ -192,19 +215,6 @@ async function saveCameraSettings(settings = {}) {
 
     if (settings.name !== undefined) setStoredCameraName(cameraName)
 
-    // Registration alone never touches the stream (FR-048), so the saved
-    // profile would sit in the pending slot until the next start. Streaming
-    // start doubles as a restart and promotes the pending profile, so one
-    // call applies the new source immediately.
-    try {
-      const startRes = await authFetch(APP_ENDPOINTS.streamingStart, { method: 'POST' })
-      if (!startRes.ok) {
-        saveStatus.value = '프로필은 저장되었으나 스트리밍 재시작에 실패했습니다.'
-      }
-    } catch {
-      saveStatus.value = '프로필은 저장되었으나 스트리밍 재시작에 실패했습니다.'
-    }
-
     applyCameraConfig({
       configured: true,
       name: cameraName,
@@ -213,7 +223,7 @@ async function saveCameraSettings(settings = {}) {
       password_set: Boolean(body.password || config.password_set),
     })
     loaded.value = true
-    reconnectKey.value += 1
+    if (streamConfigChanged) reconnectKey.value += 1
     return true
   } catch (e) {
     saveStatus.value = '카메라 설정 저장에 실패했습니다.'

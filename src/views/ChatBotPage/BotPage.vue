@@ -23,7 +23,7 @@ import ChattingPlus from './Plus.vue'
 import ChattingBot from './Bot.vue'
 import ChattingBotLink from './Link.vue'
 import { useConversations } from '@/composables/useConversations'
-import ClipDetail from '@/components/Clip_Detail.vue'
+import ClipDetail from '@/components/Media/ClipDetail.vue'
 import Record from './Record.vue'
 import { ROUTES } from '@/constants'
 

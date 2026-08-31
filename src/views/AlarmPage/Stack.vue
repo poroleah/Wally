@@ -1,22 +1,23 @@
 <template>
   <div ref="listRef" :class="$style.list">
-    <div v-if="loading && displayedAlarms.length === 0" :class="$style.stateText">알림을 불러오는 중</div>
-    <div v-else-if="displayedAlarms.length === 0 && error" :class="$style.stateText">{{ error }}</div>
-    <div v-else-if="displayedAlarms.length === 0" :class="$style.stateText">알림이 없습니다.</div>
-    <div
-      v-for="alarm in displayedAlarms"
-      v-else
-      :key="alarm.id"
-      :ref="(element) => setAlarmElement(alarm.id, element)"
-      :class="[$style.alarmMotion, leavingIds.has(alarm.id) ? $style.alarmExiting : '']"
-    >
-      <AlarmItem :alarm="alarm" @click="openAlarm(alarm)" />
+    <div v-if="displayedAlarms.length === 0" :class="$style.stateText">
+      {{ !loading && error ? error : '알림이 없습니다.' }}
     </div>
+    <template v-else>
+      <div
+        v-for="alarm in displayedAlarms"
+        :key="alarm.id"
+        :ref="(element) => setAlarmElement(alarm.id, element)"
+        :class="[$style.alarmMotion, leavingIds.has(alarm.id) ? $style.alarmExiting : '']"
+      >
+        <AlarmItem :alarm="alarm" @click="openAlarm(alarm)" />
+      </div>
+    </template>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ROUTES } from '@/constants'
 import { usePlans } from '@/composables/usePlans'
@@ -41,6 +42,7 @@ const CLEAR_BASE_EXIT_MS = 160
 const CLEAR_BASE_GAP_MS = 80
 const CLEAR_MIN_EXIT_MS = 40
 const CLEAR_MIN_GAP_MS = 18
+
 function loadDismissedIds() {
   try {
     return new Set(JSON.parse(window.localStorage.getItem(DISMISSED_ALARM_IDS_STORAGE_KEY) || '[]'))
@@ -141,24 +143,30 @@ async function clearAlarms() {
   const visibleIdSet = new Set(visibleIds)
   const hiddenIds = allIds.filter((id) => !visibleIdSet.has(id))
 
+  // Lock the complete stack as dismissed before animating so realtime updates
+  // cannot put already-cleared cards back into the list mid-transition.
+  dismissedIds.value = new Set([...dismissedIds.value, ...allIds])
+  saveDismissedIds(dismissedIds.value)
+
   if (hiddenIds.length > 0) {
     const hiddenIdSet = new Set(hiddenIds)
     displayedAlarms.value = displayedAlarms.value.filter((alarm) => !hiddenIdSet.has(alarm.id))
+    await nextTick()
   }
 
+  // Peel the cards currently visible in the viewport from bottom to top.
   const animatedIds = [...visibleIds].reverse()
   const { exitMs, gapMs } = getClearTiming(animatedIds.length)
 
   for (const id of animatedIds) {
     leavingIds.value = new Set([...leavingIds.value, id])
+    await nextTick()
     await wait(exitMs)
     displayedAlarms.value = displayedAlarms.value.filter((alarm) => alarm.id !== id)
     leavingIds.value = new Set([...leavingIds.value].filter((leavingId) => leavingId !== id))
     await wait(gapMs)
   }
 
-  dismissedIds.value = new Set([...dismissedIds.value, ...allIds])
-  saveDismissedIds(dismissedIds.value)
   clearing.value = false
   emit('clearing', false)
 }
@@ -193,13 +201,14 @@ defineExpose({ clearAlarms })
 }
 .stateText {
   flex: 1;
+  width: 100%;
   min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--log-muted);
   font-family: 'Malang', sans-serif;
-  font-size: var(--alarm-state-font);
+  font-size: 1.6rem;
   text-align: center;
 }
 </style>

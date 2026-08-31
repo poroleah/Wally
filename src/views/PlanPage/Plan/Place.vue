@@ -33,7 +33,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { DAY_NAMES } from '@/constants'
-import SheetHeader from '@/components/SheetHeader.vue'
+import SheetHeader from '@/components/Sheet/SheetHeader.vue'
 
 const props = defineProps({ modelValue: Boolean, selectedDate: Object })
 const emit = defineEmits(['update:modelValue', 'select'])
@@ -72,10 +72,6 @@ const saveAndClose = () => {
 </script>
 
 <style module>
-@font-face {
-  font-family: 'Malang';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
 .planPlace {
   --sheet-action-color: var(--calendar-accent);
   position: fixed;

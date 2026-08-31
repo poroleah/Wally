@@ -163,7 +163,10 @@ app.use(router)
 app.directive('theme-src', themeSrcDirective)
 app.mount('#app')
 if (Capacitor.isNativePlatform()) {
-  removeInitialSplash()
+  void router.isReady().finally(() => {
+    removeInitialSplash()
+    void SplashScreen.hide()
+  })
   void initNotificationActions(router).then(() => {
     initScheduleAlarmSync()
     initAbnormalNotifications()
@@ -171,4 +174,6 @@ if (Capacitor.isNativePlatform()) {
 }
 initAndroidBackButton()
 
-SplashScreen.hide()
+if (!Capacitor.isNativePlatform()) {
+  void SplashScreen.hide()
+}

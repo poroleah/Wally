@@ -9,7 +9,7 @@
       <video
         ref="inlineVideo"
         :src="nativeVideoSrc"
-        :class="$style.videoImg"
+        :class="[$style.videoImg, !inlineVideoReady ? $style.mediaHidden : '']"
         autoplay
         muted
         preload="auto"
@@ -20,9 +20,13 @@
         crossorigin="anonymous"
         @loadeddata="playVideo(inlineVideo)"
         @canplay="playVideo(inlineVideo)"
+        @playing="handleMediaPlaying('inline')"
         @loadedmetadata="updateVideoAspectRatio"
         @error="handleVideoError"
       />
+      <div v-if="!inlineVideoReady" :class="$style.streamPlaceholder" aria-hidden="true">
+        <img src="/icons/Brand/Logo_Mark_Dark.svg" :class="$style.streamPlaceholderLogo" alt="" />
+      </div>
       </div>
       <div v-if="statusText" :class="$style.statusOverlay">
         <span>{{ statusText }}</span>
@@ -66,11 +70,11 @@
           <span :class="$style.cameraToggleTrack" aria-hidden="true">
             <span :class="$style.cameraToggleThumb"></span>
             <svg :class="[$style.cameraToggleIcon, isVideoMode ? $style.iconHidden : '']" viewBox="0 0 30 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M11.6985 35.3652C11.8987 34.3828 12.7733 33.6875 13.7745 33.6875H16.2255C17.2267 33.6875 18.1005 34.3828 18.3015 35.3652C18.3237 35.4734 18.3816 35.571 18.4659 35.6423C18.5503 35.7136 18.6561 35.7544 18.7665 35.7583H18.7913C19.8435 35.8048 20.652 35.9337 21.327 36.377C21.7523 36.656 22.1182 37.0145 22.4032 37.4337C22.758 37.9542 22.914 38.5528 22.989 39.2758C23.0625 39.983 23.0625 40.8688 23.0625 41.9908V42.0545C23.0625 43.1765 23.0625 44.063 22.989 44.7695C22.914 45.4925 22.758 46.091 22.4032 46.6122C22.1167 47.0312 21.7511 47.3901 21.327 47.669C20.7998 48.0148 20.1945 48.1677 19.461 48.2405C18.7425 48.3125 17.8417 48.3125 16.6972 48.3125H13.3028C12.1583 48.3125 11.2575 48.3125 10.539 48.2405C9.8055 48.1677 9.20025 48.0155 8.673 47.669C8.24883 47.3899 7.88324 47.0307 7.59675 46.6115C7.242 46.091 7.086 45.4925 7.011 44.7695C6.9375 44.063 6.9375 43.1765 6.9375 42.0545V41.9908C6.9375 40.8688 6.9375 39.983 7.011 39.2758C7.086 38.5528 7.242 37.9542 7.59675 37.4337C7.88324 37.0146 8.24883 36.6553 8.673 36.3763C9.348 35.9338 10.1565 35.8047 11.2088 35.759L11.2215 35.7583H11.2335C11.3439 35.7544 11.4497 35.7136 11.5341 35.6423C11.6184 35.571 11.6763 35.4734 11.6985 35.3652ZM13.7745 34.8125C13.2945 34.8125 12.8917 35.1447 12.801 35.5895C12.6547 36.3095 12.0157 36.8765 11.247 36.8833C10.236 36.9283 9.6945 37.052 9.2895 37.3175C8.98909 37.5154 8.73003 37.7699 8.52675 38.0667C8.31975 38.3705 8.19525 38.7597 8.12925 39.392C8.06325 40.034 8.0625 40.862 8.0625 42.023C8.0625 43.184 8.0625 44.0113 8.13 44.6532C8.19525 45.2855 8.31975 45.6748 8.5275 45.9792C8.7285 46.2747 8.98725 46.5298 9.29025 46.7285C9.603 46.9333 10.0035 47.057 10.6508 47.1215C11.3063 47.1868 12.1507 47.1875 13.3335 47.1875H16.6665C17.8485 47.1875 18.693 47.1875 19.3492 47.1215C19.9965 47.057 20.397 46.934 20.7098 46.7285C21.0128 46.5298 21.2723 46.2748 21.4733 45.9785C21.6803 45.6748 21.8047 45.2855 21.8707 44.6532C21.9367 44.0113 21.9375 43.1833 21.9375 42.023C21.9375 40.8628 21.9375 40.034 21.87 39.392C21.8047 38.7597 21.6802 38.3705 21.4725 38.0667C21.2693 37.7696 21.0102 37.5149 20.7098 37.3168C20.3063 37.052 19.7648 36.9283 18.7523 36.8833C17.9843 36.8758 17.3453 36.3102 17.199 35.5895C17.151 35.3677 17.0279 35.1693 16.8506 35.0277C16.6732 34.8861 16.4524 34.8101 16.2255 34.8125H13.7745ZM15 40.0625C14.5524 40.0625 14.1232 40.2403 13.8068 40.5568C13.4903 40.8732 13.3125 41.3024 13.3125 41.75C13.3125 42.1976 13.4903 42.6268 13.8068 42.9432C14.1232 43.2597 14.5524 43.4375 15 43.4375C15.4476 43.4375 15.8768 43.2597 16.1932 42.9432C16.5097 42.6268 16.6875 42.1976 16.6875 41.75C16.6875 41.3024 16.5097 40.8732 16.1932 40.5568C15.8768 40.2403 15.4476 40.0625 15 40.0625ZM12.1875 41.75C12.1875 41.0041 12.4838 40.2887 13.0113 39.7613C13.5387 39.2338 14.2541 38.9375 15 38.9375C15.7459 38.9375 16.4613 39.2338 16.9887 39.7613C17.5162 40.2887 17.8125 41.0041 17.8125 41.75C17.8125 42.4959 17.5162 43.2113 16.9887 43.7387C16.4613 44.2662 15.7459 44.5625 15 44.5625C14.2541 44.5625 13.5387 44.2662 13.0113 43.7387C12.4838 43.2113 12.1875 42.4959 12.1875 41.75ZM18.9375 39.5C18.9375 39.3508 18.9968 39.2077 19.1023 39.1023C19.2077 38.9968 19.3508 38.9375 19.5 38.9375H20.25C20.3992 38.9375 20.5423 38.9968 20.6477 39.1023C20.7532 39.2077 20.8125 39.3508 20.8125 39.5C20.8125 39.6492 20.7532 39.7923 20.6477 39.8977C20.5423 40.0032 20.3992 40.0625 20.25 40.0625H19.5C19.3508 40.0625 19.2077 40.0032 19.1023 39.8977C18.9968 39.7923 18.9375 39.6492 18.9375 39.5Z" fill="#84776E"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M11.6985 35.3652C11.8987 34.3828 12.7733 33.6875 13.7745 33.6875H16.2255C17.2267 33.6875 18.1005 34.3828 18.3015 35.3652C18.3237 35.4734 18.3816 35.571 18.4659 35.6423C18.5503 35.7136 18.6561 35.7544 18.7665 35.7583H18.7913C19.8435 35.8048 20.652 35.9337 21.327 36.377C21.7523 36.656 22.1182 37.0145 22.4032 37.4337C22.758 37.9542 22.914 38.5528 22.989 39.2758C23.0625 39.983 23.0625 40.8688 23.0625 41.9908V42.0545C23.0625 43.1765 23.0625 44.063 22.989 44.7695C22.914 45.4925 22.758 46.091 22.4032 46.6122C22.1167 47.0312 21.7511 47.3901 21.327 47.669C20.7998 48.0148 20.1945 48.1677 19.461 48.2405C18.7425 48.3125 17.8417 48.3125 16.6972 48.3125H13.3028C12.1583 48.3125 11.2575 48.3125 10.539 48.2405C9.8055 48.1677 9.20025 48.0155 8.673 47.669C8.24883 47.3899 7.88324 47.0307 7.59675 46.6115C7.242 46.091 7.086 45.4925 7.011 44.7695C6.9375 44.063 6.9375 43.1765 6.9375 42.0545V41.9908C6.9375 40.8688 6.9375 39.983 7.011 39.2758C7.086 38.5528 7.242 37.9542 7.59675 37.4337C7.88324 37.0146 8.24883 36.6553 8.673 36.3763C9.348 35.9338 10.1565 35.8047 11.2088 35.759L11.2215 35.7583H11.2335C11.3439 35.7544 11.4497 35.7136 11.5341 35.6423C11.6184 35.571 11.6763 35.4734 11.6985 35.3652ZM13.7745 34.8125C13.2945 34.8125 12.8917 35.1447 12.801 35.5895C12.6547 36.3095 12.0157 36.8765 11.247 36.8833C10.236 36.9283 9.6945 37.052 9.2895 37.3175C8.98909 37.5154 8.73003 37.7699 8.52675 38.0667C8.31975 38.3705 8.19525 38.7597 8.12925 39.392C8.06325 40.034 8.0625 40.862 8.0625 42.023C8.0625 43.184 8.0625 44.0113 8.13 44.6532C8.19525 45.2855 8.31975 45.6748 8.5275 45.9792C8.7285 46.2747 8.98725 46.5298 9.29025 46.7285C9.603 46.9333 10.0035 47.057 10.6508 47.1215C11.3063 47.1868 12.1507 47.1875 13.3335 47.1875H16.6665C17.8485 47.1875 18.693 47.1875 19.3492 47.1215C19.9965 47.057 20.397 46.934 20.7098 46.7285C21.0128 46.5298 21.2723 46.2748 21.4733 45.9785C21.6803 45.6748 21.8047 45.2855 21.8707 44.6532C21.9367 44.0113 21.9375 43.1833 21.9375 42.023C21.9375 40.8628 21.9375 40.034 21.87 39.392C21.8047 38.7597 21.6802 38.3705 21.4725 38.0667C21.2693 37.7696 21.0102 37.5149 20.7098 37.3168C20.3063 37.052 19.7648 36.9283 18.7523 36.8833C17.9843 36.8758 17.3453 36.3102 17.199 35.5895C17.151 35.3677 17.0279 35.1693 16.8506 35.0277C16.6732 34.8861 16.4524 34.8101 16.2255 34.8125H13.7745ZM15 40.0625C14.5524 40.0625 14.1232 40.2403 13.8068 40.5568C13.4903 40.8732 13.3125 41.3024 13.3125 41.75C13.3125 42.1976 13.4903 42.6268 13.8068 42.9432C14.1232 43.2597 14.5524 43.4375 15 43.4375C15.4476 43.4375 15.8768 43.2597 16.1932 42.9432C16.5097 42.6268 16.6875 42.1976 16.6875 41.75C16.6875 41.3024 16.5097 40.8732 16.1932 40.5568C15.8768 40.2403 15.4476 40.0625 15 40.0625ZM12.1875 41.75C12.1875 41.0041 12.4838 40.2887 13.0113 39.7613C13.5387 39.2338 14.2541 38.9375 15 38.9375C15.7459 38.9375 16.4613 39.2338 16.9887 39.7613C17.5162 40.2887 17.8125 41.0041 17.8125 41.75C17.8125 42.4959 17.5162 43.2113 16.9887 43.7387C16.4613 44.2662 15.7459 44.5625 15 44.5625C14.2541 44.5625 13.5387 44.2662 13.0113 43.7387C12.4838 43.2113 12.1875 42.4959 12.1875 41.75ZM18.9375 39.5C18.9375 39.3508 18.9968 39.2077 19.1023 39.1023C19.2077 38.9968 19.3508 38.9375 19.5 38.9375H20.25C20.3992 38.9375 20.5423 38.9968 20.6477 39.1023C20.7532 39.2077 20.8125 39.3508 20.8125 39.5C20.8125 39.6492 20.7532 39.7923 20.6477 39.8977C20.5423 40.0032 20.3992 40.0625 20.25 40.0625H19.5C19.3508 40.0625 19.2077 40.0032 19.1023 39.8977C18.9968 39.7923 18.9375 39.6492 18.9375 39.5Z" fill="currentColor"/>
               </svg>
             <svg :class="[$style.cameraToggleIcon, isVideoMode ? '' : $style.iconHidden]" viewBox="0 0 30 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M8.69238 20.6243C8.29456 20.6243 7.91303 20.4662 7.63172 20.1849C7.35042 19.9036 7.19238 19.5221 7.19238 19.1243V10.8765C7.19238 10.4787 7.35042 10.0971 7.63172 9.81584C7.91303 9.53454 8.29456 9.3765 8.69238 9.3765H17.1006C17.2976 9.3765 17.4927 9.4153 17.6747 9.49068C17.8566 9.56607 18.022 9.67656 18.1613 9.81584C18.3006 9.95513 18.4111 10.1205 18.4865 10.3025C18.5618 10.4845 18.6006 10.6795 18.6006 10.8765V19.1243C18.6006 19.5221 18.4426 19.9036 18.1613 20.1849C17.88 20.4662 17.4985 20.6243 17.1006 20.6243H8.69238ZM18.9906 16.8758C18.8726 16.8112 18.7741 16.716 18.7055 16.6003C18.6369 16.4846 18.6007 16.3525 18.6006 16.218V13.7828C18.6007 13.6482 18.6369 13.5162 18.7055 13.4004C18.7741 13.2847 18.8726 13.1896 18.9906 13.125L21.6966 11.643C21.8108 11.5805 21.9393 11.5488 22.0695 11.5511C22.1996 11.5533 22.327 11.5894 22.439 11.6557C22.551 11.7221 22.6438 11.8165 22.7082 11.9296C22.7727 12.0427 22.8066 12.1706 22.8066 12.3008V17.7008C22.8065 17.8309 22.7725 17.9587 22.7079 18.0717C22.6434 18.1847 22.5506 18.2789 22.4386 18.3452C22.3267 18.4115 22.1994 18.4475 22.0693 18.4497C21.9392 18.4519 21.8108 18.4202 21.6966 18.3578L18.9906 16.8758Z" stroke="#84776E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M15.3721 15.7432C15.1638 16.2269 14.8184 16.6389 14.3785 16.9284C13.9387 17.2179 13.4237 17.3721 12.8971 17.3721C12.3705 17.3721 11.8555 17.2179 11.4156 16.9284C10.9758 16.6389 10.6304 16.2269 10.4221 15.7432M10.5683 12.8415C10.5038 12.8464 10.4431 12.8743 10.3974 12.9201C10.3517 12.9659 10.324 13.0267 10.3193 13.0912C10.3193 13.2157 10.4438 13.3402 10.5683 13.3402C10.6329 13.3356 10.6936 13.3079 10.7395 13.2622C10.7853 13.2165 10.8132 13.1558 10.8181 13.0912C10.8181 12.966 10.6936 12.8415 10.5683 12.8415ZM15.2266 12.8415C15.162 12.8464 15.1014 12.8743 15.0557 12.9201C15.01 12.9659 14.9823 13.0267 14.9776 13.0912C14.9776 13.2157 15.1021 13.3402 15.2266 13.3402C15.2912 13.3356 15.3519 13.3079 15.3977 13.2622C15.4436 13.2165 15.4715 13.1558 15.4763 13.0912C15.4763 12.966 15.3518 12.8415 15.2266 12.8415Z" stroke="#84776E" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8.69238 20.6243C8.29456 20.6243 7.91303 20.4662 7.63172 20.1849C7.35042 19.9036 7.19238 19.5221 7.19238 19.1243V10.8765C7.19238 10.4787 7.35042 10.0971 7.63172 9.81584C7.91303 9.53454 8.29456 9.3765 8.69238 9.3765H17.1006C17.2976 9.3765 17.4927 9.4153 17.6747 9.49068C17.8566 9.56607 18.022 9.67656 18.1613 9.81584C18.3006 9.95513 18.4111 10.1205 18.4865 10.3025C18.5618 10.4845 18.6006 10.6795 18.6006 10.8765V19.1243C18.6006 19.5221 18.4426 19.9036 18.1613 20.1849C17.88 20.4662 17.4985 20.6243 17.1006 20.6243H8.69238ZM18.9906 16.8758C18.8726 16.8112 18.7741 16.716 18.7055 16.6003C18.6369 16.4846 18.6007 16.3525 18.6006 16.218V13.7828C18.6007 13.6482 18.6369 13.5162 18.7055 13.4004C18.7741 13.2847 18.8726 13.1896 18.9906 13.125L21.6966 11.643C21.8108 11.5805 21.9393 11.5488 22.0695 11.5511C22.1996 11.5533 22.327 11.5894 22.439 11.6557C22.551 11.7221 22.6438 11.8165 22.7082 11.9296C22.7727 12.0427 22.8066 12.1706 22.8066 12.3008V17.7008C22.8065 17.8309 22.7725 17.9587 22.7079 18.0717C22.6434 18.1847 22.5506 18.2789 22.4386 18.3452C22.3267 18.4115 22.1994 18.4475 22.0693 18.4497C21.9392 18.4519 21.8108 18.4202 21.6966 18.3578L18.9906 16.8758Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M15.3721 15.7432C15.1638 16.2269 14.8184 16.6389 14.3785 16.9284C13.9387 17.2179 13.4237 17.3721 12.8971 17.3721C12.3705 17.3721 11.8555 17.2179 11.4156 16.9284C10.9758 16.6389 10.6304 16.2269 10.4221 15.7432M10.5683 12.8415C10.5038 12.8464 10.4431 12.8743 10.3974 12.9201C10.3517 12.9659 10.324 13.0267 10.3193 13.0912C10.3193 13.2157 10.4438 13.3402 10.5683 13.3402C10.6329 13.3356 10.6936 13.3079 10.7395 13.2622C10.7853 13.2165 10.8132 13.1558 10.8181 13.0912C10.8181 12.966 10.6936 12.8415 10.5683 12.8415ZM15.2266 12.8415C15.162 12.8464 15.1014 12.8743 15.0557 12.9201C15.01 12.9659 14.9823 13.0267 14.9776 13.0912C14.9776 13.2157 15.1021 13.3402 15.2266 13.3402C15.2912 13.3356 15.3519 13.3079 15.3977 13.2622C15.4436 13.2165 15.4715 13.1558 15.4763 13.0912C15.4763 12.966 15.3518 12.8415 15.2266 12.8415Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
           </span>
         </button>
@@ -114,15 +118,15 @@
       <div :class="$style.fullscreenStage">
         <div :class="$style.fullscreenContent" @click.stop>
           <div :class="$style.fullVideoArea">
-            <div :class="$style.fullStreamFrame" :style="streamFrameStyle">
             <div data-debug-id="full-protocol-switch" :data-protocol="protocol" :class="[$style.protocolSwitch, $style.fullProtocolSwitch, protocol === 'webrtc' ? $style.protocolSwitchWebRtc : $style.protocolSwitchHls]" aria-label="스트리밍 프로토콜">
               <button type="button" :class="[$style.protocolOption, protocol === 'hls' ? $style.protocolOptionActive : '']" @click.stop="selectProtocol('hls')">HLS</button>
               <button type="button" :class="[$style.protocolOption, protocol === 'webrtc' ? $style.protocolOptionActive : '']" @click.stop="selectProtocol('webrtc')">WebRTC</button>
             </div>
+            <div :class="$style.fullStreamFrame" :style="streamFrameStyle">
             <video
               ref="expandedVideo"
               :src="nativeVideoSrc"
-              :class="$style.fullImg"
+              :class="[$style.fullImg, !expandedVideoReady ? $style.mediaHidden : '']"
               autoplay
               muted
               preload="auto"
@@ -132,9 +136,13 @@
               webkit-playsinline
               @loadeddata="playVideo(expandedVideo)"
               @canplay="playVideo(expandedVideo)"
+              @playing="handleMediaPlaying('expanded')"
               @loadedmetadata="updateVideoAspectRatio"
               @error="handleVideoError"
             />
+            <div v-if="!expandedVideoReady" :class="$style.streamPlaceholder" aria-hidden="true">
+              <img src="/icons/Brand/Logo_Mark_Dark.svg" :class="$style.streamPlaceholderLogo" alt="" />
+            </div>
             </div>
             <div v-if="statusText" :class="[$style.statusOverlay, $style.fullStatusOverlay]">
               <span>{{ statusText }}</span>
@@ -170,11 +178,11 @@
                 <span :class="$style.cameraToggleTrack" aria-hidden="true">
             <span :class="$style.cameraToggleThumb"></span>
             <svg :class="[$style.cameraToggleIcon, isVideoMode ? $style.iconHidden : '']" viewBox="0 0 30 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M11.6985 35.3652C11.8987 34.3828 12.7733 33.6875 13.7745 33.6875H16.2255C17.2267 33.6875 18.1005 34.3828 18.3015 35.3652C18.3237 35.4734 18.3816 35.571 18.4659 35.6423C18.5503 35.7136 18.6561 35.7544 18.7665 35.7583H18.7913C19.8435 35.8048 20.652 35.9337 21.327 36.377C21.7523 36.656 22.1182 37.0145 22.4032 37.4337C22.758 37.9542 22.914 38.5528 22.989 39.2758C23.0625 39.983 23.0625 40.8688 23.0625 41.9908V42.0545C23.0625 43.1765 23.0625 44.063 22.989 44.7695C22.914 45.4925 22.758 46.091 22.4032 46.6122C22.1167 47.0312 21.7511 47.3901 21.327 47.669C20.7998 48.0148 20.1945 48.1677 19.461 48.2405C18.7425 48.3125 17.8417 48.3125 16.6972 48.3125H13.3028C12.1583 48.3125 11.2575 48.3125 10.539 48.2405C9.8055 48.1677 9.20025 48.0155 8.673 47.669C8.24883 47.3899 7.88324 47.0307 7.59675 46.6115C7.242 46.091 7.086 45.4925 7.011 44.7695C6.9375 44.063 6.9375 43.1765 6.9375 42.0545V41.9908C6.9375 40.8688 6.9375 39.983 7.011 39.2758C7.086 38.5528 7.242 37.9542 7.59675 37.4337C7.88324 37.0146 8.24883 36.6553 8.673 36.3763C9.348 35.9338 10.1565 35.8047 11.2088 35.759L11.2215 35.7583H11.2335C11.3439 35.7544 11.4497 35.7136 11.5341 35.6423C11.6184 35.571 11.6763 35.4734 11.6985 35.3652ZM13.7745 34.8125C13.2945 34.8125 12.8917 35.1447 12.801 35.5895C12.6547 36.3095 12.0157 36.8765 11.247 36.8833C10.236 36.9283 9.6945 37.052 9.2895 37.3175C8.98909 37.5154 8.73003 37.7699 8.52675 38.0667C8.31975 38.3705 8.19525 38.7597 8.12925 39.392C8.06325 40.034 8.0625 40.862 8.0625 42.023C8.0625 43.184 8.0625 44.0113 8.13 44.6532C8.19525 45.2855 8.31975 45.6748 8.5275 45.9792C8.7285 46.2747 8.98725 46.5298 9.29025 46.7285C9.603 46.9333 10.0035 47.057 10.6508 47.1215C11.3063 47.1868 12.1507 47.1875 13.3335 47.1875H16.6665C17.8485 47.1875 18.693 47.1875 19.3492 47.1215C19.9965 47.057 20.397 46.934 20.7098 46.7285C21.0128 46.5298 21.2723 46.2748 21.4733 45.9785C21.6803 45.6748 21.8047 45.2855 21.8707 44.6532C21.9367 44.0113 21.9375 43.1833 21.9375 42.023C21.9375 40.8628 21.9375 40.034 21.87 39.392C21.8047 38.7597 21.6802 38.3705 21.4725 38.0667C21.2693 37.7696 21.0102 37.5149 20.7098 37.3168C20.3063 37.052 19.7648 36.9283 18.7523 36.8833C17.9843 36.8758 17.3453 36.3102 17.199 35.5895C17.151 35.3677 17.0279 35.1693 16.8506 35.0277C16.6732 34.8861 16.4524 34.8101 16.2255 34.8125H13.7745ZM15 40.0625C14.5524 40.0625 14.1232 40.2403 13.8068 40.5568C13.4903 40.8732 13.3125 41.3024 13.3125 41.75C13.3125 42.1976 13.4903 42.6268 13.8068 42.9432C14.1232 43.2597 14.5524 43.4375 15 43.4375C15.4476 43.4375 15.8768 43.2597 16.1932 42.9432C16.5097 42.6268 16.6875 42.1976 16.6875 41.75C16.6875 41.3024 16.5097 40.8732 16.1932 40.5568C15.8768 40.2403 15.4476 40.0625 15 40.0625ZM12.1875 41.75C12.1875 41.0041 12.4838 40.2887 13.0113 39.7613C13.5387 39.2338 14.2541 38.9375 15 38.9375C15.7459 38.9375 16.4613 39.2338 16.9887 39.7613C17.5162 40.2887 17.8125 41.0041 17.8125 41.75C17.8125 42.4959 17.5162 43.2113 16.9887 43.7387C16.4613 44.2662 15.7459 44.5625 15 44.5625C14.2541 44.5625 13.5387 44.2662 13.0113 43.7387C12.4838 43.2113 12.1875 42.4959 12.1875 41.75ZM18.9375 39.5C18.9375 39.3508 18.9968 39.2077 19.1023 39.1023C19.2077 38.9968 19.3508 38.9375 19.5 38.9375H20.25C20.3992 38.9375 20.5423 38.9968 20.6477 39.1023C20.7532 39.2077 20.8125 39.3508 20.8125 39.5C20.8125 39.6492 20.7532 39.7923 20.6477 39.8977C20.5423 40.0032 20.3992 40.0625 20.25 40.0625H19.5C19.3508 40.0625 19.2077 40.0032 19.1023 39.8977C18.9968 39.7923 18.9375 39.6492 18.9375 39.5Z" fill="#84776E"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M11.6985 35.3652C11.8987 34.3828 12.7733 33.6875 13.7745 33.6875H16.2255C17.2267 33.6875 18.1005 34.3828 18.3015 35.3652C18.3237 35.4734 18.3816 35.571 18.4659 35.6423C18.5503 35.7136 18.6561 35.7544 18.7665 35.7583H18.7913C19.8435 35.8048 20.652 35.9337 21.327 36.377C21.7523 36.656 22.1182 37.0145 22.4032 37.4337C22.758 37.9542 22.914 38.5528 22.989 39.2758C23.0625 39.983 23.0625 40.8688 23.0625 41.9908V42.0545C23.0625 43.1765 23.0625 44.063 22.989 44.7695C22.914 45.4925 22.758 46.091 22.4032 46.6122C22.1167 47.0312 21.7511 47.3901 21.327 47.669C20.7998 48.0148 20.1945 48.1677 19.461 48.2405C18.7425 48.3125 17.8417 48.3125 16.6972 48.3125H13.3028C12.1583 48.3125 11.2575 48.3125 10.539 48.2405C9.8055 48.1677 9.20025 48.0155 8.673 47.669C8.24883 47.3899 7.88324 47.0307 7.59675 46.6115C7.242 46.091 7.086 45.4925 7.011 44.7695C6.9375 44.063 6.9375 43.1765 6.9375 42.0545V41.9908C6.9375 40.8688 6.9375 39.983 7.011 39.2758C7.086 38.5528 7.242 37.9542 7.59675 37.4337C7.88324 37.0146 8.24883 36.6553 8.673 36.3763C9.348 35.9338 10.1565 35.8047 11.2088 35.759L11.2215 35.7583H11.2335C11.3439 35.7544 11.4497 35.7136 11.5341 35.6423C11.6184 35.571 11.6763 35.4734 11.6985 35.3652ZM13.7745 34.8125C13.2945 34.8125 12.8917 35.1447 12.801 35.5895C12.6547 36.3095 12.0157 36.8765 11.247 36.8833C10.236 36.9283 9.6945 37.052 9.2895 37.3175C8.98909 37.5154 8.73003 37.7699 8.52675 38.0667C8.31975 38.3705 8.19525 38.7597 8.12925 39.392C8.06325 40.034 8.0625 40.862 8.0625 42.023C8.0625 43.184 8.0625 44.0113 8.13 44.6532C8.19525 45.2855 8.31975 45.6748 8.5275 45.9792C8.7285 46.2747 8.98725 46.5298 9.29025 46.7285C9.603 46.9333 10.0035 47.057 10.6508 47.1215C11.3063 47.1868 12.1507 47.1875 13.3335 47.1875H16.6665C17.8485 47.1875 18.693 47.1875 19.3492 47.1215C19.9965 47.057 20.397 46.934 20.7098 46.7285C21.0128 46.5298 21.2723 46.2748 21.4733 45.9785C21.6803 45.6748 21.8047 45.2855 21.8707 44.6532C21.9367 44.0113 21.9375 43.1833 21.9375 42.023C21.9375 40.8628 21.9375 40.034 21.87 39.392C21.8047 38.7597 21.6802 38.3705 21.4725 38.0667C21.2693 37.7696 21.0102 37.5149 20.7098 37.3168C20.3063 37.052 19.7648 36.9283 18.7523 36.8833C17.9843 36.8758 17.3453 36.3102 17.199 35.5895C17.151 35.3677 17.0279 35.1693 16.8506 35.0277C16.6732 34.8861 16.4524 34.8101 16.2255 34.8125H13.7745ZM15 40.0625C14.5524 40.0625 14.1232 40.2403 13.8068 40.5568C13.4903 40.8732 13.3125 41.3024 13.3125 41.75C13.3125 42.1976 13.4903 42.6268 13.8068 42.9432C14.1232 43.2597 14.5524 43.4375 15 43.4375C15.4476 43.4375 15.8768 43.2597 16.1932 42.9432C16.5097 42.6268 16.6875 42.1976 16.6875 41.75C16.6875 41.3024 16.5097 40.8732 16.1932 40.5568C15.8768 40.2403 15.4476 40.0625 15 40.0625ZM12.1875 41.75C12.1875 41.0041 12.4838 40.2887 13.0113 39.7613C13.5387 39.2338 14.2541 38.9375 15 38.9375C15.7459 38.9375 16.4613 39.2338 16.9887 39.7613C17.5162 40.2887 17.8125 41.0041 17.8125 41.75C17.8125 42.4959 17.5162 43.2113 16.9887 43.7387C16.4613 44.2662 15.7459 44.5625 15 44.5625C14.2541 44.5625 13.5387 44.2662 13.0113 43.7387C12.4838 43.2113 12.1875 42.4959 12.1875 41.75ZM18.9375 39.5C18.9375 39.3508 18.9968 39.2077 19.1023 39.1023C19.2077 38.9968 19.3508 38.9375 19.5 38.9375H20.25C20.3992 38.9375 20.5423 38.9968 20.6477 39.1023C20.7532 39.2077 20.8125 39.3508 20.8125 39.5C20.8125 39.6492 20.7532 39.7923 20.6477 39.8977C20.5423 40.0032 20.3992 40.0625 20.25 40.0625H19.5C19.3508 40.0625 19.2077 40.0032 19.1023 39.8977C18.9968 39.7923 18.9375 39.6492 18.9375 39.5Z" fill="currentColor"/>
               </svg>
             <svg :class="[$style.cameraToggleIcon, isVideoMode ? '' : $style.iconHidden]" viewBox="0 0 30 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M8.69238 20.6243C8.29456 20.6243 7.91303 20.4662 7.63172 20.1849C7.35042 19.9036 7.19238 19.5221 7.19238 19.1243V10.8765C7.19238 10.4787 7.35042 10.0971 7.63172 9.81584C7.91303 9.53454 8.29456 9.3765 8.69238 9.3765H17.1006C17.2976 9.3765 17.4927 9.4153 17.6747 9.49068C17.8566 9.56607 18.022 9.67656 18.1613 9.81584C18.3006 9.95513 18.4111 10.1205 18.4865 10.3025C18.5618 10.4845 18.6006 10.6795 18.6006 10.8765V19.1243C18.6006 19.5221 18.4426 19.9036 18.1613 20.1849C17.88 20.4662 17.4985 20.6243 17.1006 20.6243H8.69238ZM18.9906 16.8758C18.8726 16.8112 18.7741 16.716 18.7055 16.6003C18.6369 16.4846 18.6007 16.3525 18.6006 16.218V13.7828C18.6007 13.6482 18.6369 13.5162 18.7055 13.4004C18.7741 13.2847 18.8726 13.1896 18.9906 13.125L21.6966 11.643C21.8108 11.5805 21.9393 11.5488 22.0695 11.5511C22.1996 11.5533 22.327 11.5894 22.439 11.6557C22.551 11.7221 22.6438 11.8165 22.7082 11.9296C22.7727 12.0427 22.8066 12.1706 22.8066 12.3008V17.7008C22.8065 17.8309 22.7725 17.9587 22.7079 18.0717C22.6434 18.1847 22.5506 18.2789 22.4386 18.3452C22.3267 18.4115 22.1994 18.4475 22.0693 18.4497C21.9392 18.4519 21.8108 18.4202 21.6966 18.3578L18.9906 16.8758Z" stroke="#84776E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M15.3721 15.7432C15.1638 16.2269 14.8184 16.6389 14.3785 16.9284C13.9387 17.2179 13.4237 17.3721 12.8971 17.3721C12.3705 17.3721 11.8555 17.2179 11.4156 16.9284C10.9758 16.6389 10.6304 16.2269 10.4221 15.7432M10.5683 12.8415C10.5038 12.8464 10.4431 12.8743 10.3974 12.9201C10.3517 12.9659 10.324 13.0267 10.3193 13.0912C10.3193 13.2157 10.4438 13.3402 10.5683 13.3402C10.6329 13.3356 10.6936 13.3079 10.7395 13.2622C10.7853 13.2165 10.8132 13.1558 10.8181 13.0912C10.8181 12.966 10.6936 12.8415 10.5683 12.8415ZM15.2266 12.8415C15.162 12.8464 15.1014 12.8743 15.0557 12.9201C15.01 12.9659 14.9823 13.0267 14.9776 13.0912C14.9776 13.2157 15.1021 13.3402 15.2266 13.3402C15.2912 13.3356 15.3519 13.3079 15.3977 13.2622C15.4436 13.2165 15.4715 13.1558 15.4763 13.0912C15.4763 12.966 15.3518 12.8415 15.2266 12.8415Z" stroke="#84776E" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8.69238 20.6243C8.29456 20.6243 7.91303 20.4662 7.63172 20.1849C7.35042 19.9036 7.19238 19.5221 7.19238 19.1243V10.8765C7.19238 10.4787 7.35042 10.0971 7.63172 9.81584C7.91303 9.53454 8.29456 9.3765 8.69238 9.3765H17.1006C17.2976 9.3765 17.4927 9.4153 17.6747 9.49068C17.8566 9.56607 18.022 9.67656 18.1613 9.81584C18.3006 9.95513 18.4111 10.1205 18.4865 10.3025C18.5618 10.4845 18.6006 10.6795 18.6006 10.8765V19.1243C18.6006 19.5221 18.4426 19.9036 18.1613 20.1849C17.88 20.4662 17.4985 20.6243 17.1006 20.6243H8.69238ZM18.9906 16.8758C18.8726 16.8112 18.7741 16.716 18.7055 16.6003C18.6369 16.4846 18.6007 16.3525 18.6006 16.218V13.7828C18.6007 13.6482 18.6369 13.5162 18.7055 13.4004C18.7741 13.2847 18.8726 13.1896 18.9906 13.125L21.6966 11.643C21.8108 11.5805 21.9393 11.5488 22.0695 11.5511C22.1996 11.5533 22.327 11.5894 22.439 11.6557C22.551 11.7221 22.6438 11.8165 22.7082 11.9296C22.7727 12.0427 22.8066 12.1706 22.8066 12.3008V17.7008C22.8065 17.8309 22.7725 17.9587 22.7079 18.0717C22.6434 18.1847 22.5506 18.2789 22.4386 18.3452C22.3267 18.4115 22.1994 18.4475 22.0693 18.4497C21.9392 18.4519 21.8108 18.4202 21.6966 18.3578L18.9906 16.8758Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M15.3721 15.7432C15.1638 16.2269 14.8184 16.6389 14.3785 16.9284C13.9387 17.2179 13.4237 17.3721 12.8971 17.3721C12.3705 17.3721 11.8555 17.2179 11.4156 16.9284C10.9758 16.6389 10.6304 16.2269 10.4221 15.7432M10.5683 12.8415C10.5038 12.8464 10.4431 12.8743 10.3974 12.9201C10.3517 12.9659 10.324 13.0267 10.3193 13.0912C10.3193 13.2157 10.4438 13.3402 10.5683 13.3402C10.6329 13.3356 10.6936 13.3079 10.7395 13.2622C10.7853 13.2165 10.8132 13.1558 10.8181 13.0912C10.8181 12.966 10.6936 12.8415 10.5683 12.8415ZM15.2266 12.8415C15.162 12.8464 15.1014 12.8743 15.0557 12.9201C15.01 12.9659 14.9823 13.0267 14.9776 13.0912C14.9776 13.2157 15.1021 13.3402 15.2266 13.3402C15.2912 13.3356 15.3519 13.3079 15.3977 13.2622C15.4436 13.2165 15.4715 13.1558 15.4763 13.0912C15.4763 12.966 15.3518 12.8415 15.2266 12.8415Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
           </span>
               </button>
@@ -197,30 +205,37 @@
       </div>
     </div>
   </Teleport>
+  <Teleport to="body">
+    <Transition name="cameraRotationCover">
+      <div v-if="isOrientationTransition" :class="$style.rotationCam" aria-hidden="true">
+        <img src="/icons/Brand/Logo_Mark_Dark.svg" :class="$style.rotationLogo" alt="" />
+      </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup>
+import { Capacitor } from '@capacitor/core'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useAuth } from '@/composables/useAuth'
-import { useAutoLifecycle } from '@/composables/useAutoLifecycle'
 import { useCamera } from '@/composables/useCamera'
 import { getHlsUrl, getWhepUrl } from '@/endpoints'
 import { usePtz } from '@/composables/usePtz'
 import { useWebRtcStream } from '@/composables/useWebRtcStream'
-
-const { accessToken } = useAuth()
-// Restores the always-on streaming/analysis the screens were designed for.
-useAutoLifecycle()
+import { getReliableLandscape, ORIENTATION_DEBOUNCE_MS } from '@/utils/viewportOrientation'
 
 const isMuted = ref(true)
 const isExpanded = ref(false)
 const isLandscape = ref(false)
+let webExpandedBeforeLandscape = false
+const isOrientationTransition = ref(false)
 const isVideoMode = ref(false)
 const isRecording = ref(false)
 const captureFeedbackKey = ref(0)
 const captureModeFeedback = ref('')
 const inlineVideo = ref(null)
 const expandedVideo = ref(null)
+const inlineVideoReady = ref(false)
+const expandedVideoReady = ref(false)
 const videoAspectRatio = ref(16 / 9)
 const streamFrameStyle = computed(() => ({ '--video-aspect-ratio': videoAspectRatio.value }))
 
@@ -246,7 +261,7 @@ function readStoredProtocol() {
 }
 
 const protocol = ref(readStoredProtocol())
-const { cameraUrl, loading, error, cameraViewState, reconnectKey, selectedCamera, loadCameras, setConnected, setDisconnected } = useCamera()
+const { cameraUrl, loading, error, cameraViewState, reconnectKey, loadCameras, setConnected, setDisconnected } = useCamera()
 const { startMove, stopMove, saveHome, gotoHome } = usePtz()
 const emit = defineEmits(['ptz-change'])
 const ptzOpen = ref(false)
@@ -257,7 +272,34 @@ let recordedChunks = []
 let recordingCleanup = null
 let captureFeedbackTimer = null
 let captureModeFeedbackTimer = null
+let orientationTransitionTimer = null
+let orientationUpdateTimer = null
 
+function showOrientationTransition() {
+  isOrientationTransition.value = true
+  window.clearTimeout(orientationTransitionTimer)
+  orientationTransitionTimer = window.setTimeout(() => {
+    requestAnimationFrame(() => {
+      isOrientationTransition.value = false
+    })
+  }, 320)
+}
+
+function handleOrientationChange() {
+  queueOrientationUpdate()
+}
+
+function handleViewportResize() {
+  queueOrientationUpdate()
+}
+
+function queueOrientationUpdate() {
+  window.clearTimeout(orientationUpdateTimer)
+  orientationUpdateTimer = window.setTimeout(() => {
+    orientationUpdateTimer = null
+    void updateOrientation()
+  }, ORIENTATION_DEBOUNCE_MS)
+}
 
 function blurFullscreenControl(event) {
   const button = event.target?.closest?.("button")
@@ -648,6 +690,8 @@ let expandedHls = null
 let HlsLib = null
 let timeoutTimer = null
 let retryTimer = null
+let longRecoveryTimer = null
+let networkRecoveryTimer = null
 const setNativeImmersiveMode = (enabled) => {
   try {
     window.WallySystemUi?.setImmersive(Boolean(enabled))
@@ -655,14 +699,24 @@ const setNativeImmersiveMode = (enabled) => {
     console.warn('Failed to update Android system bars', err)
   }
 }
+const setPortraitExpandedStatusBar = (expanded) => {
+  try {
+    const appUsesDarkTheme = document.documentElement.classList.contains('theme-dark')
+    window.WallySystemUi?.setStatusBarLightContent(Boolean(expanded) || appUsesDarkTheme)
+  } catch (err) {
+    console.warn('Failed to update Android status bar contrast', err)
+  }
+}
 let stallTimer = null
 let streamSessionId = 0
 let connectDeadline = 0
 let retryAttempts = 0
+let longRecoveryAttempts = 0
 const CONNECT_TIMEOUT = 15000
 const RETRY_DELAY = 3000
 const STALL_TIMEOUT = 8000
 const MAX_AUTO_RETRIES = 3
+const LONG_RECOVERY_DELAYS = [5000, 10000, 15000, 30000]
 
 const {
   mediaStream: webRtcMediaStream,
@@ -670,7 +724,6 @@ const {
   disconnect: disconnectWebRtc,
 } = useWebRtcStream({
   getUrl: getWhepUrl,
-  getHeaders: () => (accessToken.value ? { Authorization: `Bearer ${accessToken.value}` } : {}),
   connectTimeout: CONNECT_TIMEOUT,
   retryDelay: RETRY_DELAY,
   onTerminalFailure: () => fallbackToHls(),
@@ -678,7 +731,7 @@ const {
 
 const videoSrc = computed(() => cameraUrl.value || (cameraViewState.value === 'configured' ? getHlsUrl() : ''))
 const isHlsStream = computed(() => protocol.value === 'hls' && videoSrc.value.includes('.m3u8'))
-const nativeVideoSrc = computed(() => (protocol.value === 'webrtc' || isHlsStream.value ? '' : videoSrc.value))
+const nativeVideoSrc = computed(() => (protocol.value === 'webrtc' || isHlsStream.value ? undefined : videoSrc.value))
 
 const statusText = computed(() => {
   if (loading.value || streamLoading.value) return '카메라 연결 중'
@@ -718,6 +771,15 @@ const handleVideoError = () => {
   playbackError.value = '카메라 영상을 재생할 수 없습니다.'
   streamLoading.value = false
   setDisconnected()
+  scheduleLongRecovery()
+}
+
+const clearLongRecovery = ({ resetAttempts = false } = {}) => {
+  if (longRecoveryTimer) {
+    clearTimeout(longRecoveryTimer)
+    longRecoveryTimer = null
+  }
+  if (resetAttempts) longRecoveryAttempts = 0
 }
 
 const clearStreamTimers = () => {
@@ -733,6 +795,7 @@ const clearStreamTimers = () => {
     clearInterval(stallTimer)
     stallTimer = null
   }
+  clearLongRecovery()
 }
 
 const onPlaying = () => {
@@ -740,6 +803,7 @@ const onPlaying = () => {
   timedOut.value = false
   playbackError.value = ''
   retryAttempts = 0
+  clearLongRecovery({ resetAttempts: true })
   setConnected()
   if (timeoutTimer) {
     clearTimeout(timeoutTimer)
@@ -747,11 +811,25 @@ const onPlaying = () => {
   }
 }
 
+function scheduleLongRecovery() {
+  if (longRecoveryTimer || !videoSrc.value || !navigator.onLine || document.visibilityState !== 'visible') return
+
+  const delayIndex = Math.min(longRecoveryAttempts, LONG_RECOVERY_DELAYS.length - 1)
+  const delay = LONG_RECOVERY_DELAYS[delayIndex]
+  longRecoveryAttempts += 1
+  longRecoveryTimer = setTimeout(() => {
+    longRecoveryTimer = null
+    if (!videoSrc.value || !navigator.onLine || document.visibilityState !== 'visible') return
+    void replayInlineVideo()
+  }, delay)
+}
+
 const scheduleRetry = (sessionId) => {
   if (Date.now() >= connectDeadline || retryAttempts >= MAX_AUTO_RETRIES) {
     streamLoading.value = false
     timedOut.value = true
     setDisconnected()
+    scheduleLongRecovery()
     return
   }
   retryAttempts += 1
@@ -770,6 +848,7 @@ const startTimeout = (sessionId) => {
     timedOut.value = true
     setDisconnected()
     destroyHls('inline')
+    scheduleLongRecovery()
   }, CONNECT_TIMEOUT)
 }
 
@@ -812,8 +891,32 @@ const destroyHls = (target = 'all') => {
   }
 }
 
+function handleMediaPlaying(target) {
+  const video = target === 'expanded' ? expandedVideo.value : inlineVideo.value
+  const revealVideo = () => {
+    if (!video || video.paused || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return
+    if (target === 'inline') inlineVideoReady.value = true
+    if (target === 'expanded') expandedVideoReady.value = true
+  }
+
+  if (typeof video?.requestVideoFrameCallback === 'function') {
+    video.requestVideoFrameCallback(revealVideo)
+  } else {
+    window.setTimeout(revealVideo, 120)
+  }
+  onPlaying()
+}
+
 function selectProtocol(nextProtocol) {
-  protocol.value = normalizeProtocol(nextProtocol)
+  const normalizedProtocol = normalizeProtocol(nextProtocol)
+  if (normalizedProtocol === protocol.value) return
+
+  // Hide both video elements before either one is reset. In portrait expanded
+  // mode the expanded HLS element was otherwise still marked ready while
+  // load() briefly exposed Android WebView's native playback placeholder.
+  inlineVideoReady.value = false
+  expandedVideoReady.value = false
+  protocol.value = normalizedProtocol
 }
 
 function writeStoredProtocol(nextProtocol) {
@@ -837,8 +940,12 @@ function clearVideoStream(video) {
 
 async function attachSharedWebRtcStream(video) {
   if (!video || !webRtcMediaStream.value) return false
-  resetVideoElement(video)
-  video.srcObject = webRtcMediaStream.value
+  if (video.srcObject !== webRtcMediaStream.value) {
+    if (video === inlineVideo.value) inlineVideoReady.value = false
+    if (video === expandedVideo.value) expandedVideoReady.value = false
+    resetVideoElement(video)
+    video.srcObject = webRtcMediaStream.value
+  }
   await playVideo(video)
   return true
 }
@@ -853,8 +960,8 @@ async function startWebRtcStream() {
   const stream = await connectWebRtc()
   if (!stream || protocol.value !== 'webrtc') return
 
-  await attachSharedWebRtcStream(inlineVideo.value)
   if (isExpanded.value) await attachSharedWebRtcStream(expandedVideo.value)
+  else await attachSharedWebRtcStream(inlineVideo.value)
   onPlaying()
 }
 
@@ -881,11 +988,6 @@ const attachHls = async (video, target, sessionId = streamSessionId) => {
       liveMaxLatencyDurationCount: 3,
       maxBufferLength: 3,
       maxMaxBufferLength: 6,
-      // The HLS relay sits behind the router and every request —
-      // playlist and segments alike — must carry the access token.
-      xhrSetup: (xhr) => {
-        if (accessToken.value) xhr.setRequestHeader('Authorization', `Bearer ${accessToken.value}`)
-      },
     })
     hls.loadSource(videoSrc.value)
     hls.attachMedia(video)
@@ -905,11 +1007,7 @@ const attachHls = async (video, target, sessionId = streamSessionId) => {
   }
 
   if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    // Native HLS cannot set headers; the token rides the playlist URL.
-    // Segment requests do not inherit it, so native-only environments are
-    // limited — hls.js above is the supported path.
-    const separator = videoSrc.value.includes('?') ? '&' : '?'
-    video.src = `${videoSrc.value}${separator}token=${encodeURIComponent(accessToken.value || '')}`
+    video.src = videoSrc.value
     await playVideo(video)
     return
   }
@@ -931,6 +1029,8 @@ const setupVideoSource = async (video, target, sessionId = streamSessionId) => {
   }
 
   if (isHlsStream.value) {
+    if (target === 'inline') inlineVideoReady.value = false
+    if (target === 'expanded') expandedVideoReady.value = false
     await attachHls(video, target, sessionId)
     return
   }
@@ -981,6 +1081,7 @@ const retryStream = async () => {
   playbackError.value = ''
   timedOut.value = false
   retryAttempts = 0
+  longRecoveryAttempts = 0
   await loadCameras({ force: true })
   await replayInlineVideo()
   if (isExpanded.value) {
@@ -989,17 +1090,53 @@ const retryStream = async () => {
 }
 
 const handleVisibilityChange = () => {
-  if (document.visibilityState === 'visible') {
+  if (document.visibilityState === 'visible' && navigator.onLine) {
+    clearLongRecovery({ resetAttempts: true })
     replayInlineVideo()
+  } else {
+    clearLongRecovery()
   }
+}
+
+const clearNetworkRecoveryTimer = () => {
+  if (!networkRecoveryTimer) return
+  clearTimeout(networkRecoveryTimer)
+  networkRecoveryTimer = null
+}
+
+const handleNetworkOffline = () => {
+  clearNetworkRecoveryTimer()
+  streamSessionId += 1
+  clearStreamTimers()
+  destroyHls()
+  disconnectWebRtc()
+  clearVideoStream(inlineVideo.value)
+  clearVideoStream(expandedVideo.value)
+  streamLoading.value = false
+  timedOut.value = false
+  playbackError.value = '네트워크 연결을 확인해주세요.'
+  setDisconnected()
+}
+
+const handleNetworkOnline = () => {
+  clearNetworkRecoveryTimer()
+  if (document.visibilityState !== 'visible') return
+
+  networkRecoveryTimer = setTimeout(() => {
+    networkRecoveryTimer = null
+    if (!navigator.onLine || document.visibilityState !== 'visible') return
+    void retryStream()
+  }, 500)
 }
 
 const updateOrientation = async () => {
   const wasLandscape = isLandscape.value
-  const viewportLandscape = window.innerWidth > window.innerHeight
+  const viewportLandscape = getReliableLandscape(wasLandscape)
+  const rawViewportLandscape = window.innerWidth > window.innerHeight
+  const isNativeApp = Capacitor.isNativePlatform()
 
   if (document.documentElement.classList.contains('home-force-portrait')) {
-    if (!viewportLandscape) {
+    if (!rawViewportLandscape) {
       document.documentElement.classList.remove('home-force-portrait')
       window.dispatchEvent(new CustomEvent('wally:home-force-portrait', { detail: false }))
     } else {
@@ -1009,18 +1146,21 @@ const updateOrientation = async () => {
   }
 
   const wasExpanded = isExpanded.value
+  if (wasLandscape !== viewportLandscape) showOrientationTransition()
+  if (!isNativeApp && !wasLandscape && viewportLandscape) {
+    webExpandedBeforeLandscape = wasExpanded
+  }
   isLandscape.value = viewportLandscape
   setNativeImmersiveMode(isLandscape.value)
 
-  if (wasLandscape && !isLandscape.value && ptzOpen.value) {
-    ptzOpen.value = false
-    stopPtz()
+  if (wasLandscape !== isLandscape.value && ptzOpen.value) {
+    closePtzPad()
   }
 
   if (isLandscape.value) {
     isExpanded.value = false
   } else if (wasLandscape) {
-    isExpanded.value = true
+    isExpanded.value = isNativeApp ? true : webExpandedBeforeLandscape
   }
 
   if (wasLandscape !== isLandscape.value && !wasExpanded) {
@@ -1031,17 +1171,20 @@ const updateOrientation = async () => {
 
 onMounted(async () => {
   updateOrientation()
-  await loadCameras({ force: true })
-  window.addEventListener('resize', updateOrientation)
+  window.addEventListener('resize', handleViewportResize)
   window.addEventListener('wally:android-back', handleAndroidBack)
-  window.addEventListener('orientationchange', updateOrientation)
-  window.visualViewport?.addEventListener('resize', updateOrientation)
+  window.addEventListener('orientationchange', handleOrientationChange)
+  window.visualViewport?.addEventListener('resize', handleViewportResize)
   window.addEventListener('pageshow', replayInlineVideo)
+  window.addEventListener('online', handleNetworkOnline)
+  window.addEventListener('offline', handleNetworkOffline)
   document.addEventListener('visibilitychange', handleVisibilityChange)
+  await loadCameras({ force: true })
 })
 
 onBeforeUnmount(() => {
   setNativeImmersiveMode(false)
+  setPortraitExpandedStatusBar(false)
   if (isRecording.value) stopRecording()
   if (captureFeedbackTimer) {
     window.clearTimeout(captureFeedbackTimer)
@@ -1051,6 +1194,9 @@ onBeforeUnmount(() => {
     window.clearTimeout(captureModeFeedbackTimer)
     captureModeFeedbackTimer = null
   }
+  window.clearTimeout(orientationTransitionTimer)
+  window.clearTimeout(orientationUpdateTimer)
+  clearNetworkRecoveryTimer()
   document.documentElement.classList.remove('home-force-portrait')
   window.dispatchEvent(new CustomEvent('wally:home-force-portrait', { detail: false }))
   streamSessionId++
@@ -1059,11 +1205,13 @@ onBeforeUnmount(() => {
   disconnectWebRtc()
   clearVideoStream(inlineVideo.value)
   clearVideoStream(expandedVideo.value)
-  window.removeEventListener('resize', updateOrientation)
+  window.removeEventListener('resize', handleViewportResize)
   window.removeEventListener('wally:android-back', handleAndroidBack)
-  window.removeEventListener('orientationchange', updateOrientation)
-  window.visualViewport?.removeEventListener('resize', updateOrientation)
+  window.removeEventListener('orientationchange', handleOrientationChange)
+  window.visualViewport?.removeEventListener('resize', handleViewportResize)
   window.removeEventListener('pageshow', replayInlineVideo)
+  window.removeEventListener('online', handleNetworkOnline)
+  window.removeEventListener('offline', handleNetworkOffline)
   document.removeEventListener('visibilitychange', handleVisibilityChange)
 })
 
@@ -1077,6 +1225,7 @@ watch(
     if (!videoSrc.value) {
       streamLoading.value = false
       timedOut.value = false
+      longRecoveryAttempts = 0
       setDisconnected()
       return
     }
@@ -1090,6 +1239,8 @@ watch(
 
 watch(protocol, async (nextProtocol) => {
   writeStoredProtocol(nextProtocol)
+  inlineVideoReady.value = false
+  expandedVideoReady.value = false
   streamSessionId++
   clearStreamTimers()
   destroyHls()
@@ -1101,6 +1252,7 @@ watch(protocol, async (nextProtocol) => {
   playbackError.value = ''
   timedOut.value = false
   retryAttempts = 0
+  longRecoveryAttempts = 0
   await replayInlineVideo()
   if (isExpanded.value) await setupVideoSource(expandedVideo.value, 'expanded')
 })
@@ -1113,8 +1265,8 @@ watch(webRtcMediaStream, async (stream) => {
     return
   }
   await nextTick()
-  await attachSharedWebRtcStream(inlineVideo.value)
   if (isExpanded.value) await attachSharedWebRtcStream(expandedVideo.value)
+  else await attachSharedWebRtcStream(inlineVideo.value)
 })
 
 watch(reconnectKey, async () => {
@@ -1127,7 +1279,9 @@ watch(isMuted, () => {
 })
 
 watch(isExpanded, async (expanded) => {
+  setPortraitExpandedStatusBar(expanded)
   if (!expanded) {
+    expandedVideoReady.value = false
     destroyHls('expanded')
     clearVideoStream(expandedVideo.value)
     await nextTick()
@@ -1141,6 +1295,39 @@ watch(isExpanded, async (expanded) => {
 </script>
 
 <style module>
+.rotationCam {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  display: grid;
+  place-items: center;
+  width: 100dvw;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: #000;
+  pointer-events: none;
+}
+
+.rotationLogo {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 90px;
+  max-width: 100%;
+  overflow: hidden;
+  object-fit: contain;
+}
+
+:global(.cameraRotationCover-enter-active),
+:global(.cameraRotationCover-leave-active) {
+  transition: opacity 0.08s linear;
+}
+
+:global(.cameraRotationCover-enter-from),
+:global(.cameraRotationCover-leave-to) {
+  opacity: 0;
+}
+
 .wrapper {
   --landscape-overlay-icon-size-phone: clamp(2.4rem, 6.2vmin, 4.6rem);
   --landscape-overlay-icon-size-tablet: clamp(3.2rem, 7.4vmin, 5.8rem);
@@ -1178,13 +1365,54 @@ watch(isExpanded, async (expanded) => {
   height: 100%;
 }
 
+.mediaHidden {
+  position: fixed !important;
+  top: 0 !important;
+  left: -10000px !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.videoImg::-webkit-media-controls,
+.fullImg::-webkit-media-controls,
+.videoImg::-webkit-media-controls-overlay-play-button,
+.fullImg::-webkit-media-controls-overlay-play-button,
+.videoImg::-webkit-media-controls-start-playback-button,
+.fullImg::-webkit-media-controls-start-playback-button {
+  display: none !important;
+  -webkit-appearance: none;
+}
+
+.streamPlaceholder {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background-color: #000;
+  pointer-events: none;
+}
+
+.streamPlaceholderLogo {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 90px;
+  max-width: 100%;
+  overflow: hidden;
+  object-fit: contain;
+}
+
 .protocolSwitch {
   position: absolute;
   z-index: 4;
   display: flex;
-  width: 82px;
+  width: 80px;
   height: 23px;
-  padding: 2px;
+  padding: 2px 0 2px 2px;
   border-radius: 20px;
   background-color: var(--home-protocol-bg);
   box-sizing: border-box;
@@ -1253,8 +1481,8 @@ watch(isExpanded, async (expanded) => {
 }
 
 .protocolOption:last-child {
-  flex: 0 0 52px;
-  width: 52px;
+  flex: 0 0 50px;
+  width: 50px;
 }
 
 .protocolSwitchHls {
@@ -1285,7 +1513,7 @@ watch(isExpanded, async (expanded) => {
 
 .protocolSwitchWebRtc::before {
   left: 28px;
-  width: 52px;
+  width: 50px;
   background-color: var(--home-protocol-active-bg);
 }
 @media (orientation: landscape) {
@@ -1386,9 +1614,9 @@ watch(isExpanded, async (expanded) => {
   min-height: 2rem;
   padding: 0.45rem 0.7rem;
   border-radius: 0.8rem;
-  background-color: rgba(0, 0, 0, 0.56);
-  color: #fffbf5;
-  border: 0.06rem solid rgba(255, 251, 245, 0.16);
+  background-color: var(--home-stream-overlay-bg);
+  color: var(--home-stream-overlay-text);
+  border: 0.06rem solid var(--home-stream-overlay-border);
   box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.22);
   backdrop-filter: blur(0.6rem);
   font-family: 'Malang', sans-serif;
@@ -1496,25 +1724,12 @@ watch(isExpanded, async (expanded) => {
   align-items: center;
   gap: 0.34rem;
   box-sizing: border-box;
-  color: #84776e;
+  color: var(--home-muted);
   font-family: 'Malang', sans-serif;
   font-weight: 400;
   font-size: 1rem;
   pointer-events: none;
   transform: translateX(-50%);
-}
-.recordingCameraIcon {
-  width: 1.35rem;
-  height: 1.35rem;
-  display: block;
-  filter: var(--home-icon-filter);
-  flex-shrink: 0;
-}
-.recordingDot {
-  width: 0.6rem;
-  height: 0.6rem;
-  display: block;
-  flex-shrink: 0;
 }
 .recordingText {
   line-height: 1;
@@ -1836,7 +2051,7 @@ watch(isExpanded, async (expanded) => {
     position: absolute;
     inset: 0;
     border-radius: 1.5rem;
-    background-color: #eee8de;
+    background-color: var(--home-panel-border);
     overflow: hidden;
   }
 
@@ -1847,7 +2062,7 @@ watch(isExpanded, async (expanded) => {
     width: 2.2rem;
     height: 2.2rem;
     border-radius: 50%;
-    background-color: #fffbf5;
+    background-color: var(--home-panel-bg);
     box-shadow: 0 0.08rem 0.25rem rgba(0, 0, 0, 0.08);
     transition: top 0.28s cubic-bezier(0.22, 1, 0.36, 1);
   }
@@ -2122,13 +2337,14 @@ watch(isExpanded, async (expanded) => {
 }
 .fullStreamFrame {
   position: relative;
-  width: min(100%, calc(100cqh * var(--video-aspect-ratio)));
+  width: min(100%, calc(100cqh * (16 / 9)));
   height: auto;
   max-height: 100%;
-  aspect-ratio: var(--video-aspect-ratio);
+  aspect-ratio: 16 / 9;
+  transform: translateY(-2rem);
 }
 .fullProtocolSwitch {
-  top: 0.75rem;
+  top: calc(50% - min(50cqh, 28.125cqw) - 1.6rem);
   right: 0.75rem;
   z-index: 6;
 }
@@ -2242,7 +2458,7 @@ watch(isExpanded, async (expanded) => {
   position: absolute;
   inset: 0;
   border-radius: 2rem;
-  background-color: #eee8de;
+  background-color: var(--home-panel-border);
   overflow: hidden;
 }
 .fullCameraToggle .cameraToggleThumb {
@@ -2252,7 +2468,7 @@ watch(isExpanded, async (expanded) => {
   width: 2.6rem;
   height: 2.6rem;
   border-radius: 50%;
-  background-color: #fffbf5;
+  background-color: var(--home-panel-bg);
   box-shadow: 0 0.08rem 0.25rem rgba(0, 0, 0, 0.08);
   transition: left 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -2265,6 +2481,7 @@ watch(isExpanded, async (expanded) => {
   width: 100%;
   height: 100%;
   display: none;
+  color: var(--home-muted);
   pointer-events: none;
   transform: rotate(90deg);
   transition: opacity 0.18s ease;
@@ -2502,6 +2719,7 @@ watch(isExpanded, async (expanded) => {
   .fullStreamFrame {
     position: relative;
     display: block;
+    color: var(--home-muted);
     width: min(100%, calc(100cqh * var(--video-aspect-ratio)));
     aspect-ratio: var(--video-aspect-ratio);
     max-height: 100%;

@@ -8,7 +8,7 @@
 
         <!-- 헤더 -->
         <div :class="$style.head">
-          <img :class="$style.iconBack" src="/icons/Calender/chevron.svg" alt="뒤로" @click="emit('update:modelValue', false)" />
+          <img :class="$style.iconBack" src="/icons/Calendar/chevron.svg" alt="뒤로" @click="emit('update:modelValue', false)" />
           <b :class="$style.headTitle">반려동물 종류</b>
         </div>
 
@@ -175,14 +175,6 @@ function select(breed) {
 </style>
 
 <style>
-@font-face {
-  font-family: 'Malang';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
-@font-face {
-  font-family: 'MalangBold';
-  src: url('@/assets/Fonts/Malang_Bold.ttf') format('truetype');
-}
 .select-backdrop {
   position: fixed;
   inset: 0;

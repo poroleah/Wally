@@ -1,6 +1,6 @@
 <template>
   <div :class="$style.head">
-    <img :class="$style.iconArrowRight" src="/icons/Calender/chevron.svg" alt="뒤로" @click="emit('close')" />
+    <img :class="$style.iconArrowRight" src="/icons/Calendar/chevron.svg" alt="뒤로" @click="emit('close')" />
     <b :class="$style.content">프로필 변경</b>
   </div>
 </template>
@@ -42,8 +42,4 @@ const emit = defineEmits(['close'])
 </style>
 
 <style>
-@font-face {
-  font-family: 'MalangBold';
-  src: url('@/assets/Fonts/Malang_Bold.ttf') format('truetype');
-}
 </style>

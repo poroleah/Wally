@@ -1,12 +1,12 @@
 <template>
   <div :class="$style.rectangle">
-    <CalenderDate :selectedDate="selectedDate" />
+    <CalendarDate :selectedDate="selectedDate" />
     <Plan :selectedDate="selectedDate" />
   </div>
 </template>
 
 <script setup>
-import CalenderDate from './Date.vue'
+import CalendarDate from './Date.vue'
 import Plan from './Plan/Plan.vue'
 
 defineProps({ selectedDate: Object })

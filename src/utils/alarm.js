@@ -1,6 +1,7 @@
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { useAlarmSettings } from '@/composables/useAlarmSettings'
 import { ROUTES } from '@/constants'
+import { formatDateQuery, pad2 } from '@/utils/date'
 import {
   createNotificationId,
   ensureNotificationPermission,
@@ -20,14 +21,6 @@ const ALARM_OFFSET_MINUTES = Object.freeze({
   '2일 전': 2880,
   '1주 전': 10080,
 })
-
-function pad2(value) {
-  return String(value).padStart(2, '0')
-}
-
-function formatDateQuery(date) {
-  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`
-}
 
 export function formatScheduleNotificationTitle(title) {
   const scheduleTitle = String(title || '').trim() || '일정'

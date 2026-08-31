@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       host: '0.0.0.0',
-      port: 5177,
+      port: 5176,
       strictPort: true,
       allowedHosts: true,
       hmr: {

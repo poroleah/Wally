@@ -10,7 +10,7 @@
 
 <script setup>
 import MenuItem from '../MenuItem.vue'
-import DarkToggle from './Dark_Toggle.vue'
+import DarkToggle from './DarkToggle.vue'
 const emit = defineEmits(['openProfile', 'openPasswordSetting', 'openAlarmSetting'])
 </script>
 
@@ -22,11 +22,5 @@ const emit = defineEmits(['openProfile', 'openPasswordSetting', 'openAlarmSettin
   font-size: var(--fluid-text-lg);
   color: var(--settings-muted);
   margin-bottom: 0.8rem;
-}
-.box {
-  background-color: var(--settings-card-bg);
-  border-radius: 1rem;
-  padding: 0 1.6rem;
-  overflow: hidden;
 }
 </style>

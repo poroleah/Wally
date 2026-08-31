@@ -22,10 +22,4 @@ const emit = defineEmits(['openIp', 'openPromptSetting'])
   color: var(--settings-muted);
   margin-bottom: 0.8rem;
 }
-.box {
-  background-color: var(--settings-card-bg);
-  border-radius: 1rem;
-  padding: 0 1.6rem;
-  overflow: hidden;
-}
 </style>

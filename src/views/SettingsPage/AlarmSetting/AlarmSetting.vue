@@ -4,7 +4,7 @@
       <div v-if="modelValue" :class="$style.page">
         <header :class="$style.head">
           <button :class="$style.backButton" type="button" aria-label="뒤로가기" @click="emit('update:modelValue', false)">
-            <img :class="$style.iconArrowRight" src="/icons/Calender/chevron.svg" alt="" />
+            <img :class="$style.iconArrowRight" src="/icons/Calendar/chevron.svg" alt="" />
           </button>
           <b :class="$style.headTitle">알림 설정</b>
         </header>
@@ -77,14 +77,6 @@ const { settings, toggleAlarmSetting } = useAlarmSettings()
 </style>
 
 <style module>
-@font-face {
-  font-family: 'Malang';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
-@font-face {
-  font-family: 'MalangBold';
-  src: url('@/assets/Fonts/Malang_Bold.ttf') format('truetype');
-}
 .page {
   position: fixed;
   inset: 0;

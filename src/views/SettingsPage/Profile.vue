@@ -11,15 +11,10 @@
 
 <script setup>
 import { useProfile } from '@/composables/useProfile'
-const emit = defineEmits(['openProfile'])
 const { name, profileImg, breed } = useProfile()
 </script>
 
-<style  module>@font-face {
-  font-family: 'Malang';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
-
+<style module>
 .profile {
       width: 100%;
       display: flex;
@@ -43,15 +38,24 @@ const { name, profileImg, breed } = useProfile()
             display: flex;
             align-items: flex-end;
             gap: 0.2rem;
+            min-width: 0;
+            flex: 1;
       }
       .name {
-            display: flex;
-            align-items: center;
+            display: block;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
       }
       .placeholder {
             color: var(--settings-text);
       }
       .breedLabel {
+            min-width: 0;
+            max-width: 45%;
+            overflow: hidden;
+            text-overflow: ellipsis;
             font-size: 0.5em;
             font-family: 'Malang', sans-serif;
             color: var(--settings-muted);

@@ -61,9 +61,9 @@ function toggleControl(action) {
 <style module>
 .homeBar {
   width: 100%;
-  height: 7.2rem;
-  flex: 0 0 7.2rem;
-  padding: 0 4rem;
+  height: clamp(5.6rem, 16vw, 6.4rem);
+  flex: 0 0 clamp(5.6rem, 16vw, 6.4rem);
+  padding: 0 clamp(2.4rem, 10vw, 4rem);
   box-sizing: border-box;
   background-color: var(--home-panel-bg);
   border-top: 0.08rem solid var(--home-panel-border);
@@ -73,8 +73,8 @@ function toggleControl(action) {
 }
 
 .iconButton {
-  width: 4.4rem;
-  height: 4.4rem;
+  width: clamp(3.8rem, 11vw, 4.4rem);
+  height: clamp(3.8rem, 11vw, 4.4rem);
   padding: 0;
   border: 0;
   border-radius: 0.8rem;
@@ -95,8 +95,8 @@ function toggleControl(action) {
 }
 
 .icon {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: clamp(2.2rem, 6.4vw, 2.5rem);
+  height: clamp(2.2rem, 6.4vw, 2.5rem);
   display: block;
   filter: var(--home-icon-filter);
 }

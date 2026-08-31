@@ -20,10 +20,6 @@ defineProps({
 </script>
 
 <style scoped>
-@font-face {
-  font-family: 'Bazzi';
-  src: url('@/assets/Fonts/Bazzi.ttf') format('truetype');
-}
 
 .nav-item {
   display: flex;
@@ -39,6 +35,8 @@ defineProps({
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   outline: none;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .nav-item:focus,
@@ -60,6 +58,9 @@ defineProps({
 }
 
 .nav-item > span:not(.nav-icon) {
+  display: block;
+  width: 100%;
+  min-width: 0;
   height: 1.3rem;
   font-family: 'Bazzi', sans-serif;
   font-size: 1.3rem;
@@ -68,6 +69,9 @@ defineProps({
   letter-spacing: 0;
   color: currentColor;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
 }
 @media (min-width: 48rem) and (orientation: portrait) {
   .nav-item {

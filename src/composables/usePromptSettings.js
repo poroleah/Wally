@@ -1,4 +1,5 @@
 import { computed, readonly, ref, watch } from 'vue'
+import { SERVER_REQUEST_TIMEOUT_MS } from '@/constants/network'
 import { APP_ENDPOINTS } from '@/endpoints'
 import { authFetch } from './useFetch'
 import { useRealtimeEvents } from './useRealtimeEvents'
@@ -54,13 +55,35 @@ function ensureSyncStarted() {
 }
 
 export async function saveVlmPromptConfig({ question, keywords }) {
-  const res = await authFetch(APP_ENDPOINTS.prompt, {
-    method: "POST",
-    body: {
-      prompt: String(question || "").trim(),
-      triggers: String(keywords || "").trim(),
-    },
+  const controller = new AbortController()
+  let timeoutId
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => {
+      controller.abort()
+      reject(new PromptSettingsError('서버에 연결할 수 없습니다.'))
+    }, SERVER_REQUEST_TIMEOUT_MS)
   })
+
+  let res
+  try {
+    res = await Promise.race([
+      authFetch(APP_ENDPOINTS.prompt, {
+        method: 'POST',
+        body: {
+          prompt: String(question || '').trim(),
+          triggers: String(keywords || '').trim(),
+        },
+        signal: controller.signal,
+      }),
+      timeoutPromise,
+    ])
+  } catch (error) {
+    if (error instanceof PromptSettingsError) throw error
+    throw new PromptSettingsError('서버에 연결할 수 없습니다.', error)
+  } finally {
+    clearTimeout(timeoutId)
+  }
+
   const data = await res.json().catch(() => null)
   if (!res.ok || data?.ok === false) {
     throw new PromptSettingsError(data?.detail || data?.error || "프롬프트 설정을 저장하지 못했습니다.")

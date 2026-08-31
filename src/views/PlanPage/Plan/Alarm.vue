@@ -11,7 +11,7 @@
 <script setup>
 import { computed } from 'vue'
 import { ALARM_OPTIONS } from '@/constants'
-import OptionSheet from '@/components/OptionSheet.vue'
+import OptionSheet from '@/components/Sheet/OptionSheet.vue'
 
 const props = defineProps({ modelValue: Boolean })
 const emit = defineEmits(['update:modelValue', 'select'])

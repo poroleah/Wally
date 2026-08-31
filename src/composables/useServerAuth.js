@@ -34,6 +34,8 @@ export function useServerAuth() {
 
   function clearServerAuthentication() {
     serverAuthenticated.value = false
+    serverAddress.value = ''
+    setStoredWallyHost('')
     if (hasWindow()) {
       window.sessionStorage.removeItem(SERVER_AUTHENTICATED_KEY)
     }

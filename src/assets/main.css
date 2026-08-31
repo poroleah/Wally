@@ -3,10 +3,26 @@
 @font-face {
   font-family: 'Malang';
   src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Malang';
+  src: url('@/assets/Fonts/Malang_Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
 }
 @font-face {
   font-family: 'MalangBold';
   src: url('@/assets/Fonts/Malang_Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Bazzi';
+  src: url('@/assets/Fonts/Bazzi.ttf') format('truetype');
+  font-weight: 400 700;
+  font-style: normal;
 }
 
 #app {

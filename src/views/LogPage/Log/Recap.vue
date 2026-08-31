@@ -10,10 +10,6 @@ defineProps({ recap: String })
 </script>
 
 <style module>
-@font-face {
-  font-family: 'Malang';
-  src: url('@/assets/Fonts/Malang_Regular.ttf') format('truetype');
-}
 .content {
   display: flex;
   align-items: center;
@@ -27,8 +23,12 @@ defineProps({ recap: String })
   flex-shrink: 0;
 }
 .recap {
+  min-width: 0;
+  flex: 1;
   font-size: 1rem;
   color: var(--log-text);
   font-family: 'Malang', sans-serif;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 </style>

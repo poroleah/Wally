@@ -11,6 +11,9 @@ export const ROUTES = {
   ALARM:         '/alarm',
 }
 
+export const LOGIN_NOTICE_STORAGE_KEY = 'wally:loginNotice'
+export const PASSWORD_CHANGED_NOTICE = '비밀번호가 변경되었습니다. 새 비밀번호로 로그인해주세요.'
+
 export const ALARM_OPTIONS = ['없음', '5분 전', '10분 전', '15분 전', '30분 전', '1시간 전', '2시간 전', '1일 전', '2일 전', '1주 전']
 
 export const REPEAT_OPTIONS = ['안 함', '매일', '매주', '매월', '매년']

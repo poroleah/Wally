@@ -7,7 +7,7 @@
       ref="videoRef"
       :src="clip"
       :class="$style.captureVideo"
-      preload="metadata"
+      preload="auto"
       muted
       playsinline
       crossorigin="anonymous"
@@ -27,7 +27,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import ClipDetail from '@/components/Clip_Detail.vue'
+import ClipDetail from '@/components/Media/ClipDetail.vue'
 const props = defineProps({ clip: String, thumbnail: String, mediaType: String, detail: String })
 const videoRef = ref(null)
 const capturedThumbnail = ref('')
@@ -44,11 +44,13 @@ function captureVideoFrame() {
   if (!video || capturedThumbnail.value) return
   try {
     const canvas = document.createElement('canvas')
-    canvas.width = 320
-    canvas.height = 180
+    const width = Math.min(960, video.videoWidth || 960)
+    const height = Math.max(1, Math.round(width * (video.videoHeight || 540) / (video.videoWidth || 960)))
+    canvas.width = width
+    canvas.height = height
     const context = canvas.getContext('2d')
     context?.drawImage(video, 0, 0, canvas.width, canvas.height)
-    capturedThumbnail.value = canvas.toDataURL('image/jpeg', 0.6)
+    capturedThumbnail.value = canvas.toDataURL('image/jpeg', 0.85)
   } catch {
     capturedThumbnail.value = ''
   }
@@ -122,24 +124,12 @@ function handleVideoLoaded() {
 }
 .detail {
   flex: 1;
+  min-width: 0;
   font-family: 'Malang', sans-serif;
   font-size: 1rem;
   line-height: 1.55;
   color: var(--log-text);
-}
-.fullscreen {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.9);
-  z-index: 300;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-.fullImg {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 </style>

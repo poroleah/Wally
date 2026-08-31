@@ -31,15 +31,23 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
+import { useCalendarMonth } from '@/composables/useCalendarMonth'
 
 const emit = defineEmits(['selectDate'])
 const props = defineProps({ selectedDate: Object })
 
-const now = new Date()
-const currentYear = ref(now.getFullYear())
-const currentMonth = ref(now.getMonth() + 1)
-const selectedDay = ref(now.getDate())
+const {
+  currentYear,
+  currentMonth,
+  calendarWeeks,
+  dayNames,
+  isToday,
+  getDayClass,
+  previousMonth: prevMonth,
+  nextMonth,
+} = useCalendarMonth()
+const selectedDay = ref(new Date().getDate())
 
 watch(() => props.selectedDate, (date) => {
   if (!date?.year || !date?.month || !date?.day) return
@@ -47,32 +55,6 @@ watch(() => props.selectedDate, (date) => {
   currentMonth.value = date.month
   selectedDay.value = date.day
 }, { immediate: true, deep: true })
-
-const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
-
-const calendarWeeks = computed(() => {
-  const year = currentYear.value
-  const month = currentMonth.value - 1
-  const firstDay = new Date(year, month, 1).getDay()
-  const daysInMonth = new Date(year, month + 1, 0).getDate()
-  const weeks = []
-  let week = Array(firstDay).fill(null)
-  for (let d = 1; d <= daysInMonth; d++) {
-    week.push(d)
-    if (week.length === 7) { weeks.push(week); week = [] }
-  }
-  if (week.length > 0) {
-    while (week.length < 7) week.push(null)
-    weeks.push(week)
-  }
-  return weeks
-})
-
-const isToday = (day) =>
-  day !== null &&
-  day === now.getDate() &&
-  currentMonth.value === now.getMonth() + 1 &&
-  currentYear.value === now.getFullYear()
 
 const isSelected = (day) => day !== null && day === selectedDay.value
 
@@ -82,23 +64,6 @@ const selectDate = (day) => {
   emit('selectDate', { year: currentYear.value, month: currentMonth.value, day })
 }
 
-const getDayClass = (day, dayIndex) => {
-  if (day === null) return 'date2'
-  if (isToday(day)) return 'date23'
-  if (dayIndex === 0) return 'date'
-  if (dayIndex === 6) return 'date7'
-  return 'date2'
-}
-
-const prevMonth = () => {
-  if (currentMonth.value === 1) { currentMonth.value = 12; currentYear.value-- }
-  else currentMonth.value--
-}
-
-const nextMonth = () => {
-  if (currentMonth.value === 12) { currentMonth.value = 1; currentYear.value++ }
-  else currentMonth.value++
-}
 </script>
 
 <style module>
