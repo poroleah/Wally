@@ -1,8 +1,10 @@
-// Babycat-compatible service map.
-// The router (port 8000) is the single entry point for everything —
-// control, SSE/MJPEG relays, and the HLS/WHEP streaming relays.
-// Only WebRTC media (UDP 8189) bypasses it.
+// Mewly-compatible service map.
+// The gateway (HTTPS, port 8000) is the single entry point for everything —
+// auth/camera/clips REST, runtime controls, SSE, and the HLS/WHEP relays.
 const WALLY_HOST_STORAGE_KEY = 'wally_host'
+
+const SCHEME = 'https'
+const PORT = 8000
 
 function hasWindow() {
   return typeof window !== 'undefined'
@@ -52,8 +54,20 @@ export function setStoredWallyHost(host) {
   return normalizedHost
 }
 
+function getServiceUrl(path) {
+  return `${SCHEME}://${getWallyHost()}:${PORT}${path}`
+}
+
 function getApiUrl(path) {
-  return `http://${getWallyHost()}:8000${path}`
+  return getServiceUrl(path)
+}
+
+function getAppUrl(path) {
+  return getServiceUrl(path)
+}
+
+export function getApiBaseUrl() {
+  return getApiUrl('')
 }
 
 export function createApiUrl(path) {
@@ -83,37 +97,67 @@ export const API_ENDPOINTS = {
   clipFile(name) {
     return getApiUrl(`/clips/${encodeURIComponent(name)}`)
   },
+  // Stored event history (recorder). Distinct from the live-state SSE at
+  // APP_ENDPOINTS.events (/state), hence the separate name.
+  get eventHistory() {
+    return getApiUrl('/events')
+  },
+
+  // Temporary compatibility aliases for Wally code that will be migrated next.
+  get cameras() {
+    return getApiUrl('/camera')
+  },
+  cameraStream() {
+    return getHlsUrl()
+  },
+
+  // NOT IN MEWLY BACKEND: the four routes below (petProfile, homeStatus,
+  // homeAlerts, anomalies) have no mewly gateway counterpart. Kept for now;
+  // removal happens in the next migration step.
+  get petProfile() {
+    return getApiUrl('/api/pet/profile')
+  },
+  get homeStatus() {
+    return getApiUrl('/api/home/status')
+  },
+  get homeAlerts() {
+    return getApiUrl('/api/home/alerts')
+  },
+  get anomalies() {
+    return getApiUrl('/api/anomalies')
+  },
 }
 
 export const APP_ENDPOINTS = {
   get prompt() {
-    return getApiUrl('/prompt')
+    return getAppUrl('/prompt')
   },
   get ptz() {
-    return getApiUrl('/ptz')
-  },
-  get streamingStart() {
-    return getApiUrl('/streaming/start')
-  },
-  get streamingStop() {
-    return getApiUrl('/streaming/stop')
+    return getAppUrl('/ptz')
   },
   get analysisStart() {
-    return getApiUrl('/analysis/start')
+    return getAppUrl('/analysis/start')
   },
   get analysisStop() {
-    return getApiUrl('/analysis/stop')
+    return getAppUrl('/analysis/stop')
   },
-  // Live state SSE. The router path is /state (its /events carries the
-  // stored event history).
+  // Streaming start is a precondition for video playback (HLS/WHEP).
+  get streamingStart() {
+    return getAppUrl('/streaming/start')
+  },
+  get streamingStop() {
+    return getAppUrl('/streaming/stop')
+  },
+  // Live state SSE. The gateway path is /state; /events is the stored
+  // history (API_ENDPOINTS.eventHistory).
   get events() {
-    return getApiUrl('/state')
+    return getAppUrl('/state')
   },
   get mjpeg() {
-    return getApiUrl('/stream')
+    return getAppUrl('/stream')
   },
   get vlmSwitch() {
-    return getApiUrl('/vlm/switch')
+    return getAppUrl('/vlm/switch')
   },
 }
 
@@ -121,14 +165,14 @@ export function getStreamHost() {
   return getWallyHost()
 }
 
-// HLS and WHEP go through the router relay (single entry). Only the
-// WebRTC media itself flows directly from the streamer (UDP 8189).
+// HLS and WHEP go through the gateway relay (single entry). Only the
+// WebRTC media itself flows directly from the streamer.
 export function getHlsUrl(host = getStreamHost()) {
-  return `http://${host}:8000/live/hls/index.m3u8`
+  return `${SCHEME}://${host}:${PORT}/live/hls/index.m3u8`
 }
 
 export function getWhepUrl(host = getStreamHost()) {
-  return `http://${host}:8000/live/whep`
+  return `${SCHEME}://${host}:${PORT}/live/whep`
 }
 
 export function getEventsUrl(token) {
@@ -137,4 +181,8 @@ export function getEventsUrl(token) {
 
 export function getClipUrl(name, size, token) {
   return `${API_ENDPOINTS.clipFile(name)}?s=${size}&token=${encodeURIComponent(token)}`
+}
+
+export function getCameraStreamUrl() {
+  return getHlsUrl()
 }
