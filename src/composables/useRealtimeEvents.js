@@ -1,10 +1,12 @@
 import { computed, reactive, readonly, ref, watch } from 'vue'
 import { API_ENDPOINTS, getClipUrl, getEventsUrl } from '@/endpoints'
-import { authJson } from './useFetch'
+import { authJson, probeSession } from './useFetch'
 import { useAuth } from './useAuth'
 import { captureDetectionThumbnail, getDetectionThumbnail } from '@/utils/detectionThumbnails'
+import network from '../../config/network.json'
 
-const MAX_RECONNECT_DELAY = 30000
+const INITIAL_RECONNECT_DELAY = network.sse.initialReconnectDelayMs
+const MAX_RECONNECT_DELAY = network.sse.maxReconnectDelayMs
 const DEFAULT_LIMIT = 20
 const SAVED_EVENT_KEYS_STORAGE_KEY = 'wally:vlmSavedEventKeys'
 const MAX_SAVED_EVENT_KEYS = 80
@@ -23,7 +25,7 @@ const realtimeState = reactive(createDefaultRealtimeState())
 let started = false
 let eventSource = null
 let reconnectTimer = null
-let reconnectDelay = 1000
+let reconnectDelay = INITIAL_RECONNECT_DELAY
 let lastClipCount = null
 let lastListOptions = { limit: DEFAULT_LIMIT }
 let savedEventKeys = loadSavedEventKeys()
@@ -447,7 +449,7 @@ function openRealtimeConnection(token) {
 
   eventSource.onopen = () => {
     connected.value = true
-    reconnectDelay = 1000
+    reconnectDelay = INITIAL_RECONNECT_DELAY
     error.value = ''
   }
 
@@ -461,6 +463,9 @@ function openRealtimeConnection(token) {
 
   eventSource.onerror = () => {
     closeRealtimeConnection()
+    // EventSource cannot expose the 401 a dead token receives on reconnect;
+    // the probe classifies it (refresh, or revoked-session logout).
+    probeSession()
     scheduleReconnect(token)
   }
 }
@@ -471,7 +476,7 @@ function startRealtimeEvents() {
 
   const { accessToken } = useAuth()
   watch(accessToken, (token) => {
-    reconnectDelay = 1000
+    reconnectDelay = INITIAL_RECONNECT_DELAY
     if (!token) {
       closeRealtimeConnection()
       resetRealtimeState()

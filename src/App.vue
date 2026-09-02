@@ -4,11 +4,29 @@
       <RouterView />
     </div>
     <Nav v-if="showNav" />
+    <Transition name="session-chip">
+      <div v-if="showSessionChip" class="session-chip" role="status">
+        <!-- mewly의 phosphor ph-clock(regular)과 동일한 지오메트리 -->
+        <svg class="session-chip-icon" viewBox="0 0 256 256" fill="none" aria-hidden="true">
+          <circle cx="128" cy="128" r="96" stroke="currentColor" stroke-width="16" />
+          <polyline points="128 72 128 128 184 128" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        {{ sessionRemainingText }}
+      </div>
+    </Transition>
     <Transition name="app-toast">
       <div v-if="toastMessage" class="app-toast" role="status" aria-live="polite">
         {{ toastMessage }}
       </div>
     </Transition>
+    <SessionExpiryModal
+      :show="warningVisible"
+      :remaining-seconds="sessionRemainingSeconds"
+      :can-extend="canExtendSession"
+      :extending="extendingSession"
+      @extend="extendSession"
+      @logout="logout"
+    />
     <SplashScreen />
   </div>
 </template>
@@ -17,9 +35,17 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import Nav from '@/components/Nav/Nav.vue'
+import SessionExpiryModal from '@/components/App/SessionExpiryModal.vue'
 import SplashScreen from '@/components/App/SplashScreen.vue'
 import { ROUTES } from '@/constants'
+import { useAuth } from '@/composables/useAuth'
+import { useAutoLifecycle } from '@/composables/useAutoLifecycle'
 import { getReliableLandscape, isEditableElement, ORIENTATION_DEBOUNCE_MS } from '@/utils/viewportOrientation'
+
+// The backend keeps streaming/analysis off until asked (FR-048/FR-049);
+// Wally has no manual toggle, so this watcher is the only thing that turns
+// them on. It is inert until the SSE reports state after login.
+useAutoLifecycle()
 
 const route = useRoute()
 const isLandscape = ref(false)
@@ -103,6 +129,23 @@ const authRoutes = [ROUTES.LOGIN_ADDRESS, ROUTES.LOGIN]
 const isAuthRoute = computed(() => authRoutes.includes(route.path))
 const isFullscreenPage = computed(() => isHomeLandscape.value || isAuthRoute.value)
 const showNav = computed(() => !isHomeLandscape.value && !isAuthRoute.value)
+
+// A session without 로그인 유지 ends on a fixed clock, so keep the remaining
+// time visible on every page instead of surprising the user with a logout.
+const {
+  isAuthenticated, isPersistentSession, sessionRemainingSeconds,
+  warningVisible, canExtendSession, extendingSession, extendSession, logout,
+} = useAuth()
+const showSessionChip = computed(() =>
+  isAuthenticated.value
+  && !isPersistentSession.value
+  && sessionRemainingSeconds.value > 0
+  && !isAuthRoute.value,
+)
+const sessionRemainingText = computed(() => {
+  const total = sessionRemainingSeconds.value
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`
+})
 </script>
 
 <style>
@@ -266,6 +309,44 @@ html:not(.wally-native) .page-content:not(.page-content--fullscreen) {
   box-shadow: 0 0.4rem 1.4rem var(--app-shadow);
   transform: translateX(-50%);
   pointer-events: none;
+}
+
+/* mewly MainView .session-chip 원본 치수 — 테두리·그림자 없는 민무늬 알약.
+   글꼴만 Wally의 Malang을 쓴다. */
+.session-chip {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 29px);
+  left: 50%;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 100px;
+  background: var(--session-chip-bg);
+  color: var(--session-chip-text);
+  font-family: 'Malang', sans-serif;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.session-chip-icon {
+  width: 13.5px;
+  height: 13.5px;
+  flex: none;
+}
+
+.session-chip-enter-active,
+.session-chip-leave-active {
+  transition: opacity 0.18s ease;
+}
+
+.session-chip-enter-from,
+.session-chip-leave-to {
+  opacity: 0;
 }
 
 .app-toast-enter-active,

@@ -1,4 +1,6 @@
-import { createApiUrl } from '@/endpoints'
+import { API_ENDPOINTS, createApiUrl } from '@/endpoints'
+import { SESSION_REPLACED_NOTICE } from '@/constants'
+import network from '../../config/network.json'
 
 function isAbsoluteUrl(url) {
   return /^https?:\/\//i.test(String(url || ''))
@@ -67,13 +69,51 @@ export async function authFetch(url, options = {}) {
     return res
   }
 
-  const refreshed = isPersistentSession.value ? await refreshAccessToken() : false
+  let detail = ''
+  try {
+    detail = (await res.clone().json())?.detail || ''
+  } catch {
+    // Non-JSON 401 body — treated as an ordinary expiry.
+  }
+  if (detail === 'token revoked') {
+    // Epoch mismatch: a newer login replaced this session (FR-047). No
+    // refresh attempt — the refresh token is revoked with it, and a logout
+    // call with these credentials must not touch the new session.
+    logout({ revoke: false, notice: SESSION_REPLACED_NOTICE })
+    return res
+  }
+
+  let refreshed = false
+  if (isPersistentSession.value) {
+    try {
+      refreshed = await refreshAccessToken()
+    } catch {
+      // Temporary refresh failure (network/5xx) keeps the session; the
+      // caller sees the original 401 and a later request retries.
+      return res
+    }
+  }
   if (refreshed) {
     return fetch(resolveUrl(url), createRequestOptions(options, getToken()))
   }
 
   logout({ revoke: false })
   return res
+}
+
+// EventSource and media elements cannot surface the 401 a dead token gets,
+// so a broken stream calls this throttled probe. authFetch's 401 handling
+// then refreshes the token (streams pick up the new one on retry) or
+// classifies the revoked session and logs out.
+const PROBE_MIN_INTERVAL_MS = network.sseProbeMinIntervalMs
+let lastProbeAt = 0
+export function probeSession() {
+  const now = Date.now()
+  if (now - lastProbeAt < PROBE_MIN_INTERVAL_MS) return
+  lastProbeAt = now
+  authFetch(API_ENDPOINTS.camera).catch(() => {
+    // Network-level failure — the stream's own retry loop already covers it.
+  })
 }
 
 export async function authJson(url, options = {}) {

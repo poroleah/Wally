@@ -1,7 +1,9 @@
 import { computed, readonly, ref } from 'vue'
 import { API_ENDPOINTS } from '@/endpoints'
+import { LOGIN_NOTICE_STORAGE_KEY, SESSION_EXPIRED_NOTICE } from '@/constants'
 import { SERVER_REQUEST_TIMEOUT_MS } from '@/constants/network'
 import { apiFetch } from './useFetch'
+import network from '../../config/network.json'
 
 const SESSION_KIND_KEY = 'wally:sessionKind'
 const TOKEN_KEY = 'wally:token'
@@ -11,13 +13,102 @@ const LEGACY_TOKEN_KEY = 'token'
 const LEGACY_REFRESH_TOKEN_KEY = 'refresh_token'
 const SESSION_KIND_PERSISTENT = 'persistent'
 const SESSION_KIND_EPHEMERAL = 'ephemeral'
+// First login must change the initial password (FR-006). The flag rides the
+// login response and is persisted with the session so a reload keeps forcing
+// the change until it actually happens.
+const MUST_CHANGE_KEY = 'wally:mustChangePassword'
 
 const token = ref('')
 const refreshToken = ref('')
 const sessionKind = ref(SESSION_KIND_EPHEMERAL)
 const expiresAt = ref(0)
+const sessionRemainingSeconds = ref(0)
+const warningVisible = ref(false)
+const extendingSession = ref(false)
+const mustChangePassword = ref(false)
 let refreshPromise = null
 let sessionInitialization = null
+
+// Streams and SSE never pass authFetch, so nothing refreshes an aging token
+// on their behalf: a session with a refresh token renews itself before the
+// access token expires, and one without ends at expiry instead of silently
+// feeding 401s to the relays.
+const AUTO_REFRESH_LEAD_MS = network.session.autoRefreshLeadMs
+// Lead time for the expiry-warning modal on a session without 로그인 유지.
+const WARNING_LEAD_MS = network.session.warningLeadMs
+let autoRefreshTimer = null
+let expiryLogoutTimer = null
+let warningTimer = null
+let sessionClockTimer = null
+
+function clearSessionTimers() {
+  if (autoRefreshTimer) clearTimeout(autoRefreshTimer)
+  if (expiryLogoutTimer) clearTimeout(expiryLogoutTimer)
+  if (warningTimer) clearTimeout(warningTimer)
+  autoRefreshTimer = null
+  expiryLogoutTimer = null
+  warningTimer = null
+}
+
+// Drives the countdown chip App.vue shows for a session without 로그인 유지.
+// Each tick recomputes from expiresAt, so a token refresh resets the display
+// without extra bookkeeping.
+function stopSessionClock() {
+  if (sessionClockTimer) clearInterval(sessionClockTimer)
+  sessionClockTimer = null
+  sessionRemainingSeconds.value = 0
+}
+
+function updateSessionRemainingSeconds() {
+  if (!expiresAt.value) {
+    sessionRemainingSeconds.value = 0
+    return
+  }
+  sessionRemainingSeconds.value = Math.max(0, Math.ceil((expiresAt.value - Date.now()) / 1000))
+}
+
+function startSessionClock() {
+  stopSessionClock()
+  if (!token.value || !expiresAt.value) return
+  updateSessionRemainingSeconds()
+  sessionClockTimer = setInterval(updateSessionRemainingSeconds, 1000)
+}
+
+function scheduleSessionTimers() {
+  clearSessionTimers()
+  if (!token.value || !expiresAt.value) return
+
+  const now = Date.now()
+
+  // 로그인 유지: renew silently before expiry. Only persistent sessions renew
+  // on their own — an ephemeral session ends on a fixed clock unless the user
+  // extends it from the warning modal.
+  if (sessionKind.value === SESSION_KIND_PERSISTENT && refreshToken.value) {
+    const delay = Math.max(0, expiresAt.value - now - AUTO_REFRESH_LEAD_MS)
+    autoRefreshTimer = setTimeout(() => {
+      refreshAccessToken().catch(() => {
+        // Temporary failure keeps the session; the next 401-driven refresh
+        // (authFetch or the stream probe) retries.
+      })
+    }, delay)
+    return
+  }
+
+  if (sessionKind.value === SESSION_KIND_EPHEMERAL) {
+    const warningDelay = expiresAt.value - WARNING_LEAD_MS - now
+    if (warningDelay <= 0) {
+      warningVisible.value = true
+    } else {
+      warningTimer = setTimeout(() => {
+        warningVisible.value = true
+      }, warningDelay)
+    }
+  }
+
+  expiryLogoutTimer = setTimeout(() => {
+    void terminateSession({ revoke: true, notice: SESSION_EXPIRED_NOTICE })
+  }, Math.max(0, expiresAt.value - now))
+}
 
 export class LoginRateLimitError extends Error {
   constructor(message, retryAfterSeconds = null) {
@@ -45,6 +136,7 @@ function clearStoredSession() {
     storage.removeItem(LEGACY_TOKEN_KEY)
     storage.removeItem(LEGACY_REFRESH_TOKEN_KEY)
     storage.removeItem(LEGACY_SESSION_KIND_KEY)
+    storage.removeItem(MUST_CHANGE_KEY)
   }
 }
 
@@ -58,10 +150,13 @@ function writeStoredSession(kind, sessionToken, sessionRefreshToken) {
   storage.setItem(LEGACY_TOKEN_KEY, sessionToken)
   storage.setItem(LEGACY_REFRESH_TOKEN_KEY, sessionRefreshToken || '')
   storage.setItem(LEGACY_SESSION_KIND_KEY, kind)
+  // Re-persisted on every session write (a refresh rotation rewrites the
+  // whole set) so the forced-change state survives until cleared.
+  if (mustChangePassword.value) storage.setItem(MUST_CHANGE_KEY, '1')
 }
 
 function loadStoredSession() {
-  if (!hasWindow()) return { kind: SESSION_KIND_EPHEMERAL, token: '', refreshToken: '' }
+  if (!hasWindow()) return { kind: SESSION_KIND_EPHEMERAL, token: '', refreshToken: '', mustChange: false }
 
   for (const kind of [SESSION_KIND_PERSISTENT, SESSION_KIND_EPHEMERAL]) {
     const storage = getStorage(kind)
@@ -71,10 +166,11 @@ function loadStoredSession() {
       kind: storage.getItem(SESSION_KIND_KEY) || storage.getItem(LEGACY_SESSION_KIND_KEY) || kind,
       token: storedToken,
       refreshToken: storage.getItem(REFRESH_TOKEN_KEY) || storage.getItem(LEGACY_REFRESH_TOKEN_KEY) || '',
+      mustChange: storage.getItem(MUST_CHANGE_KEY) === '1',
     }
   }
 
-  return { kind: SESSION_KIND_EPHEMERAL, token: '', refreshToken: '' }
+  return { kind: SESSION_KIND_EPHEMERAL, token: '', refreshToken: '', mustChange: false }
 }
 
 function decodeTokenPayload(jwt) {
@@ -108,30 +204,51 @@ function applySession(data, kind, fallbackRefreshToken = '') {
   sessionKind.value = kind
   expiresAt.value = resolveExpiryMs(token.value, data.expires_in)
   writeStoredSession(kind, token.value, refreshToken.value)
+  // A fresh token dismisses the warning; scheduleSessionTimers re-arms it if
+  // the new expiry is somehow already inside the warning window.
+  warningVisible.value = false
+  scheduleSessionTimers()
+  startSessionClock()
 }
 
-async function revokeRefreshToken(sessionRefreshToken) {
-  if (!sessionRefreshToken) return
+async function revokeSessionTokens(sessionRefreshToken, sessionAccessToken) {
+  // Ephemeral sessions may carry no refresh token (FR-002); the access token
+  // then identifies the user for the server-side epoch bump (FR-003), so a
+  // logout still invalidates the token before its natural expiry.
+  if (!sessionRefreshToken && !sessionAccessToken) return
   try {
     await apiFetch(API_ENDPOINTS.logout, {
       method: 'POST',
-      body: { refresh_token: sessionRefreshToken },
+      headers: sessionAccessToken ? { Authorization: `Bearer ${sessionAccessToken}` } : {},
+      body: { refresh_token: sessionRefreshToken || null },
     })
   } catch {
     // Best-effort logout. Local session cleanup is still enough for the app UI.
   }
 }
 
-async function terminateSession({ revoke = true } = {}) {
+async function terminateSession({ revoke = true, notice = '' } = {}) {
   const sessionRefreshToken = refreshToken.value
+  const sessionAccessToken = token.value
   token.value = ''
   refreshToken.value = ''
   sessionKind.value = SESSION_KIND_EPHEMERAL
   expiresAt.value = 0
+  mustChangePassword.value = false
+  warningVisible.value = false
+  extendingSession.value = false
+  clearSessionTimers()
+  stopSessionClock()
   clearStoredSession()
 
+  // Why the session ended, shown once on the login page (e.g. replaced by a
+  // newer login, or expired without a refresh token).
+  if (notice && hasWindow()) {
+    window.sessionStorage.setItem(LOGIN_NOTICE_STORAGE_KEY, notice)
+  }
+
   if (revoke) {
-    await revokeRefreshToken(sessionRefreshToken)
+    await revokeSessionTokens(sessionRefreshToken, sessionAccessToken)
   }
 }
 
@@ -157,7 +274,7 @@ async function performTokenRefresh() {
 
   if (!res.ok) {
     if ([400, 401, 403].includes(res.status)) {
-      await terminateSession({ revoke: false })
+      await terminateSession({ revoke: false, notice: SESSION_EXPIRED_NOTICE })
       return false
     }
     // Keep the stored session for temporary server errors and retry later.
@@ -204,9 +321,15 @@ async function initializeSession() {
   token.value = stored.token
   refreshToken.value = stored.refreshToken
   sessionKind.value = stored.kind
+  mustChangePassword.value = !!stored.mustChange
   expiresAt.value = resolveExpiryMs(token.value)
 
-  if (!token.value || !expiresAt.value || expiresAt.value > Date.now()) return Boolean(token.value)
+  if (!token.value) return false
+  if (!expiresAt.value || expiresAt.value > Date.now()) {
+    scheduleSessionTimers()
+    startSessionClock()
+    return true
+  }
 
   if (sessionKind.value === SESSION_KIND_PERSISTENT && refreshToken.value) {
     // Do not hold the initial route while the server refreshes a persisted
@@ -227,6 +350,25 @@ sessionInitialization = initializeSession()
 export function useAuth() {
   const isAuthenticated = computed(() => !!token.value)
   const isPersistentSession = computed(() => sessionKind.value === SESSION_KIND_PERSISTENT)
+  // 연장 needs a refresh token; a backend that issues none for ephemeral
+  // sessions leaves the warning modal's extend button disabled.
+  const canExtendSession = computed(() =>
+    sessionKind.value === SESSION_KIND_EPHEMERAL && !!refreshToken.value,
+  )
+
+  async function extendSession() {
+    if (!canExtendSession.value) return false
+    extendingSession.value = true
+    try {
+      return await refreshAccessToken()
+    } catch {
+      // Temporary refresh failure keeps the session and the modal; the user
+      // can retry 연장 until expiry actually logs the session out.
+      return false
+    } finally {
+      extendingSession.value = false
+    }
+  }
 
   async function login(username, password, rememberMe = false) {
     let res
@@ -272,11 +414,23 @@ export function useAuth() {
     }
 
     const data = await res.json()
+    // Set before applySession so writeStoredSession persists the flag.
+    mustChangePassword.value = !!data.must_change_password
     applySession(data, rememberMe ? SESSION_KIND_PERSISTENT : SESSION_KIND_EPHEMERAL)
   }
 
   function logout(options) {
     void terminateSession(options)
+  }
+
+  // Called after the change-password request succeeds: lifts the forced
+  // first-login state without touching the session itself.
+  function confirmPasswordChanged() {
+    mustChangePassword.value = false
+    if (!hasWindow()) return
+    for (const storage of [window.localStorage, window.sessionStorage]) {
+      storage.removeItem(MUST_CHANGE_KEY)
+    }
   }
 
   function getToken() {
@@ -292,10 +446,17 @@ export function useAuth() {
     accessToken: readonly(token),
     storedRefreshToken: readonly(refreshToken),
     sessionExpiresAt: readonly(expiresAt),
+    sessionRemainingSeconds: readonly(sessionRemainingSeconds),
+    warningVisible: readonly(warningVisible),
+    extendingSession: readonly(extendingSession),
+    mustChangePassword: readonly(mustChangePassword),
     isAuthenticated,
     isPersistentSession,
+    canExtendSession,
     login,
     logout,
+    extendSession,
+    confirmPasswordChanged,
     refreshAccessToken,
     ensureSessionReady,
     getToken,

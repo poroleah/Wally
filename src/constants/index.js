@@ -13,6 +13,8 @@ export const ROUTES = {
 
 export const LOGIN_NOTICE_STORAGE_KEY = 'wally:loginNotice'
 export const PASSWORD_CHANGED_NOTICE = '비밀번호가 변경되었습니다. 새 비밀번호로 로그인해주세요.'
+export const SESSION_REPLACED_NOTICE = '다른 기기에서 로그인되어 세션이 종료되었습니다.'
+export const SESSION_EXPIRED_NOTICE = '세션이 만료되었습니다. 다시 로그인해주세요.'
 
 export const ALARM_OPTIONS = ['없음', '5분 전', '10분 전', '15분 전', '30분 전', '1시간 전', '2시간 전', '1일 전', '2일 전', '1주 전']
 

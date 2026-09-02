@@ -17,6 +17,9 @@
   --color-vanilla-custard: #ffefbd;
   --color-blue-gray: #9bbcc3;
   --color-warm-neutral: #efe8df;
+  /* 세션 칩 — mewly 원본값 (global.css light neutral-900/400) */
+  --session-chip-bg: #efe8df;
+  --session-chip-text: #6b5f55;
   --splash-bg: #fffbf5;
   --splash-logo-shadow: none;
 
@@ -164,6 +167,9 @@ body.theme-dark,
   --color-vanilla-custard: #fad586;
   --color-blue-gray: #6a8a93;
   --color-warm-neutral: #463b36;
+  /* 세션 칩 — mewly 원본값 (global.css dark neutral-900/400) */
+  --session-chip-bg: #2c2723;
+  --session-chip-text: #b0a59a;
   --splash-bg: #1c1918;
   --splash-logo-shadow: drop-shadow(0 0.28rem 0.8rem rgba(0, 0, 0, 0.28));
 
@@ -302,6 +308,8 @@ body.theme-light,
   --color-vanilla-custard: #ffefbd;
   --color-blue-gray: #9bbcc3;
   --color-warm-neutral: #efe8df;
+  --session-chip-bg: #efe8df;
+  --session-chip-text: #6b5f55;
 
 
   --login-bg: #fffbf5;
