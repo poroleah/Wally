@@ -52,6 +52,12 @@
   </div>
 </template>
 
+<script>
+// 월별 로그 날짜 캐시 — 페이지 재방문(재마운트) 시 fetch 완료 전에도
+// 마지막으로 알던 마커를 즉시 표시하기 위해 모듈 스코프에 보관한다.
+const logDateKeysCache = new Map()
+</script>
+
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { usePlans } from '@/composables/usePlans'
@@ -122,15 +128,21 @@ const planDateKeys = computed(() => new Set(
 const hasPlanDate = (day) => planDateKeys.value.has(getDateKey(day))
 const hasLogDate = (day) => logDateKeys.value.has(getDateKey(day))
 async function loadLogDateKeys() {
+  const cacheKey = `${currentYear.value}-${currentMonth.value}`
+  const cached = logDateKeysCache.get(cacheKey)
+  logDateKeys.value = cached || new Set()
+
   const requestId = ++logDateRequestId
   try {
     const keys = await fetchRealtimeEventDateKeys({
       year: currentYear.value,
       month: currentMonth.value,
     })
+    logDateKeysCache.set(cacheKey, keys)
     if (requestId === logDateRequestId) logDateKeys.value = keys
   } catch {
-    if (requestId === logDateRequestId) logDateKeys.value = new Set()
+    // 일시적 오류로 이미 표시 중인 마커(캐시)를 지우지 않는다.
+    if (requestId === logDateRequestId && !cached) logDateKeys.value = new Set()
   }
 }
 

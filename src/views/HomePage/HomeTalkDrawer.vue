@@ -10,39 +10,87 @@
       <img class="micLayer micInner" src="/icons/Home/Bar/Mic/Ellipse 3.svg" alt="" />
       <img class="micIcon" src="/icons/Home/Bar/Mic/Frame.svg" alt="" />
     </button>
-    <div class="waveGroup" aria-hidden="true">
-      <svg class="waveSvg" viewBox="0 0 360 148" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <path :d="waveOnePath" fill="url(#talkWaveBase)" opacity="0.76" />
-        <path :d="waveTwoPath" fill="url(#talkWaveTop)" :opacity="waveTwoOpacity" />
-        <path :d="waveThreePath" fill="#FFDECC" :opacity="waveThreeOpacity" />
-        <path :d="waveOneLinePath" stroke="#FF955C" stroke-width="0.96" stroke-miterlimit="10" :opacity="waveLineOpacity" />
-        <path :d="waveTwoLinePath" stroke="#FF955C" stroke-width="0.96" stroke-miterlimit="10" :opacity="waveLineOpacity" />
-        <path :d="waveThreeLinePath" stroke="#DD8D61" stroke-width="0.96" stroke-miterlimit="10" :opacity="waveLineOpacity" />
-        <defs>
-          <linearGradient id="talkWaveTop" x1="180" y1="20" x2="180" y2="0" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#FFCBAF" />
-            <stop offset="1" stop-color="var(--home-accent)" />
-          </linearGradient>
-          <linearGradient id="talkWaveBase" x1="180" y1="124" x2="180" y2="25" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#FFDECC" />
-            <stop offset="1" stop-color="var(--home-accent)" />
-          </linearGradient>
-        </defs>
-      </svg>
+    <div class="barGroup" aria-hidden="true">
+      <span v-for="(bar, i) in bars" :key="i" class="micBar" :style="bar"></span>
+    </div>
+    <span v-if="isMicOn" class="statusChip">
+      <span class="statusChipDot"></span>전송 중
+    </span>
+    <div class="volHead">
+      <span class="volLabel">스피커 음량</span>
+      <span class="volValue">{{ volume }}%</span>
+    </div>
+    <div class="soundBar">
+      <button type="button" class="soundIconBtn" aria-label="음량 줄이기" @click="slideVolumeTo(Math.max(volume - 20, 0))">
+        <span class="soundIcon soundIconMute" aria-hidden="true"></span>
+      </button>
+      <input
+        v-model.number="volume"
+        type="range"
+        class="volRange"
+        min="0"
+        max="100"
+        step="5"
+        aria-label="스피커 음량"
+        :style="{ backgroundImage: volumeFill }"
+        @pointerdown="stopVolumeSlide"
+      >
+      <button type="button" class="soundIconBtn" aria-label="음량 키우기" @click="slideVolumeTo(Math.min(volume + 20, 100))">
+        <span class="soundIcon soundIconOn" aria-hidden="true"></span>
+      </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
 const emit = defineEmits(['close'])
+
+const VOLUME_STORAGE_KEY = 'wally:speakerVolume'
+
+function loadStoredVolume() {
+  try {
+    const stored = Number(localStorage.getItem(VOLUME_STORAGE_KEY))
+    if (Number.isFinite(stored) && stored >= 0 && stored <= 100) {
+      return Math.round(stored / 5) * 5
+    }
+  } catch { /* 저장소 접근 불가 시 기본값 */ }
+  return 50
+}
+
+const volume = ref(loadStoredVolume())
+watch(volume, (v) => {
+  try { localStorage.setItem(VOLUME_STORAGE_KEY, String(v)) } catch { /* noop */ }
+  // 단계 이동마다 짧은 진동 틱 — 드르륵 감각 (지원 기기 한정)
+  try { navigator.vibrate?.(8) } catch { /* noop */ }
+})
+const volumeFill = computed(() =>
+  `linear-gradient(to right, #ffb085 ${volume.value}%, #eee8de ${volume.value}%)`,
+)
+
+// 아이콘 버튼으로 0%/100% 이동 시 5%씩 드르륵 훑으며 이동
+let volumeSlideTimer = null
+
+function stopVolumeSlide() {
+  window.clearInterval(volumeSlideTimer)
+  volumeSlideTimer = null
+}
+
+function slideVolumeTo(target) {
+  stopVolumeSlide()
+  const direction = target > volume.value ? 5 : -5
+  if (volume.value === target) return
+  volumeSlideTimer = window.setInterval(() => {
+    const next = volume.value + direction
+    volume.value = direction > 0 ? Math.min(next, target) : Math.max(next, target)
+    if (volume.value === target) stopVolumeSlide()
+  }, 24)
+}
 const isMicOn = ref(false)
 const isMicPending = ref(false)
 const targetAmplitude = ref(0)
 const currentAmplitude = ref(0)
-const targetSeparation = ref(0)
-const currentSeparation = ref(0)
 const waveTime = ref(0)
 
 let animationFrame = 0
@@ -73,52 +121,18 @@ const toggleMic = async () => {
   startWaveLoop()
 }
 
-const rounded = (value) => Number(value.toFixed(2))
-const waveOffset = (time, speed, size, shift = 0) => Math.sin(time * speed + shift) * size
+// 시안 기준 막대 높이 프로필(px): 가운데가 봉우리인 10개 막대
+const BAR_HEIGHTS = [6, 8, 10, 22, 30, 14, 16, 12, 8, 6]
+const bars = computed(() => BAR_HEIGHTS.map((maxPx, i) => {
+  if (!isMicOn.value) return { height: '0.4rem', opacity: 0.35 }
 
-const waveAmplitude = computed(() => currentAmplitude.value)
-const separationAmount = computed(() => currentSeparation.value)
-const waveLineOpacity = computed(() => rounded(Math.min(separationAmount.value * 1.15, 1)))
-const waveTwoOpacity = computed(() => rounded(0.04 + separationAmount.value * 0.58))
-const waveThreeOpacity = computed(() => rounded(0.04 + separationAmount.value * 0.64))
-
-const buildWavePoints = ({ baseY, amplitudeRatio, speed, phase }) => {
-  const separation = separationAmount.value
-  const amplitude = waveAmplitude.value * amplitudeRatio * (0.55 + separation * 0.65)
-  const yBase = 33 + (baseY - 33) * separation
-  const points = []
-
-  for (let i = 0; i <= 10; i += 1) {
-    const x = (360 / 10) * i
-    const primary = waveOffset(waveTime.value, speed, amplitude, phase + i * 0.82)
-    const secondary = waveOffset(waveTime.value, speed * 0.56, amplitude * 0.38, phase * 0.7 + i * 1.36)
-    points.push([rounded(x), rounded(yBase + primary + secondary)])
+  const wobble = 0.5 + 0.5 * Math.sin(waveTime.value * (2.1 + (i % 4) * 0.55) + i * 1.7)
+  const strength = Math.min(currentAmplitude.value * (0.45 + wobble * 0.55) * 1.6, 1)
+  return {
+    height: `${(0.4 + (maxPx / 10 - 0.4) * strength).toFixed(2)}rem`,
+    opacity: Number((0.55 + strength * 0.45).toFixed(2)),
   }
-
-  return points
-}
-
-const buildWaveLinePath = (settings) => {
-  const points = buildWavePoints(settings)
-  return points.map(([x, y], index) => (index === 0 ? 'M' : 'L') + x + ' ' + y).join(' ')
-}
-
-const buildWaveFillPath = (settings) => {
-  const points = buildWavePoints(settings)
-  const topLine = points.map(([x, y]) => 'L' + x + ' ' + y).join(' ')
-  return 'M0 148 ' + topLine + ' L360 148 Z'
-}
-
-const waveOneSettings = { baseY: 48, amplitudeRatio: 18, speed: 1.15, phase: 0.2 }
-const waveTwoSettings = { baseY: 38, amplitudeRatio: 13, speed: 0.88, phase: 1.9 }
-const waveThreeSettings = { baseY: 56, amplitudeRatio: 22, speed: 1.36, phase: 3.4 }
-
-const waveOnePath = computed(() => buildWaveFillPath(waveOneSettings))
-const waveTwoPath = computed(() => buildWaveFillPath(waveTwoSettings))
-const waveThreePath = computed(() => buildWaveFillPath(waveThreeSettings))
-const waveOneLinePath = computed(() => buildWaveLinePath(waveOneSettings))
-const waveTwoLinePath = computed(() => buildWaveLinePath(waveTwoSettings))
-const waveThreeLinePath = computed(() => buildWaveLinePath(waveThreeSettings))
+}))
 
 const readMicLevel = () => {
   if (!analyser || !timeData) return 0
@@ -169,11 +183,8 @@ const startWaveLoop = () => {
 
   const draw = () => {
     waveTime.value += 0.045
-    const level = readMicLevel()
-    targetAmplitude.value = level
-    targetSeparation.value = Math.min(Math.max((level - 0.12) / 0.3, 0), 1)
+    targetAmplitude.value = readMicLevel()
     currentAmplitude.value += (targetAmplitude.value - currentAmplitude.value) * 0.12
-    currentSeparation.value += (targetSeparation.value - currentSeparation.value) * 0.08
     animationFrame = requestAnimationFrame(draw)
   }
 
@@ -185,8 +196,6 @@ const stopWaveLoop = () => {
   animationFrame = 0
   targetAmplitude.value = 0
   currentAmplitude.value = 0
-  targetSeparation.value = 0
-  currentSeparation.value = 0
   analyser = undefined
   timeData = undefined
 
@@ -198,7 +207,10 @@ const stopWaveLoop = () => {
 }
 
 
-onBeforeUnmount(stopWaveLoop)
+onBeforeUnmount(() => {
+  stopVolumeSlide()
+  stopWaveLoop()
+})
 </script>
 
 <style scoped>
@@ -207,7 +219,8 @@ onBeforeUnmount(stopWaveLoop)
   z-index: 90;
   width: 100%;
   flex: 1 1 auto;
-  min-height: clamp(27.2rem, 58dvh, 31.8rem);
+  /* 절대 배치된 스피커 음량 영역(~31rem)까지 항상 담기도록 최소 높이 고정 */
+  min-height: 31.6rem;
   margin-top: 2.4rem;
   border-radius: 2rem 2rem 0 0;
   background-color: var(--home-panel-bg);
@@ -261,7 +274,7 @@ onBeforeUnmount(stopWaveLoop)
 
 .micGroup {
   position: absolute;
-  top: 5.4rem;
+  top: 6.4rem;
   left: 50%;
   width: 13rem;
   height: 13rem;
@@ -346,25 +359,143 @@ body.theme-dark .micMiddle,
   transition: transform 0.18s ease, filter 0.18s ease;
 }
 
-.waveGroup {
+.barGroup {
   position: absolute;
+  top: 21rem;
   left: 50%;
-  bottom: -2.6rem;
-  width: 100%;
-  height: 14.8rem;
-  pointer-events: none;
-  overflow: hidden;
   transform: translateX(-50%);
+  display: flex;
+  align-items: flex-end;
+  gap: 0.4rem;
+  height: 3rem;
+  pointer-events: none;
 }
 
-.waveSvg {
+.micBar {
+  width: 0.4rem;
+  border-radius: 0.2rem;
+  background-color: #ffb085;
+  transition: height 0.15s ease, opacity 0.15s ease;
+}
+
+.statusChip {
   position: absolute;
-  left: 0;
+  top: 1.4rem;
+  right: 2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  height: 2.6rem;
+  padding: 0 1.1rem;
+  border-radius: 0.8rem;
+  background-color: color-mix(in srgb, var(--home-accent) 18%, var(--home-panel-bg));
+  color: var(--home-accent);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.statusChipDot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.volHead {
+  position: absolute;
+  top: 25.7rem;
+  right: 1.6rem;
+  left: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1rem;
+  color: var(--home-text);
+}
+
+.soundBar {
+  position: absolute;
+  top: 27rem;
   right: 0;
-  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  height: 4rem;
+  padding: 0 1.6rem;
+}
+
+.soundIconBtn {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.28s cubic-bezier(0.34, 1.86, 0.44, 1);
+}
+
+.soundIconBtn:active {
+  transform: scale(0.95);
+  transition-duration: 0.08s;
+}
+
+.soundIconBtn:focus,
+.soundIconBtn:focus-visible {
+  outline: none;
+}
+
+.soundIcon {
   display: block;
-  width: 100%;
-  height: 14.8rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  background-color: var(--home-text);
+}
+
+.soundIconMute {
+  mask: url('/icons/Home/Cam/Cam_SoundMute_Line.svg') center / contain no-repeat;
+  -webkit-mask: url('/icons/Home/Cam/Cam_SoundMute_Line.svg') center / contain no-repeat;
+}
+
+.soundIconOn {
+  mask: url('/icons/Home/Cam/Cam_Sound.svg') center / contain no-repeat;
+  -webkit-mask: url('/icons/Home/Cam/Cam_Sound.svg') center / contain no-repeat;
+}
+
+.volRange {
+  flex: 1;
+  min-width: 0;
+  height: 0.8rem;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 0.4rem;
+  background-color: #eee8de;
+  outline: none;
+  cursor: pointer;
+}
+
+.volRange::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 0;
+  border-radius: 50%;
+  background-color: #fffbf5;
+  box-shadow: 0.2rem 0.2rem 0.4rem rgba(0, 0, 0, 0.25);
+}
+
+.volRange::-moz-range-thumb {
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 0;
+  border-radius: 50%;
+  background-color: #fffbf5;
+  box-shadow: 0.2rem 0.2rem 0.4rem rgba(0, 0, 0, 0.25);
 }
 
 @keyframes micOrangeGlow {

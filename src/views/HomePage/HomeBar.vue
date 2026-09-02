@@ -83,10 +83,12 @@ function toggleControl(action) {
   place-items: center;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  transition: transform 0.28s cubic-bezier(0.34, 1.86, 0.44, 1);
 }
 
 .iconButton:active {
-  transform: scale(0.96);
+  transform: scale(0.95);
+  transition-duration: 0.08s;
 }
 
 .iconButton:focus,

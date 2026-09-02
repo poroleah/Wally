@@ -364,7 +364,11 @@ onBeforeUnmount(() => {
 }
 
 .topArea {
-  display: contents;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  width: 100%;
+  background-color: var(--home-panel-bg);
 }
 
 .homeIconsArea {
@@ -464,7 +468,7 @@ onBeforeUnmount(() => {
 }
 
 :global(html.home-force-portrait) .topArea {
-  display: contents;
+  display: flex;
 }
 
 :global(html.home-force-portrait) .homeIconsArea {
@@ -528,7 +532,7 @@ onBeforeUnmount(() => {
   }
 
   :global(html.home-force-portrait) .topArea {
-    display: contents;
+    display: flex;
   }
 
   :global(html.home-force-portrait) .videoArea {

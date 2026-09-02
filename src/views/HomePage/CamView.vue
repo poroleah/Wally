@@ -97,6 +97,11 @@
           </div>
         </div>
       </div>
+      <Transition name="cameraRotationCover">
+        <div v-if="isOrientationTransition" :class="$style.rotationCam" aria-hidden="true">
+          <img src="/icons/Brand/Logo_Mark_Dark.svg" :class="$style.rotationLogo" alt="" />
+        </div>
+      </Transition>
     </div>
   </div>
   <Teleport to="body">
@@ -204,13 +209,6 @@
         </div>
       </div>
     </div>
-  </Teleport>
-  <Teleport to="body">
-    <Transition name="cameraRotationCover">
-      <div v-if="isOrientationTransition" :class="$style.rotationCam" aria-hidden="true">
-        <img src="/icons/Brand/Logo_Mark_Dark.svg" :class="$style.rotationLogo" alt="" />
-      </div>
-    </Transition>
   </Teleport>
 </template>
 
@@ -1310,13 +1308,11 @@ watch(isExpanded, async (expanded) => {
 
 <style module>
 .rotationCam {
-  position: fixed;
+  position: absolute;
   inset: 0;
-  z-index: 10001;
+  z-index: 40;
   display: grid;
   place-items: center;
-  width: 100dvw;
-  height: 100dvh;
   overflow: hidden;
   background-color: #000;
   pointer-events: none;
