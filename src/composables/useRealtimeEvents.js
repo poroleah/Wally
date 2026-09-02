@@ -80,10 +80,17 @@ function createDefaultRealtimeState() {
     vlm_error: '',
     vlm_models: [],
     vlm_current_model: '',
+    // null = 아직 스냅숏을 받지 못함 (소비처는 true/false만 신뢰).
+    streaming_active: null,
   }
 }
 
 function resetRealtimeState() {
+  // SSE 스냅숏은 기본값 목록 밖의 필드도 실어 오므로, 남은 키를 지워야
+  // 로그아웃 뒤 이전 세션의 상태가 잔류하지 않는다.
+  for (const key of Object.keys(realtimeState)) {
+    delete realtimeState[key]
+  }
   Object.assign(realtimeState, createDefaultRealtimeState())
   lastPayload.value = null
   lastClipCount = null
