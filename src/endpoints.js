@@ -117,6 +117,10 @@ export const API_ENDPOINTS = {
   get eventHistory() {
     return getApiUrl('/events')
   },
+  // Per-key client storage on the gateway (pet profile 등 서버 보관 값).
+  clientStorage(key) {
+    return getApiUrl(`/client/storage/${encodeURIComponent(key)}`)
+  },
 }
 
 export const APP_ENDPOINTS = {

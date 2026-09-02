@@ -33,7 +33,7 @@
 | GET /stream (MJPEG) | 부분 (정의만) | `src/endpoints.js:130-132` 정의만, 호출부 없음 |
 | petProfile·homeStatus·homeAlerts·anomalies | 부분 (placeholder) | `src/endpoints.js:105-117` — 호출부 없음. mewly 백엔드에는 이 경로 자체가 없고 `/client/storage`로 대체됨 |
 | 홈 데이터 로드 | 없음 (빈 stub) | `src/composables/useHomeData.js:17-22` `loadHomeData`가 아무 요청도 안 함 |
-| 반려견 프로필 | 없음 (localStorage만) | `src/composables/useProfile.js:28-37` — 서버 통신 없음 |
+| 반려견 프로필 | 반영됨 | `src/composables/useProfile.js` — `/client/storage/pet_profile` GET/PUT, localStorage는 호스트별 캐시 |
 
 ---
 
@@ -45,7 +45,7 @@
 | 2 | SSE 라이브 상태 `/state` (신규 필드: `streaming_active`, `monitor_sources`, `label_groups`, `presets`, `active_preset`, `profile_pending`, `ptz_presets`, `ptz_preset_positions`, `ptz_patrol`) | 부분 | `src/composables/useSSE.js:8-70`, `src/endpoints.js:105-107` | 8080 `/events`로 구버전 필드만 수신 (`src/composables/useRealtimeEvents.js:40-82`) |
 | 3 | 이벤트 이력 조회 `GET /events` (FR-031) | 완료 (집계 용도) | `src/composables/useEventSummary.js:21` | `src/composables/useEventSummary.js` `fetchDaySummary` — mewly와 동일하게 목록이 아닌 히스토그램 집계·드릴다운에 사용. 클립 목록 자체는 mewly 기록 탭과 같이 `/clips` 유지 |
 | 4 | 집계 조회 `GET /summary` (시간 버킷별 라벨 발생 수·분모) | 없음 | `src/composables/useInferenceSummary.js:26` | — |
-| 5 | 클라이언트 저장소 `GET·PUT /client/storage/{key}` (반려견 프로필 서버 저장) | 없음 | `src/composables/useProfile.js:67,74` | 프로필이 localStorage 전용 (`src/composables/useProfile.js:28-37`) |
+| 5 | 클라이언트 저장소 `GET·PUT /client/storage/{key}` (반려견 프로필 서버 저장) | 완료 | `src/composables/useProfile.js:67,74` | 서버 원본 + 호스트별 localStorage 캐시 (`src/composables/useProfile.js`) — 로그인 시 GET, 변경 시 디바운스 PUT(에코 차단), 실패 시 캐시 표시 유지 |
 | 6 | 클립 삭제 `DELETE /clips` (`{names:[...]}` body) | 보류 | `src/composables/useClips.js:14-19` | 사용자 결정으로 보류 — [DEFERRED_SETUP.md](DEFERRED_SETUP.md) §5 |
 | 7 | 분석 수동 시작/정지 `POST /analysis/start·stop` (409/502 detail 분기) | 부분 | `src/composables/useAnalysis.js:27,41` | 엔드포인트 정의 완료(`src/endpoints.js` `analysisStart/Stop`), `useAutoLifecycle`이 자동 호출. 수동 UI·409/502 detail 분기는 없음 |
 | 8 | 스트리밍 수동 시작/정지 `POST /streaming/start·stop` | 부분 | `src/components/CameraPanel.vue:126,142` | 엔드포인트 정의 완료(`src/endpoints.js` `streamingStart/Stop`), 자동 라이프사이클이 호출. 수동 토글 UI는 없음 |
