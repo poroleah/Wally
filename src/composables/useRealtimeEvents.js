@@ -399,26 +399,21 @@ function closeRealtimeConnection() {
 }
 
 async function reconnectWithFreshToken(previousToken) {
-  const { getToken, refreshAccessToken, isPersistentSession, logout } = useAuth()
+  const { getToken, refreshAccessToken, isPersistentSession } = useAuth()
   let nextToken = getToken()
   if (!nextToken) return
 
-  if (nextToken === previousToken) {
-    if (!isPersistentSession.value) {
-      error.value = '실시간 이벤트 인증이 만료되었습니다. 다시 로그인해주세요.'
-      logout({ revoke: false })
-      return
-    }
-
+  if (nextToken === previousToken && isPersistentSession.value && refreshAccessToken) {
+    // 로그인 유지 세션은 끊긴 김에 토큰을 미리 갱신해 둔다. 실패해도
+    // 순단일 수 있으니 기존 토큰으로 재시도한다.
     const refreshed = await refreshAccessToken().catch(() => false)
-    if (!refreshed) {
-      error.value = '실시간 이벤트 인증이 만료되었습니다. 다시 로그인해주세요.'
-      closeRealtimeConnection()
-      return
-    }
-    nextToken = getToken()
+    if (refreshed) nextToken = getToken()
   }
 
+  // 토큰이 그대로여도 같은 토큰으로 다시 붙는다 — 연결 오류는 대부분
+  // 네트워크 순단이고, 진짜 만료·폐기라면 probeSession의 401 분류와
+  // 세션 만료 타이머(useAuth)가 로그아웃을 담당한다. 여기서 로그아웃을
+  // 결정하면 순단만으로 비유지 세션이 강제 로그아웃된다.
   openRealtimeConnection(nextToken)
 }
 
