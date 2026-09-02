@@ -43,7 +43,7 @@
 |---|---|---|---|---|
 | 1 | HTTPS 단일 게이트웨이(8000) — 모든 REST·SSE·스트림이 한 포트 경유 | 없음 | `src/endpoints.js:1-12`, `config/network.json:2-3` | http + 8000/8080/8888/8889 분산 (`src/endpoints.js:53-63`) |
 | 2 | SSE 라이브 상태 `/state` (신규 필드: `streaming_active`, `monitor_sources`, `label_groups`, `presets`, `active_preset`, `profile_pending`, `ptz_presets`, `ptz_preset_positions`, `ptz_patrol`) | 부분 | `src/composables/useSSE.js:8-70`, `src/endpoints.js:105-107` | 8080 `/events`로 구버전 필드만 수신 (`src/composables/useRealtimeEvents.js:40-82`) |
-| 3 | 이벤트 이력 조회 `GET /events` (FR-031) | 없음 | `src/composables/useEventSummary.js:21` | 로그를 `/clips` 목록으로 대체 중 (`src/composables/useRealtimeEvents.js:314`) |
+| 3 | 이벤트 이력 조회 `GET /events` (FR-031) | 완료 (집계 용도) | `src/composables/useEventSummary.js:21` | `src/composables/useEventSummary.js` `fetchDaySummary` — mewly와 동일하게 목록이 아닌 히스토그램 집계·드릴다운에 사용. 클립 목록 자체는 mewly 기록 탭과 같이 `/clips` 유지 |
 | 4 | 집계 조회 `GET /summary` (시간 버킷별 라벨 발생 수·분모) | 없음 | `src/composables/useInferenceSummary.js:26` | — |
 | 5 | 클라이언트 저장소 `GET·PUT /client/storage/{key}` (반려견 프로필 서버 저장) | 없음 | `src/composables/useProfile.js:67,74` | 프로필이 localStorage 전용 (`src/composables/useProfile.js:28-37`) |
 | 6 | 클립 삭제 `DELETE /clips` (`{names:[...]}` body) | 없음 | `src/composables/useClips.js:14-19` | — |
@@ -68,7 +68,7 @@
 | # | 기능 | 상태 | mewly 근거 | Wally 현황 |
 |---|---|---|---|---|
 | 1 | 분석 화면 — 시간대별 자세 그래프, 주야간 점유율, 14일 베이스라인·액토그램, 리듬 판정 | 없음 | `src/components/AnalysisTab.vue`, `src/composables/useInferenceSummary.js:109-172` | LogPage는 클립 목록만 |
-| 2 | 이벤트 키워드 24시간 히스토그램 집계 | 없음 | `src/composables/useEventSummary.js` | — |
+| 2 | 이벤트 키워드 24시간 히스토그램 집계 | 완료 | `src/composables/useEventSummary.js` | LogPage 상단 키워드 카드 + 셀/키워드 드릴다운으로 클립 목록 필터 (`src/views/LogPage/EventSummary.vue`) — 인사이트(지난주 같은 요일 비교) 포함 |
 | 3 | VLM 관찰 문장 로그 (`infer_raw` 누적 20건) | 없음 | `src/composables/useInferLog.js:25-37` | `infer_raw` 수신만 하고 미표시 |
 | 4 | VLM 상태 표시(색 점·라벨) + 모델 전환 UI | 없음 | `src/composables/useVlmStatus.js:31-40`, `src/components/HomeTab.vue:111` | `vlm_state` 수신만 |
 | 5 | 하드웨어 리소스 화면 (CPU·RAM·디스크·GPU·온도) | 없음 | `src/components/ResourcesSheet.vue` | 필드는 수신하나 표시 화면 없음 (`cpu_percent` 등 사용처가 `useRealtimeEvents.js`와 타입 정의뿐) |
@@ -79,7 +79,7 @@
 | 10 | 알림 인박스 (수신 목록 저장·읽음 처리) | 부분 | `src/composables/useNotifications.js`, `src/components/NotificationsOverlay.vue` | AlarmPage는 있으나 mewly식 인박스 저장 구조와 다름 (`src/utils/notifications.js`) |
 | 11 | 프로필 사진 크롭·리사이즈 (512px JPEG, 크롭 뷰) | 없음 | `src/components/ProfileOverlay.vue`, `config/ui.json:5-9` | 프로필 이미지 경로만 저장 (`src/composables/useProfile.js:23`) |
 | 12 | 프롬프트 보호 장치 — 검증 원형 이탈 경고 + 2단계 저장 확인 + 베이스라인 단절 기록 | 없음 | `src/components/PromptSheet.vue:42-77`, `src/composables/analysisConfig.js:49-87` | 단순 저장 (`src/composables/usePromptSettings.js:57-92`) |
-| 13 | 설정 외부화 — `config/*.json` (network·analysis·ptz·ui) | 부분 | `config/` 4개 파일 | `config/network.json` 이식 완료 (게이트웨이 scheme/port·스트림 버퍼/재시도·SSE 재접속/프로브·세션 리드타임). analysis·ptz·ui는 미이식 |
+| 13 | 설정 외부화 — `config/*.json` (network·analysis·ptz·ui) | 부분 | `config/` 4개 파일 | `config/network.json` 이식 완료 (게이트웨이 scheme/port·스트림 버퍼/재시도·SSE 재접속/프로브·세션 리드타임). `config/analysis.json`은 `eventsDayLimit`만 우선 이식(나머지 키는 /summary 기능과 함께). ptz·ui는 미이식 |
 | 14 | 공용 `persistentRef` localStorage 헬퍼 | 없음 | `src/composables/storage.js` | 컴포저블마다 수동 JSON 처리 |
 
 **제외 항목**: 조명·온도·마이크 제어는 mewly에서도 mock(localStorage, `useDevices.js:2-5`)이라 백엔드 기능이 아니며 Wally에 동등 드로어가 이미 있음. 테마(다크 토글), HLS/WebRTC 전환 UI, 일정 관리, 알림 설정 토글, 서버 주소 입력, 비밀번호 변경 화면은 Wally에 동등 기능 존재.
