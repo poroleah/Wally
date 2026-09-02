@@ -190,7 +190,8 @@ function toggleMode() {
 }
 
 .heatTrack {
-  stroke: var(--home-panel-border);
+  /* 말하기 드로어 음량 슬라이더 트랙과 동일한 색 */
+  stroke: #eee8de;
 }
 
 .heatValue {
@@ -221,8 +222,9 @@ function toggleMode() {
 :global(:root.theme-dark) .temperatureChild,
 :global(body.theme-dark) .temperatureChild,
 :global(#app.theme-dark) .temperatureChild {
-  background-color: var(--home-panel-border);
-  box-shadow: 0 0.12rem 0.26rem rgba(0, 0, 0, 0.24);
+  /* 말하기 드로어 음량 토글과 동일한 룩 */
+  background-color: #fffbf5;
+  box-shadow: 0.2rem 0.2rem 0.4rem rgba(0, 0, 0, 0.25);
 }
 
 .titleHope {
