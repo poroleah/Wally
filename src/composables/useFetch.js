@@ -43,6 +43,21 @@ function createRequestOptions(options = {}, token = '') {
   return { ...options, headers, body }
 }
 
+// 실패 응답의 사유 추출. mewly 백엔드가 오류 본문을 detail로 통일했으므로
+// detail을 우선하고, 구버전의 error·reason도 받아 둔다.
+export function failureMessage(data, fallback = 'request failed') {
+  if (!isPlainObject(data)) return fallback
+  return data.detail || data.error || data.reason || fallback
+}
+
+export async function failureDetail(res, fallback) {
+  try {
+    return failureMessage(await res.clone().json(), fallback)
+  } catch {
+    return fallback
+  }
+}
+
 export async function apiFetch(url, options = {}) {
   const res = await fetch(resolveUrl(url), createRequestOptions(options))
   return res
@@ -53,7 +68,7 @@ export async function apiJson(url, options = {}) {
   const data = await parseResponse(res)
 
   if (!res.ok) {
-    const message = data?.detail || data?.error || res.statusText || 'request failed'
+    const message = failureMessage(data, res.statusText || 'request failed')
     throw new Error(`server error ${res.status}: ${message}`)
   }
 
@@ -121,7 +136,7 @@ export async function authJson(url, options = {}) {
   const data = await parseResponse(res)
 
   if (!res.ok) {
-    const message = data?.detail || data?.error || res.statusText || 'request failed'
+    const message = failureMessage(data, res.statusText || 'request failed')
     throw new Error(`server error ${res.status}: ${message}`)
   }
 

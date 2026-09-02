@@ -37,7 +37,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { API_ENDPOINTS } from '@/endpoints'
-import { authFetch } from '@/composables/useFetch'
+import { authFetch, failureMessage } from '@/composables/useFetch'
 
 // Forced first-login mode (FR-006): no cancel until the change succeeds.
 const emit = defineEmits(['done'])
@@ -97,7 +97,7 @@ async function handleChange() {
     })
     const data = await res.json().catch(() => null)
     if (!res.ok) {
-      error.value = data?.detail || data?.error || '비밀번호 변경에 실패했습니다.'
+      error.value = failureMessage(data, '비밀번호 변경에 실패했습니다.')
       return
     }
 

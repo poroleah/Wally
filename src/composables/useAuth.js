@@ -2,7 +2,7 @@ import { computed, readonly, ref } from 'vue'
 import { API_ENDPOINTS, persistWallyHost } from '@/endpoints'
 import { LOGIN_NOTICE_STORAGE_KEY, SESSION_EXPIRED_NOTICE } from '@/constants'
 import { SERVER_REQUEST_TIMEOUT_MS } from '@/constants/network'
-import { apiFetch } from './useFetch'
+import { apiFetch, failureMessage } from './useFetch'
 import network from '../../config/network.json'
 
 const SESSION_KIND_KEY = 'wally:sessionKind'
@@ -404,7 +404,7 @@ export function useAuth() {
     if (res.status === 429) {
       const body = await res.json().catch(() => ({}))
       throw new LoginRateLimitError(
-        body.detail || body.error || 'too many attempts',
+        failureMessage(body, 'too many attempts'),
         parseRetryAfterSeconds(res, body),
       )
     }
@@ -415,7 +415,7 @@ export function useAuth() {
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({}))
-      throw new Error(`server error ${res.status}: ${body.detail || body.error || res.statusText || 'login failed'}`)
+      throw new Error(`server error ${res.status}: ${failureMessage(body, res.statusText || 'login failed')}`)
     }
 
     const data = await res.json()

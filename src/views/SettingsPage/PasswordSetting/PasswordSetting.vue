@@ -44,7 +44,7 @@
 import { reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { API_ENDPOINTS } from '@/endpoints'
-import { authFetch } from '@/composables/useFetch'
+import { authFetch, failureMessage } from '@/composables/useFetch'
 import { useAuth } from '@/composables/useAuth'
 import { LOGIN_NOTICE_STORAGE_KEY, PASSWORD_CHANGED_NOTICE, ROUTES } from '@/constants'
 
@@ -125,7 +125,7 @@ async function handleSave() {
     })
     const data = await res.json().catch(() => null)
     if (!res.ok) {
-      message.value = data?.detail || data?.error || '비밀번호 변경에 실패했습니다.'
+      message.value = failureMessage(data, '비밀번호 변경에 실패했습니다.')
       return
     }
 

@@ -1,7 +1,7 @@
 import { computed, readonly, ref, watch } from 'vue'
 import { SERVER_REQUEST_TIMEOUT_MS } from '@/constants/network'
 import { APP_ENDPOINTS } from '@/endpoints'
-import { authFetch } from './useFetch'
+import { authFetch, failureMessage } from './useFetch'
 import { useRealtimeEvents } from './useRealtimeEvents'
 
 const DEFAULT_PROMPT = 'What is the dog doing? Answer in one sentence.'
@@ -86,7 +86,7 @@ export async function saveVlmPromptConfig({ question, keywords }) {
 
   const data = await res.json().catch(() => null)
   if (!res.ok || data?.ok === false) {
-    throw new PromptSettingsError(data?.detail || data?.error || "프롬프트 설정을 저장하지 못했습니다.")
+    throw new PromptSettingsError(failureMessage(data, '프롬프트 설정을 저장하지 못했습니다.'))
   }
   return data
 }

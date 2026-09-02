@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { APP_ENDPOINTS } from '@/endpoints'
-import { authFetch } from './useFetch'
+import { authFetch, failureMessage } from './useFetch'
 
 const PTZ_SPEED = 0.5
 const status = ref('idle')
@@ -20,7 +20,7 @@ async function postPtz(body) {
     const data = await res.json().catch(() => null)
 
     if (!res.ok || data?.ok === false) {
-      error.value = data?.detail || data?.error || '카메라 방향 제어에 실패했습니다.'
+      error.value = failureMessage(data, '카메라 방향 제어에 실패했습니다.')
       return false
     }
 

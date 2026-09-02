@@ -1,6 +1,6 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { API_ENDPOINTS, APP_ENDPOINTS, getHlsUrl } from '@/endpoints'
-import { authFetch, authJson } from './useFetch'
+import { authFetch, authJson, failureMessage } from './useFetch'
 import { useRealtimeEvents } from './useRealtimeEvents'
 import {
   hasBackendCameraConfigChanged,
@@ -74,7 +74,7 @@ function firstValue(...values) {
 }
 
 function cameraErrorMessage(body, fallback) {
-  return body?.error || body?.detail || fallback
+  return failureMessage(body, fallback)
 }
 
 function resolveCameraName(data = {}) {
