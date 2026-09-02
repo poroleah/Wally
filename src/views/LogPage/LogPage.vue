@@ -6,17 +6,16 @@
       <img src="/icons/Log/Arrow_Right.svg" :class="[$style.dateArrow, $style.dateArrowPrev]" @click="prevDate" />
       <img src="/icons/Log/Arrow_Right.svg" :class="[$style.dateArrow, $style.dateArrowNext]" @click="nextDate" />
     </div>
-    <EventSummary :date="current" @filter="summaryFilter = $event" />
     <div :class="$style.logListWrapper">
       <div :class="[$style.logList, hasStateCard && $style.stateLogList]">
         <div v-if="!hasStateCard" :class="$style.timelineLine" />
         <div v-if="!hasStateCard" :class="$style.timelineDot" />
-        <div v-if="visibleLogs.length === 0" :class="$style.stateText">
-          {{ !loading && error ? error : summaryFilter ? '선택한 행동의 기록이 없습니다.' : '기록된 행동이 없습니다.' }}
+        <div v-if="logs.length === 0" :class="$style.stateText">
+          {{ !loading && error ? error : '기록된 행동이 없습니다.' }}
         </div>
         <template v-else>
           <LogItem
-            v-for="(item, index) in visibleLogs"
+            v-for="(item, index) in logs"
             :key="item.id || index"
             :data-log-id="item.clipName || item.id"
             :class="isActiveLog(item) ? $style.activeLogItem : ''"
@@ -26,7 +25,7 @@
             :thumbnail="item.thumbnail"
             :mediaType="item.mediaType"
             :detail="item.detail"
-            :isLast="index === visibleLogs.length - 1"
+            :isLast="index === logs.length - 1"
           />
         </template>
       </div>
@@ -39,7 +38,6 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import LogHeader from './LogHeader.vue'
 import LogItem from './Log/Log.vue'
-import EventSummary from './EventSummary.vue'
 import { useLogs } from '@/composables/useLogs'
 
 const route = useRoute()
@@ -72,15 +70,7 @@ const nextDate = () => {
 }
 
 const { logs, loading, error, loadLogs, startRealtimeLogs } = useLogs()
-
-// 히스토그램 드릴다운: null | { label, clipNames: Set } (EventSummary가 발행)
-const summaryFilter = ref(null)
-const visibleLogs = computed(() => {
-  const filter = summaryFilter.value
-  if (!filter) return logs.value
-  return logs.value.filter((item) => filter.clipNames.has(item.clipName))
-})
-const hasStateCard = computed(() => visibleLogs.value.length === 0)
+const hasStateCard = computed(() => logs.value.length === 0)
 
 async function loadCurrentDate() {
   await loadLogs({ date: current.value, force: true })

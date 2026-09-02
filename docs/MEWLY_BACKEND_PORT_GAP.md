@@ -68,7 +68,7 @@
 | # | 기능 | 상태 | mewly 근거 | Wally 현황 |
 |---|---|---|---|---|
 | 1 | 분석 화면 — 시간대별 자세 그래프, 주야간 점유율, 14일 베이스라인·액토그램, 리듬 판정 | 없음 | `src/components/AnalysisTab.vue`, `src/composables/useInferenceSummary.js:109-172` | LogPage는 클립 목록만 |
-| 2 | 이벤트 키워드 24시간 히스토그램 집계 | 완료 | `src/composables/useEventSummary.js` | LogPage 상단 키워드 카드 + 셀/키워드 드릴다운으로 클립 목록 필터 (`src/views/LogPage/EventSummary.vue`) — 인사이트(지난주 같은 요일 비교) 포함 |
+| 2 | 이벤트 키워드 24시간 히스토그램 집계 | 부분 (데이터 계층만) | `src/composables/useEventSummary.js` | 집계 로직 `src/composables/useEventSummary.js` 이식 완료. 화면(카드·드릴다운 UI)은 UI 단계에서 — 참고용 초안이 커밋 `b3ba4dc`의 `EventSummary.vue`에 있음 (이후 원복) |
 | 3 | VLM 관찰 문장 로그 (`infer_raw` 누적 20건) | 없음 | `src/composables/useInferLog.js:25-37` | `infer_raw` 수신만 하고 미표시 |
 | 4 | VLM 상태 표시(색 점·라벨) + 모델 전환 UI | 없음 | `src/composables/useVlmStatus.js:31-40`, `src/components/HomeTab.vue:111` | `vlm_state` 수신만 |
 | 5 | 하드웨어 리소스 화면 (CPU·RAM·디스크·GPU·온도) | 없음 | `src/components/ResourcesSheet.vue` | 필드는 수신하나 표시 화면 없음 (`cpu_percent` 등 사용처가 `useRealtimeEvents.js`와 타입 정의뿐) |
