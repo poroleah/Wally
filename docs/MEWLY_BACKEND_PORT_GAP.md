@@ -47,10 +47,10 @@
 | 4 | 집계 조회 `GET /summary` (시간 버킷별 라벨 발생 수·분모) | 부분 (데이터 계층 완료) | `src/composables/useInferenceSummary.js:26` | `src/composables/useInferenceSummary.js` 이식 완료 — fetchDayStates/fetchBaseline/judgeRhythm + 재시도. 분석 화면(UI)은 2단계 |
 | 5 | 클라이언트 저장소 `GET·PUT /client/storage/{key}` (반려견 프로필 서버 저장) | 완료 | `src/composables/useProfile.js:67,74` | 서버 원본 + 호스트별 localStorage 캐시 (`src/composables/useProfile.js`) — 로그인 시 GET, 변경 시 디바운스 PUT(에코 차단), 실패 시 캐시 표시 유지 |
 | 6 | 클립 삭제 `DELETE /clips` (`{names:[...]}` body) | 보류 | `src/composables/useClips.js:14-19` | 사용자 결정으로 보류 — [DEFERRED_SETUP.md](DEFERRED_SETUP.md) §5 |
-| 7 | 분석 수동 시작/정지 `POST /analysis/start·stop` (409/502 detail 분기) | 부분 | `src/composables/useAnalysis.js:27,41` | 엔드포인트 정의 완료(`src/endpoints.js` `analysisStart/Stop`), `useAutoLifecycle`이 자동 호출. 수동 UI·409/502 detail 분기는 없음 |
+| 7 | 분석 수동 시작/정지 `POST /analysis/start·stop` (409/502 detail 분기) | 완료 (데이터 계층) | `src/composables/useAnalysis.js:27,41` | `src/composables/useAnalysis.js` 이식 — start/stop/toggle, 409→no_stream·네트워크·detail 분기 + 한국어 사유 문구(`startErrorMessage`). 토글 UI는 2단계 |
 | 8 | 스트리밍 수동 시작/정지 `POST /streaming/start·stop` | 부분 | `src/components/CameraPanel.vue:126,142` | 엔드포인트 정의 완료(`src/endpoints.js` `streamingStart/Stop`), 자동 라이프사이클이 호출. 수동 토글 UI는 없음 |
 | 9 | 라벨 어휘·프리셋 주입 `POST /presets` (SSE `label_groups` 비면 자동 주입) | 완료 (자동 주입) | `src/composables/analysisConfig.js:118`, `src/components/AnalysisPanel.vue:46` | `src/composables/analysisConfig.js` `ensureLabelGroupsInjected` — main.js에서 기동, 세션당 1회. 수동 적용 UI(AnalysisPanel)는 2단계 |
-| 10 | VLM 모델 전환 `POST /vlm/switch` 실제 호출 | 부분 | `src/components/HomeTab.vue:111` | 정의만 있고 호출부 없음 (`src/endpoints.js:133-135`) |
+| 10 | VLM 모델 전환 `POST /vlm/switch` 실제 호출 | 완료 (데이터 계층) | `src/components/HomeTab.vue:111` | `src/composables/useVlmStatus.js` `switchModel` — 전환 UI(메뉴)는 2단계 |
 | 11 | 스트림 토큰 인증 — HLS 전 요청 Bearer(`xhrSetup`) + WHEP Authorization | 완료 | `src/components/HomeTab.vue:403-405, 493-500` | HLS `xhrSetup` Bearer + 네이티브 폴백 `?token=` (`src/views/HomePage/CamView.vue` `attachHls`), WHEP Authorization (`src/composables/useWebRtcStream.js`) |
 | 12 | 세션 자동 갱신 타이머 + 만료 경고 카운트다운 + 연장(`extendSession`) | 완료 | `src/composables/useAuth.js:282-318, 396-399` | persistent 자동 갱신 + ephemeral 경고/만료 타이머·1초 시계·`extendSession` (`src/composables/useAuth.js` `scheduleSessionTimers`/`startSessionClock`) |
 | 13 | 세션 교체 감지(FR-047) — 401 `token revoked` 분기 + SSE 끊김 시 401 프로브 + 로그아웃 사유 알림 | 완료 | `src/composables/useFetch.js:21-41`, `src/composables/useSSE.js:149-158`, `src/composables/useAuth.js:11-14, 204-209` | `token revoked` 분기 + `probeSession` + `SESSION_REPLACED_NOTICE` (`src/composables/useFetch.js`, `src/composables/useRealtimeEvents.js`) |
@@ -69,8 +69,8 @@
 |---|---|---|---|---|
 | 1 | 분석 화면 — 시간대별 자세 그래프, 주야간 점유율, 14일 베이스라인·액토그램, 리듬 판정 | 없음 | `src/components/AnalysisTab.vue`, `src/composables/useInferenceSummary.js:109-172` | LogPage는 클립 목록만 |
 | 2 | 이벤트 키워드 24시간 히스토그램 집계 | 부분 (데이터 계층만) | `src/composables/useEventSummary.js` | 집계 로직 `src/composables/useEventSummary.js` 이식 완료. 화면(카드·드릴다운 UI)은 UI 단계에서 — 참고용 초안이 커밋 `b3ba4dc`의 `EventSummary.vue`에 있음 (이후 원복) |
-| 3 | VLM 관찰 문장 로그 (`infer_raw` 누적 20건) | 없음 | `src/composables/useInferLog.js:25-37` | `infer_raw` 수신만 하고 미표시 |
-| 4 | VLM 상태 표시(색 점·라벨) + 모델 전환 UI | 없음 | `src/composables/useVlmStatus.js:31-40`, `src/components/HomeTab.vue:111` | `vlm_state` 수신만 |
+| 3 | VLM 관찰 문장 로그 (`infer_raw` 누적 20건) | 부분 (누적 계층만) | `src/composables/useInferLog.js:25-37` | `src/composables/useInferLog.js` 이식 — 표시 UI는 2단계 |
+| 4 | VLM 상태 표시(색 점·라벨) + 모델 전환 UI | 부분 (분류·전환 계층만) | `src/composables/useVlmStatus.js:31-40`, `src/components/HomeTab.vue:111` | `src/composables/useVlmStatus.js` — vlmKind/vlmLabel(한국어)·switchModel. 색 점·메뉴 UI는 2단계 |
 | 5 | 하드웨어 리소스 화면 (CPU·RAM·디스크·GPU·온도) | 없음 | `src/components/ResourcesSheet.vue` | 필드는 수신하나 표시 화면 없음 (`cpu_percent` 등 사용처가 `useRealtimeEvents.js`와 타입 정의뿐) |
 | 6 | 스트림 통계 (WebRTC `getStats()`·HLS 대역폭) | 부분 (컴포저블만) | `src/composables/useStreamStats.js` | `src/composables/useStreamStats.js` 이식 완료 (`network.json` `stream.statsIntervalMs`). 표시 UI·재생 화면 연결은 2단계 |
 | 7 | 세션 만료 모달 (카운트다운·연장 버튼) | 완료 | `src/components/SessionExpiryModal.vue` | `src/components/App/SessionExpiryModal.vue` + 상단 세션 칩 (`src/App.vue`) |
