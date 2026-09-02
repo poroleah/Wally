@@ -1,6 +1,7 @@
-import { computed, reactive, ref } from 'vue'
-import { API_ENDPOINTS, getHlsUrl } from '@/endpoints'
+import { computed, reactive, ref, watch } from 'vue'
+import { API_ENDPOINTS, APP_ENDPOINTS, getHlsUrl } from '@/endpoints'
 import { authFetch, authJson } from './useFetch'
+import { useRealtimeEvents } from './useRealtimeEvents'
 import {
   hasBackendCameraConfigChanged,
   hasStreamCameraConfigChanged,
@@ -159,6 +160,56 @@ async function loadCameras({ force = false } = {}) {
   return loadPromise
 }
 
+// Mewly contract (FR-048/FR-049): POST /camera only stores the profile — the
+// source connects and disconnects via explicit /streaming/start·stop, and an
+// active stream keeps relaying the OLD profile. A stream-affecting change
+// therefore stops the stream before saving and starts it again afterwards.
+// Completion is judged by the SSE streaming_active transition, not by the
+// request succeeding.
+const STREAM_TOGGLE_WAIT_MS = 8000
+
+async function requestStreaming(url) {
+  try {
+    const res = await authFetch(url, { method: 'POST' })
+    return res.ok
+  } catch {
+    return false
+  }
+}
+
+function waitForStreamingActive(target, timeoutMs = STREAM_TOGGLE_WAIT_MS) {
+  const { state } = useRealtimeEvents()
+  return new Promise((resolve) => {
+    if (state.streaming_active === target) return resolve(true)
+    const stopWatch = watch(() => state.streaming_active, (value) => {
+      if (value !== target) return
+      stopWatch()
+      clearTimeout(timer)
+      resolve(true)
+    })
+    const timer = setTimeout(() => {
+      stopWatch()
+      resolve(false)
+    }, timeoutMs)
+  })
+}
+
+async function stopStreamingForUpdate() {
+  const { state } = useRealtimeEvents()
+  if (state.streaming_active !== true) return
+  if (await requestStreaming(APP_ENDPOINTS.streamingStop)) {
+    await waitForStreamingActive(false)
+  }
+}
+
+async function startStreamingAfterUpdate() {
+  // Best-effort: if the start is lost, useAutoLifecycle re-issues it once the
+  // live state reports the stream off.
+  if (await requestStreaming(APP_ENDPOINTS.streamingStart)) {
+    await waitForStreamingActive(true)
+  }
+}
+
 async function saveCameraSettings(settings = {}) {
   saving.value = true
   saveStatus.value = ''
@@ -198,6 +249,11 @@ async function saveCameraSettings(settings = {}) {
   }
 
   try {
+    // The stream must be off while the new profile is stored (mewly
+    // procedure); a failed save leaves it off and useAutoLifecycle turns it
+    // back on with the previous profile.
+    if (streamConfigChanged) await stopStreamingForUpdate()
+
     const res = await authFetch(API_ENDPOINTS.camera, {
       method: 'POST',
       body,
@@ -223,7 +279,11 @@ async function saveCameraSettings(settings = {}) {
       password_set: Boolean(body.password || config.password_set),
     })
     loaded.value = true
-    if (streamConfigChanged) reconnectKey.value += 1
+    if (streamConfigChanged) {
+      // Reconnect the backend source to the new profile, then the player.
+      await startStreamingAfterUpdate()
+      reconnectKey.value += 1
+    }
     return true
   } catch (e) {
     saveStatus.value = '카메라 설정 저장에 실패했습니다.'
