@@ -129,11 +129,11 @@ async function handleChange() {
   width: min(320px, 100%);
   position: relative;
   border-radius: 10px;
-  background-color: #fffbf5;
+  background-color: var(--app-surface, #fffbf5);
   overflow: hidden;
   text-align: left;
   font-size: 12px;
-  color: #84776e;
+  color: var(--app-text-muted, #84776e);
   font-family: 'Hancom MalangMalang', 'Malang', sans-serif;
   padding: 16px 20px;
   display: flex;
@@ -141,7 +141,7 @@ async function handleChange() {
 }
 
 .title {
-  color: #000;
+  color: var(--app-text, #000);
   line-height: 22px;
 }
 
@@ -149,15 +149,15 @@ async function handleChange() {
   margin-top: 1px;
   font-size: 10px;
   line-height: 15px;
-  color: #000;
+  color: var(--app-text, #000);
 }
 
 .pwReset {
   position: relative;
   margin-top: 14px;
   border-radius: 10px;
-  background-color: #f5f0e9;
-  border: 0.5px solid #eee8de;
+  background-color: var(--app-surface-muted, #f5f0e9);
+  border: 0.5px solid var(--home-panel-border, #eee8de);
   box-sizing: border-box;
   width: 100%;
   height: 32px;
@@ -177,14 +177,14 @@ async function handleChange() {
   outline: none;
   background: transparent;
   padding: 0 32px 0 8px;
-  color: #84776e;
+  color: var(--app-text, #84776e);
   font-family: inherit;
   font-size: 12px;
   line-height: 22px;
 }
 
 .content::placeholder {
-  color: #84776e;
+  color: var(--app-text-muted, #84776e);
 }
 
 .iconEye {
@@ -205,20 +205,22 @@ async function handleChange() {
   width: 100%;
   height: 100%;
   display: block;
+  /* 다크에서 어두운 선 아이콘이 묻히지 않게 로그인 페이지와 같은 필터 사용 */
+  filter: var(--login-icon-filter, none);
 }
 
 .chatSending {
   margin-top: 16px;
   border-radius: 10px;
-  background-color: #ffb085;
-  border: 0.5px solid #eee8de;
+  background-color: var(--app-primary, #ffb085);
+  border: 0.5px solid var(--home-panel-border, #eee8de);
   box-sizing: border-box;
   width: 100%;
   height: 32px;
   flex-shrink: 0;
   overflow: hidden;
   text-align: center;
-  color: #fffbf5;
+  color: var(--login-button-text, #fffbf5);
   font-family: inherit;
   font-size: 12px;
   padding: 0;
