@@ -1,7 +1,10 @@
 import { readonly, ref } from 'vue'
+import { useAuth } from './useAuth'
+import { probeSession } from './useFetch'
+import network from '../../config/network.json'
 
-const DEFAULT_CONNECT_TIMEOUT = 15_000
-const DEFAULT_RETRY_DELAY = 3_000
+const DEFAULT_CONNECT_TIMEOUT = network.stream.connectTimeoutMs
+const DEFAULT_RETRY_DELAY = network.stream.retryBackoffMs
 
 export function useWebRtcStream({
   getUrl,
@@ -94,7 +97,9 @@ export function useWebRtcStream({
     releasePeerConnection()
     if (activeSession !== sessionId || !shouldReconnect) throw new Error('WebRTC connection was cancelled.')
 
-    const pc = new RTCPeerConnection({ iceServers: [] })
+    // 기본 []: LAN 직결 전제라 STUN이 불필요하다. 원격 접근을 도입하면
+    // config/network.json stream.webrtc.iceServers에 서버를 추가한다.
+    const pc = new RTCPeerConnection({ iceServers: network.stream.webrtc.iceServers })
     peerConnection = pc
     pc.addTransceiver('video', { direction: 'recvonly' })
     pc.addTransceiver('audio', { direction: 'recvonly' })
@@ -124,9 +129,16 @@ export function useWebRtcStream({
     )
     let response
     try {
+      // WHEP signaling passes the gateway relay and needs the token; the
+      // WebRTC media itself then flows directly from the streamer.
+      const { getToken } = useAuth()
+      const token = getToken()
       response = await fetch(getUrl(), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/sdp' },
+        headers: {
+          'Content-Type': 'application/sdp',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: pc.localDescription.sdp,
         signal: requestController.signal,
       })
@@ -135,6 +147,11 @@ export function useWebRtcStream({
       if (abortController === requestController) abortController = null
     }
 
+    if (response.status === 401) {
+      // Dead token on the relay: refresh it (or classify the revoked
+      // session) so the reconnect attempt signs with a live token.
+      probeSession()
+    }
     if (!response.ok) throw new Error(`WHEP ${response.status}`)
     const answerSdp = await response.text()
     if (activeSession !== sessionId) throw new Error('WebRTC connection was cancelled.')

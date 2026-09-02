@@ -217,8 +217,11 @@
 <script setup>
 import { Capacitor } from '@capacitor/core'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useAuth } from '@/composables/useAuth'
+import { probeSession } from '@/composables/useFetch'
 import { useCamera } from '@/composables/useCamera'
 import { getHlsUrl, getWhepUrl } from '@/endpoints'
+import network from '../../../config/network.json'
 import { usePtz } from '@/composables/usePtz'
 import { useWebRtcStream } from '@/composables/useWebRtcStream'
 import { getReliableLandscape, ORIENTATION_DEBOUNCE_MS } from '@/utils/viewportOrientation'
@@ -249,18 +252,19 @@ const STREAM_PROTOCOL_STORAGE_KEY = 'wally_stream_protocol'
 const STREAM_PROTOCOLS = new Set(['hls', 'webrtc'])
 
 function normalizeProtocol(value) {
-  return STREAM_PROTOCOLS.has(value) ? value : 'hls'
+  return STREAM_PROTOCOLS.has(value) ? value : network.stream.defaultProtocol
 }
 
 function readStoredProtocol() {
   try {
     return normalizeProtocol(window.localStorage.getItem(STREAM_PROTOCOL_STORAGE_KEY))
   } catch {
-    return 'hls'
+    return network.stream.defaultProtocol
   }
 }
 
 const protocol = ref(readStoredProtocol())
+const { accessToken } = useAuth()
 const { cameraUrl, loading, error, cameraViewState, reconnectKey, loadCameras, setConnected, setDisconnected } = useCamera()
 const { startMove, stopMove, saveHome, gotoHome } = usePtz()
 const emit = defineEmits(['ptz-change'])
@@ -712,11 +716,11 @@ let streamSessionId = 0
 let connectDeadline = 0
 let retryAttempts = 0
 let longRecoveryAttempts = 0
-const CONNECT_TIMEOUT = 15000
-const RETRY_DELAY = 3000
-const STALL_TIMEOUT = 8000
-const MAX_AUTO_RETRIES = 3
-const LONG_RECOVERY_DELAYS = [5000, 10000, 15000, 30000]
+const CONNECT_TIMEOUT = network.stream.connectTimeoutMs
+const RETRY_DELAY = network.stream.retryBackoffMs
+const STALL_TIMEOUT = network.stream.stallTimeoutMs
+const MAX_AUTO_RETRIES = network.stream.maxAutoRetries
+const LONG_RECOVERY_DELAYS = network.stream.longRecoveryDelaysMs
 
 const {
   mediaStream: webRtcMediaStream,
@@ -984,16 +988,22 @@ const attachHls = async (video, target, sessionId = streamSessionId) => {
   destroyHls(target)
   if (Hls.isSupported()) {
     const hls = new Hls({
-      liveSyncDurationCount: 1,
-      liveMaxLatencyDurationCount: 3,
-      maxBufferLength: 3,
-      maxMaxBufferLength: 6,
+      // 라이브 지연 튜닝 — 키는 hls.js 옵션명 그대로 (config/network.json)
+      ...network.stream.hlsBuffer,
+      // The HLS relay sits behind the gateway; every request — playlist and
+      // segments alike — must carry the access token.
+      xhrSetup: (xhr) => {
+        if (accessToken.value) xhr.setRequestHeader('Authorization', `Bearer ${accessToken.value}`)
+      },
     })
     hls.loadSource(videoSrc.value)
     hls.attachMedia(video)
     hls.on(Hls.Events.MANIFEST_PARSED, () => playVideo(video))
     hls.on(Hls.Events.ERROR, (_, data) => {
       if (!data?.fatal) return
+      // A dead token 401s every relay request without surfacing here as
+      // auth; the probe refreshes it so the retry carries a live token.
+      probeSession()
       if (target === 'inline' && sessionId === streamSessionId && Date.now() < connectDeadline) {
         scheduleRetry(sessionId)
         return
@@ -1007,7 +1017,11 @@ const attachHls = async (video, target, sessionId = streamSessionId) => {
   }
 
   if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    video.src = videoSrc.value
+    // Native HLS cannot set headers; the token rides the playlist URL.
+    // Segment requests do not inherit it, so native-only browsers are
+    // limited — hls.js above is the supported path.
+    const separator = videoSrc.value.includes('?') ? '&' : '?'
+    video.src = `${videoSrc.value}${separator}token=${encodeURIComponent(accessToken.value || '')}`
     await playVideo(video)
     return
   }
