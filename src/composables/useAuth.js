@@ -1,5 +1,5 @@
 import { computed, readonly, ref } from 'vue'
-import { API_ENDPOINTS } from '@/endpoints'
+import { API_ENDPOINTS, persistWallyHost } from '@/endpoints'
 import { LOGIN_NOTICE_STORAGE_KEY, SESSION_EXPIRED_NOTICE } from '@/constants'
 import { SERVER_REQUEST_TIMEOUT_MS } from '@/constants/network'
 import { apiFetch } from './useFetch'
@@ -391,10 +391,15 @@ export function useAuth() {
         timeoutPromise,
       ])
     } catch (e) {
+      // Network-level failure: the backend host was never reached. Do not
+      // persist it so the operator can correct the host and retry.
       throw new Error(`network failed: ${e?.message || 'unknown error'}`)
     } finally {
       clearTimeout(timeoutId)
     }
+
+    // The host responded (even on 401/429), so it is reachable — remember it.
+    persistWallyHost()
 
     if (res.status === 429) {
       const body = await res.json().catch(() => ({}))

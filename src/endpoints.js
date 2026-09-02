@@ -6,6 +6,10 @@ import network from '../config/network.json'
 
 const WALLY_HOST_STORAGE_KEY = 'wally_host'
 
+// Host activated for the current page load; persistWallyHost() writes it to
+// localStorage only after the backend responds (mewly host-persist contract).
+let sessionWallyHost = ''
+
 const SCHEME = network.backendScheme
 const PORT = network.backendPort
 
@@ -39,22 +43,30 @@ export function getBrowserHost() {
 }
 
 export function getWallyHost() {
-  return getStoredWallyHost() || getConfiguredWallyHost() || getBrowserHost()
+  return sessionWallyHost || getStoredWallyHost() || getConfiguredWallyHost() || getBrowserHost()
 }
 
 export function getEditableWallyHost() {
-  return getStoredWallyHost() || getConfiguredWallyHost()
+  return sessionWallyHost || getStoredWallyHost() || getConfiguredWallyHost()
 }
 
-export function setStoredWallyHost(host) {
-  if (!hasWindow()) return ''
-  const normalizedHost = normalizeHost(host)
-  if (normalizedHost) {
-    window.localStorage.setItem(WALLY_HOST_STORAGE_KEY, normalizedHost)
+// Activate a host for the current page load without persisting it. Requests
+// target this value; call persistWallyHost() once the backend responds.
+export function applyWallyHost(host) {
+  sessionWallyHost = normalizeHost(host)
+  return sessionWallyHost
+}
+
+// Persist the active host once the backend has responded (i.e. the host is
+// reachable). An empty host clears the stored value so resolution falls back
+// to the configured/browser host.
+export function persistWallyHost() {
+  if (!hasWindow()) return
+  if (sessionWallyHost) {
+    window.localStorage.setItem(WALLY_HOST_STORAGE_KEY, sessionWallyHost)
   } else {
     window.localStorage.removeItem(WALLY_HOST_STORAGE_KEY)
   }
-  return normalizedHost
 }
 
 function getServiceUrl(path) {

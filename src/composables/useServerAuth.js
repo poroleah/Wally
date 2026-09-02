@@ -1,5 +1,5 @@
 import { computed, ref } from 'vue'
-import { getEditableWallyHost, setStoredWallyHost } from '@/endpoints'
+import { applyWallyHost, getEditableWallyHost, persistWallyHost } from '@/endpoints'
 
 const SERVER_AUTHENTICATED_KEY = 'wally:serverAuthenticated'
 
@@ -19,7 +19,9 @@ export function useServerAuth() {
   const isServerAuthenticated = computed(() => serverAuthenticated.value)
 
   function authenticateServer() {
-    const host = setStoredWallyHost(serverAddress.value)
+    // Activate only — the host is persisted by login() once the backend
+    // actually responds, so a typo never sticks in localStorage.
+    const host = applyWallyHost(serverAddress.value)
     if (!host) return false
 
     serverAddress.value = host
@@ -35,7 +37,8 @@ export function useServerAuth() {
   function clearServerAuthentication() {
     serverAuthenticated.value = false
     serverAddress.value = ''
-    setStoredWallyHost('')
+    applyWallyHost('')
+    persistWallyHost()
     if (hasWindow()) {
       window.sessionStorage.removeItem(SERVER_AUTHENTICATED_KEY)
     }
