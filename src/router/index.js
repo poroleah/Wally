@@ -28,7 +28,7 @@ const router = createRouter({
 })
 
 let isInitialNavigation = true
-const { isAuthenticated, ensureSessionReady } = useAuth()
+const { isAuthenticated, ensureSessionReady, mustChangePassword } = useAuth()
 
 function loggedOutRoute() {
   if (typeof window !== 'undefined' && window.sessionStorage.getItem(LOGIN_NOTICE_STORAGE_KEY)) {
@@ -62,6 +62,13 @@ router.beforeEach(async (to) => {
 
   if (to.path === ROUTES.LOGIN && !isServerAuthenticated.value && !isAuthenticated.value) {
     return ROUTES.LOGIN_ADDRESS
+  }
+
+  // Forced first-login flow (FR-006): until the password changes, the only
+  // place an authenticated session may be is the login page, which hosts
+  // the change popup.
+  if (isAuthenticated.value && mustChangePassword.value) {
+    return to.path === ROUTES.LOGIN ? undefined : ROUTES.LOGIN
   }
 
   if (authRoutes.includes(to.path) && isAuthenticated.value) {

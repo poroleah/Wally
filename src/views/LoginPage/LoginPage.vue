@@ -57,19 +57,22 @@
       <p v-if="feedbackMessage" :class="$style.error">{{ feedbackMessage }}</p>
       <button :class="$style.changeServerButton" type="button" @click="changeServerAddress">서버 주소 변경</button>
     </form>
+
+    <ForcePasswordChange v-if="showPasswordChange" @done="onPasswordChanged" />
   </section>
 </template>
 
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { LOGIN_NOTICE_STORAGE_KEY, ROUTES } from '@/constants'
 import { LoginRateLimitError, useAuth } from '@/composables/useAuth'
 import { useServerAuth } from '@/composables/useServerAuth'
+import ForcePasswordChange from './ForcePasswordChange.vue'
 
 const router = useRouter()
-const { login, logout } = useAuth()
+const { login, logout, isAuthenticated, mustChangePassword, confirmPasswordChanged } = useAuth()
 const { clearServerAuthentication } = useServerAuth()
 
 const username = ref('')
@@ -77,6 +80,7 @@ const password = ref('')
 const keepLogin = ref(false)
 const loading = ref(false)
 const showLoginPassword = ref(false)
+const showPasswordChange = ref(false)
 const error = ref('')
 const notice = ref(window.sessionStorage.getItem(LOGIN_NOTICE_STORAGE_KEY) || '')
 const feedbackMessage = computed(() => error.value || notice.value)
@@ -97,6 +101,20 @@ const changeServerAddress = () => {
   router.replace(ROUTES.LOGIN_ADDRESS)
 }
 
+const onPasswordChanged = () => {
+  confirmPasswordChanged()
+  showPasswordChange.value = false
+  router.push(ROUTES.HOME)
+}
+
+// A reload with the forced-change flag persisted lands back on this page
+// (router guard); reopen the popup without requiring a second login.
+onMounted(() => {
+  if (isAuthenticated.value && mustChangePassword.value) {
+    showPasswordChange.value = true
+  }
+})
+
 function formatRateLimitMessage(retryAfterSeconds) {
   if (!retryAfterSeconds) {
     return '로그인 시도가 너무 많습니다. 잠시 후 다시 시도해주세요.'
@@ -116,6 +134,12 @@ const handleLogin = async () => {
 
   try {
     await login(username.value, password.value, keepLogin.value)
+    // Forced first-login flow (FR-006): the password must change before the
+    // app opens, so the popup replaces the navigation to home.
+    if (mustChangePassword.value) {
+      showPasswordChange.value = true
+      return
+    }
     router.push(ROUTES.HOME)
   } catch (e) {
     const message = e?.message || ''
