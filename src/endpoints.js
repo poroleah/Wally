@@ -1,10 +1,13 @@
 // Mewly-compatible service map.
-// The gateway (HTTPS, port 8000) is the single entry point for everything —
-// auth/camera/clips REST, runtime controls, SSE, and the HLS/WHEP relays.
+// The gateway is the single entry point for everything — auth/camera/clips
+// REST, runtime controls, SSE, and the HLS/WHEP relays. Scheme and port live
+// in config/network.json (backendScheme/backendPort).
+import network from '../config/network.json'
+
 const WALLY_HOST_STORAGE_KEY = 'wally_host'
 
-const SCHEME = 'https'
-const PORT = 8000
+const SCHEME = network.backendScheme
+const PORT = network.backendPort
 
 function hasWindow() {
   return typeof window !== 'undefined'

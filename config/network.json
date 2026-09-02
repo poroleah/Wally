@@ -1,0 +1,31 @@
+{
+  "backendScheme": "https",
+  "backendPort": 8000,
+  "serverRequestTimeoutMs": 5000,
+  "stream": {
+    "defaultProtocol": "hls",
+    "connectTimeoutMs": 15000,
+    "stallTimeoutMs": 8000,
+    "retryBackoffMs": 3000,
+    "maxAutoRetries": 3,
+    "longRecoveryDelaysMs": [5000, 10000, 15000, 30000],
+    "hlsBuffer": {
+      "liveSyncDurationCount": 1,
+      "liveMaxLatencyDurationCount": 3,
+      "maxBufferLength": 3,
+      "maxMaxBufferLength": 6
+    },
+    "webrtc": {
+      "iceServers": []
+    }
+  },
+  "sse": {
+    "initialReconnectDelayMs": 1000,
+    "maxReconnectDelayMs": 30000
+  },
+  "sseProbeMinIntervalMs": 5000,
+  "session": {
+    "warningLeadMs": 60000,
+    "autoRefreshLeadMs": 60000
+  }
+}

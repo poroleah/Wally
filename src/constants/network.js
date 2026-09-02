@@ -1,1 +1,3 @@
-export const SERVER_REQUEST_TIMEOUT_MS = 5000
+import network from '../../config/network.json'
+
+export const SERVER_REQUEST_TIMEOUT_MS = network.serverRequestTimeoutMs
