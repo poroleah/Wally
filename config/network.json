@@ -24,6 +24,10 @@
     "maxReconnectDelayMs": 30000
   },
   "sseProbeMinIntervalMs": 5000,
+  "summaryRetry": {
+    "attempts": 2,
+    "delayMs": 250
+  },
   "session": {
     "warningLeadMs": 60000,
     "autoRefreshLeadMs": 60000

@@ -9,6 +9,7 @@ import { SplashScreen } from '@capacitor/splash-screen'
 import { ROUTES } from '@/constants'
 import { themeSrcDirective } from '@/directives/themeSrc'
 import { initNotificationActions } from '@/utils/notifications'
+import { ensureLabelGroupsInjected } from '@/composables/analysisConfig'
 import { initScheduleAlarmSync } from '@/utils/scheduleAlarmSync'
 import { initAbnormalNotifications } from '@/utils/abnormalNotifications'
 
@@ -158,6 +159,8 @@ function initAndroidBackButton() {
 }
 
 initPlatformClasses()
+// analyzer의 라벨 어휘가 비어 있으면(보드 초기화·신규 출고) 자기 어휘를 주입한다
+ensureLabelGroupsInjected()
 const app = createApp(RootApp)
 app.use(router)
 app.directive('theme-src', themeSrcDirective)

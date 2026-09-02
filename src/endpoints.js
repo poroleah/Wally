@@ -121,6 +121,10 @@ export const API_ENDPOINTS = {
   clientStorage(key) {
     return getApiUrl(`/client/storage/${encodeURIComponent(key)}`)
   },
+  // Aggregated inference counts per time bucket (분석 데이터 계층).
+  get summary() {
+    return getApiUrl('/summary')
+  },
 }
 
 export const APP_ENDPOINTS = {
@@ -153,6 +157,10 @@ export const APP_ENDPOINTS = {
   },
   get vlmSwitch() {
     return getAppUrl('/vlm/switch')
+  },
+  // analyzer 라벨 어휘·시간 구간 프리셋 주입.
+  get presets() {
+    return getAppUrl('/presets')
   },
 }
 

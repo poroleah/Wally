@@ -42,14 +42,14 @@
 | # | 기능 | 상태 | mewly 근거 | Wally 현황 |
 |---|---|---|---|---|
 | 1 | HTTPS 단일 게이트웨이(8000) — 모든 REST·SSE·스트림이 한 포트 경유 | 없음 | `src/endpoints.js:1-12`, `config/network.json:2-3` | http + 8000/8080/8888/8889 분산 (`src/endpoints.js:53-63`) |
-| 2 | SSE 라이브 상태 `/state` (신규 필드: `streaming_active`, `monitor_sources`, `label_groups`, `presets`, `active_preset`, `profile_pending`, `ptz_presets`, `ptz_preset_positions`, `ptz_patrol`) | 부분 | `src/composables/useSSE.js:8-70`, `src/endpoints.js:105-107` | 8080 `/events`로 구버전 필드만 수신 (`src/composables/useRealtimeEvents.js:40-82`) |
+| 2 | SSE 라이브 상태 `/state` (신규 필드: `streaming_active`, `monitor_sources`, `label_groups`, `presets`, `active_preset`, `profile_pending`, `ptz_presets`, `ptz_preset_positions`, `ptz_patrol`) | 완료 (수신 계층) | `src/composables/useSSE.js:8-70`, `src/endpoints.js:105-107` | 게이트웨이 `/state` 구독으로 이전, 신규 필드는 Object.assign으로 전부 수신·리셋 시 잔류 제거, `snapshotSeq` 카운터 추가 (`src/composables/useRealtimeEvents.js`). 필드별 소비 UI는 각 기능 이식 시 |
 | 3 | 이벤트 이력 조회 `GET /events` (FR-031) | 완료 (집계 용도) | `src/composables/useEventSummary.js:21` | `src/composables/useEventSummary.js` `fetchDaySummary` — mewly와 동일하게 목록이 아닌 히스토그램 집계·드릴다운에 사용. 클립 목록 자체는 mewly 기록 탭과 같이 `/clips` 유지 |
-| 4 | 집계 조회 `GET /summary` (시간 버킷별 라벨 발생 수·분모) | 없음 | `src/composables/useInferenceSummary.js:26` | — |
+| 4 | 집계 조회 `GET /summary` (시간 버킷별 라벨 발생 수·분모) | 부분 (데이터 계층 완료) | `src/composables/useInferenceSummary.js:26` | `src/composables/useInferenceSummary.js` 이식 완료 — fetchDayStates/fetchBaseline/judgeRhythm + 재시도. 분석 화면(UI)은 2단계 |
 | 5 | 클라이언트 저장소 `GET·PUT /client/storage/{key}` (반려견 프로필 서버 저장) | 완료 | `src/composables/useProfile.js:67,74` | 서버 원본 + 호스트별 localStorage 캐시 (`src/composables/useProfile.js`) — 로그인 시 GET, 변경 시 디바운스 PUT(에코 차단), 실패 시 캐시 표시 유지 |
 | 6 | 클립 삭제 `DELETE /clips` (`{names:[...]}` body) | 보류 | `src/composables/useClips.js:14-19` | 사용자 결정으로 보류 — [DEFERRED_SETUP.md](DEFERRED_SETUP.md) §5 |
 | 7 | 분석 수동 시작/정지 `POST /analysis/start·stop` (409/502 detail 분기) | 부분 | `src/composables/useAnalysis.js:27,41` | 엔드포인트 정의 완료(`src/endpoints.js` `analysisStart/Stop`), `useAutoLifecycle`이 자동 호출. 수동 UI·409/502 detail 분기는 없음 |
 | 8 | 스트리밍 수동 시작/정지 `POST /streaming/start·stop` | 부분 | `src/components/CameraPanel.vue:126,142` | 엔드포인트 정의 완료(`src/endpoints.js` `streamingStart/Stop`), 자동 라이프사이클이 호출. 수동 토글 UI는 없음 |
-| 9 | 라벨 어휘·프리셋 주입 `POST /presets` (SSE `label_groups` 비면 자동 주입) | 없음 | `src/composables/analysisConfig.js:118`, `src/components/AnalysisPanel.vue:46` | — |
+| 9 | 라벨 어휘·프리셋 주입 `POST /presets` (SSE `label_groups` 비면 자동 주입) | 완료 (자동 주입) | `src/composables/analysisConfig.js:118`, `src/components/AnalysisPanel.vue:46` | `src/composables/analysisConfig.js` `ensureLabelGroupsInjected` — main.js에서 기동, 세션당 1회. 수동 적용 UI(AnalysisPanel)는 2단계 |
 | 10 | VLM 모델 전환 `POST /vlm/switch` 실제 호출 | 부분 | `src/components/HomeTab.vue:111` | 정의만 있고 호출부 없음 (`src/endpoints.js:133-135`) |
 | 11 | 스트림 토큰 인증 — HLS 전 요청 Bearer(`xhrSetup`) + WHEP Authorization | 완료 | `src/components/HomeTab.vue:403-405, 493-500` | HLS `xhrSetup` Bearer + 네이티브 폴백 `?token=` (`src/views/HomePage/CamView.vue` `attachHls`), WHEP Authorization (`src/composables/useWebRtcStream.js`) |
 | 12 | 세션 자동 갱신 타이머 + 만료 경고 카운트다운 + 연장(`extendSession`) | 완료 | `src/composables/useAuth.js:282-318, 396-399` | persistent 자동 갱신 + ephemeral 경고/만료 타이머·1초 시계·`extendSession` (`src/composables/useAuth.js` `scheduleSessionTimers`/`startSessionClock`) |
@@ -78,9 +78,9 @@
 | 9 | 전역 토스트 시스템 (자동 숨김, kind별) | 부분 | `src/composables/useToast.js`, `config/ui.json:4` | 커스텀 이벤트 1곳뿐 (`src/main.js:135` `wally:show-toast`) |
 | 10 | 알림 인박스 (수신 목록 저장·읽음 처리) | 부분 | `src/composables/useNotifications.js`, `src/components/NotificationsOverlay.vue` | AlarmPage는 있으나 mewly식 인박스 저장 구조와 다름 (`src/utils/notifications.js`) |
 | 11 | 프로필 사진 크롭·리사이즈 (512px JPEG, 크롭 뷰) | 없음 | `src/components/ProfileOverlay.vue`, `config/ui.json:5-9` | 프로필 이미지 경로만 저장 (`src/composables/useProfile.js:23`) |
-| 12 | 프롬프트 보호 장치 — 검증 원형 이탈 경고 + 2단계 저장 확인 + 베이스라인 단절 기록 | 없음 | `src/components/PromptSheet.vue:42-77`, `src/composables/analysisConfig.js:49-87` | 단순 저장 (`src/composables/usePromptSettings.js:57-92`) |
-| 13 | 설정 외부화 — `config/*.json` (network·analysis·ptz·ui) | 부분 | `config/` 4개 파일 | `config/network.json` 이식 완료 (게이트웨이 scheme/port·스트림 버퍼/재시도·SSE 재접속/프로브·세션 리드타임). `config/analysis.json`은 `eventsDayLimit`만 우선 이식(나머지 키는 /summary 기능과 함께). ptz·ui는 미이식 |
-| 14 | 공용 `persistentRef` localStorage 헬퍼 | 없음 | `src/composables/storage.js` | 컴포저블마다 수동 JSON 처리 |
+| 12 | 프롬프트 보호 장치 — 검증 원형 이탈 경고 + 2단계 저장 확인 + 베이스라인 단절 기록 | 부분 (단절 기록만) | `src/components/PromptSheet.vue:42-77`, `src/composables/analysisConfig.js:49-87` | 저장 성공 시 `markPromptApplied`로 기준선 단절 기록 (`src/composables/usePromptSettings.js`). 경고·2단계 확인 UI는 2단계 |
+| 13 | 설정 외부화 — `config/*.json` (network·analysis·ptz·ui) | 부분 | `config/` 4개 파일 | `config/network.json`(+`summaryRetry`)·`config/analysis.json`(stateLabels·labelGroups·verifiedPrompt·dayRange·baseline·eventsDayLimit — UI 전용 clipsDayLimit·clipPageSize 제외) 이식 완료. ptz·ui는 미이식 |
+| 14 | 공용 `persistentRef` localStorage 헬퍼 | 완료 | `src/composables/storage.js` | `src/composables/storage.js` 이식 (`wally.` 접두어) |
 
 **제외 항목**: 조명·온도·마이크 제어는 mewly에서도 mock(localStorage, `useDevices.js:2-5`)이라 백엔드 기능이 아니며 Wally에 동등 드로어가 이미 있음. 테마(다크 토글), HLS/WebRTC 전환 UI, 일정 관리, 알림 설정 토글, 서버 주소 입력, 비밀번호 변경 화면은 Wally에 동등 기능 존재.
 

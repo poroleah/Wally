@@ -82,8 +82,14 @@ function createDefaultRealtimeState() {
     vlm_current_model: '',
     // null = 아직 스냅숏을 받지 못함 (소비처는 true/false만 신뢰).
     streaming_active: null,
+    // analyzer 상태 (프리셋 주입 판단에 사용 — analysisConfig 참조).
+    monitor_sources: null,
+    label_groups: null,
   }
 }
+
+// 수신한 스냅숏 수 — 「스냅숏을 받은 적 있는가」 판정용 (mewly snapshotSeq).
+const snapshotSeq = ref(0)
 
 function resetRealtimeState() {
   // SSE 스냅숏은 기본값 목록 밖의 필드도 실어 오므로, 남은 키를 지워야
@@ -94,6 +100,7 @@ function resetRealtimeState() {
   Object.assign(realtimeState, createDefaultRealtimeState())
   lastPayload.value = null
   lastClipCount = null
+  snapshotSeq.value = 0
 }
 
 function firstValue(...values) {
@@ -427,6 +434,7 @@ function scheduleReconnect(token) {
 function handleRealtimePayload(payload = {}) {
   lastPayload.value = payload
   Object.assign(realtimeState, payload)
+  snapshotSeq.value += 1
 
   trackDetectedKeywordEvent(payload)
 
@@ -507,6 +515,7 @@ export function useRealtimeEvents() {
     eventVersion: readonly(eventVersion),
     state: readonly(realtimeState),
     lastPayload: readonly(lastPayload),
+    snapshotSeq: readonly(snapshotSeq),
     detectedKeywordEvent: readonly(detectedKeywordEvent),
     hasError: computed(() => !!error.value),
     loadEvents: refreshEventList,

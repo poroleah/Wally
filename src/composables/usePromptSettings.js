@@ -3,6 +3,8 @@ import { SERVER_REQUEST_TIMEOUT_MS } from '@/constants/network'
 import { APP_ENDPOINTS } from '@/endpoints'
 import { authFetch, failureMessage } from './useFetch'
 import { useRealtimeEvents } from './useRealtimeEvents'
+import { markPromptApplied } from './analysisConfig'
+import { toIsoDate } from '@/utils/date'
 
 const DEFAULT_PROMPT = 'What is the dog doing? Answer in one sentence.'
 
@@ -112,6 +114,9 @@ async function savePromptSettings({ prompt: promptText, triggers: triggerText })
     prompt.value = nextPrompt
     triggers.value = nextTriggers
     syncedFromRealtime = true
+    // 프롬프트 변경은 라벨 분포를 바꾸므로 기준선 단절을 기록한다
+    // (동일 문안 재저장은 analysisConfig가 서명 비교로 걸러낸다).
+    markPromptApplied(nextPrompt, toIsoDate())
     success.value = true
     status.value = 'AI 감지 설정이 저장되었습니다.'
     return true
