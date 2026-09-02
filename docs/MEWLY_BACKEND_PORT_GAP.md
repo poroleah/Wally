@@ -56,7 +56,7 @@
 | 13 | 세션 교체 감지(FR-047) — 401 `token revoked` 분기 + SSE 끊김 시 401 프로브 + 로그아웃 사유 알림 | 완료 | `src/composables/useFetch.js:21-41`, `src/composables/useSSE.js:149-158`, `src/composables/useAuth.js:11-14, 204-209` | `token revoked` 분기 + `probeSession` + `SESSION_REPLACED_NOTICE` (`src/composables/useFetch.js`, `src/composables/useRealtimeEvents.js`) |
 | 14 | 최초 로그인 비밀번호 강제 변경 `must_change_password` (FR-006) | 완료 | `src/composables/useAuth.js:15-18, 385` | 플래그 영속화(`src/composables/useAuth.js`) + `src/views/LoginPage/ForcePasswordChange.vue` |
 | 15 | 로그인 응답 후에만 호스트 영속화 (`applyMewlyHost` → `persistMewlyHost`) | 없음 | `src/endpoints.js:130-145`, `src/composables/useAuth.js:374` | 로그인과 무관하게 즉시 저장 (`src/composables/useServerAuth.js:21-33`) |
-| 16 | PTZ 확장 — 다중 프리셋 slot 저장/이동, 절대 이동(FR-016), 자동 순찰(FR-052), 3단 속도 | 없음 | `src/composables/usePtz.js:39-61` | move/stop/save/goto(홈 1개), 고정 속도 0.5 (`src/composables/usePtz.js:5, 36-65`) |
+| 16 | PTZ 확장 — 다중 프리셋 slot 저장/이동, 절대 이동(FR-016), 자동 순찰(FR-052), 3단 속도 | 완료 (데이터 계층) | `src/composables/usePtz.js:39-61` | `src/composables/usePtz.js`에 savePreset/gotoPreset(slot)·moveAbsolute·setPatrol·3단 속도(`config/ptz.json` speedFactors, 기본 0.5 유지) 추가. 호출 UI는 2단계 |
 | 17 | logout 시 access token 동반 전송 — refresh token 없는 ephemeral 세션도 서버 측 epoch bump | 완료 | `src/composables/useAuth.js:211-228` | `revokeSessionTokens`가 Authorization + `refresh_token` body 동반 (`src/composables/useAuth.js`) |
 
 > mewly 근거의 경로는 `d:\Projects\mewly\` 기준, Wally 현황의 경로는 이 저장소 기준.
@@ -72,14 +72,14 @@
 | 3 | VLM 관찰 문장 로그 (`infer_raw` 누적 20건) | 없음 | `src/composables/useInferLog.js:25-37` | `infer_raw` 수신만 하고 미표시 |
 | 4 | VLM 상태 표시(색 점·라벨) + 모델 전환 UI | 없음 | `src/composables/useVlmStatus.js:31-40`, `src/components/HomeTab.vue:111` | `vlm_state` 수신만 |
 | 5 | 하드웨어 리소스 화면 (CPU·RAM·디스크·GPU·온도) | 없음 | `src/components/ResourcesSheet.vue` | 필드는 수신하나 표시 화면 없음 (`cpu_percent` 등 사용처가 `useRealtimeEvents.js`와 타입 정의뿐) |
-| 6 | 스트림 통계 (WebRTC `getStats()`·HLS 대역폭) | 없음 | `src/composables/useStreamStats.js` | `getStats(` 호출 없음 |
+| 6 | 스트림 통계 (WebRTC `getStats()`·HLS 대역폭) | 부분 (컴포저블만) | `src/composables/useStreamStats.js` | `src/composables/useStreamStats.js` 이식 완료 (`network.json` `stream.statsIntervalMs`). 표시 UI·재생 화면 연결은 2단계 |
 | 7 | 세션 만료 모달 (카운트다운·연장 버튼) | 완료 | `src/components/SessionExpiryModal.vue` | `src/components/App/SessionExpiryModal.vue` + 상단 세션 칩 (`src/App.vue`) |
 | 8 | ko/en 다국어 (i18n, `t()`/`hasMessage()`) | 없음 | `src/i18n/messages.js`, `src/composables/useLocale.js` | 한국어 하드코딩 |
 | 9 | 전역 토스트 시스템 (자동 숨김, kind별) | 부분 | `src/composables/useToast.js`, `config/ui.json:4` | 커스텀 이벤트 1곳뿐 (`src/main.js:135` `wally:show-toast`) |
 | 10 | 알림 인박스 (수신 목록 저장·읽음 처리) | 부분 | `src/composables/useNotifications.js`, `src/components/NotificationsOverlay.vue` | AlarmPage는 있으나 mewly식 인박스 저장 구조와 다름 (`src/utils/notifications.js`) |
 | 11 | 프로필 사진 크롭·리사이즈 (512px JPEG, 크롭 뷰) | 없음 | `src/components/ProfileOverlay.vue`, `config/ui.json:5-9` | 프로필 이미지 경로만 저장 (`src/composables/useProfile.js:23`) |
 | 12 | 프롬프트 보호 장치 — 검증 원형 이탈 경고 + 2단계 저장 확인 + 베이스라인 단절 기록 | 부분 (단절 기록만) | `src/components/PromptSheet.vue:42-77`, `src/composables/analysisConfig.js:49-87` | 저장 성공 시 `markPromptApplied`로 기준선 단절 기록 (`src/composables/usePromptSettings.js`). 경고·2단계 확인 UI는 2단계 |
-| 13 | 설정 외부화 — `config/*.json` (network·analysis·ptz·ui) | 부분 | `config/` 4개 파일 | `config/network.json`(+`summaryRetry`)·`config/analysis.json`(stateLabels·labelGroups·verifiedPrompt·dayRange·baseline·eventsDayLimit — UI 전용 clipsDayLimit·clipPageSize 제외) 이식 완료. ptz·ui는 미이식 |
+| 13 | 설정 외부화 — `config/*.json` (network·analysis·ptz·ui) | 부분 | `config/` 4개 파일 | `config/network.json`(+`summaryRetry`·`statsIntervalMs`)·`config/analysis.json`(UI 전용 clipsDayLimit·clipPageSize 제외)·`config/ptz.json` 이식 완료. ui.json은 UI 단계에서 |
 | 14 | 공용 `persistentRef` localStorage 헬퍼 | 완료 | `src/composables/storage.js` | `src/composables/storage.js` 이식 (`wally.` 접두어) |
 
 **제외 항목**: 조명·온도·마이크 제어는 mewly에서도 mock(localStorage, `useDevices.js:2-5`)이라 백엔드 기능이 아니며 Wally에 동등 드로어가 이미 있음. 테마(다크 토글), HLS/WebRTC 전환 UI, 일정 관리, 알림 설정 토글, 서버 주소 입력, 비밀번호 변경 화면은 Wally에 동등 기능 존재.

@@ -7,6 +7,7 @@
     "connectTimeoutMs": 15000,
     "stallTimeoutMs": 8000,
     "retryBackoffMs": 3000,
+    "statsIntervalMs": 1000,
     "maxAutoRetries": 3,
     "longRecoveryDelaysMs": [5000, 10000, 15000, 30000],
     "hlsBuffer": {

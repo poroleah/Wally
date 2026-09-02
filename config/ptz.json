@@ -1,0 +1,19 @@
+{
+  "speedFactors": [
+    0.25,
+    0.5,
+    0.9
+  ],
+  "patrolIntervalsSec": [
+    0,
+    10,
+    30,
+    60,
+    300,
+    600
+  ],
+  "gaugeHold": {
+    "epsilon": 0.03,
+    "maxMs": 8000
+  }
+}
