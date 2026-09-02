@@ -27,6 +27,12 @@
 
 (a)안 채택: 죽은 프록시 규칙 삭제, 절대 URL 유지 (mewly와 동일, 백엔드 CORS 허용 전제). `vite.config.js`는 이제 정적 설정만 남음.
 
-## 5. 네이티브 HLS 폴백 한계 (메모)
+## 5. 클립 삭제 이식 — 보류 (2026-09-02, 사용자 결정)
+
+`DELETE /clips` (`{names:[...]}` body) + 선택 모드 UI(전체선택·삭제 바) 이식은 보류.
+- mewly 참조: `mewly/src/composables/useClips.js:14-19`, `AnalysisTab.vue`의 선택 모드
+- 재개 시 참고: LogPage 히스토그램 드릴다운(`EventSummary.vue`)과 결합해 "필터된 목록만 선택 대상"으로 붙이면 자연스러움. 격차 문서 §2-6 참조.
+
+## 6. 네이티브 HLS 폴백 한계 (메모)
 
 hls.js 미지원 브라우저의 네이티브 HLS 경로는 헤더를 못 실어 `?token=` 쿼리로 대체했는데(`CamView.vue`의 `attachHls()` 폴백), **세그먼트 요청에는 토큰이 상속되지 않아** 게이트웨이 릴레이 뒤에서는 제한적임. mewly도 동일한 한계를 안고 hls.js를 정식 경로로 둠 (`mewly/src/components/HomeTab.vue:416-420`). 문제가 되면 게이트웨이 측 쿼리 토큰 지원 범위를 백엔드와 확인할 것.

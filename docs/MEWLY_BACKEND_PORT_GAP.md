@@ -46,7 +46,7 @@
 | 3 | 이벤트 이력 조회 `GET /events` (FR-031) | 완료 (집계 용도) | `src/composables/useEventSummary.js:21` | `src/composables/useEventSummary.js` `fetchDaySummary` — mewly와 동일하게 목록이 아닌 히스토그램 집계·드릴다운에 사용. 클립 목록 자체는 mewly 기록 탭과 같이 `/clips` 유지 |
 | 4 | 집계 조회 `GET /summary` (시간 버킷별 라벨 발생 수·분모) | 없음 | `src/composables/useInferenceSummary.js:26` | — |
 | 5 | 클라이언트 저장소 `GET·PUT /client/storage/{key}` (반려견 프로필 서버 저장) | 없음 | `src/composables/useProfile.js:67,74` | 프로필이 localStorage 전용 (`src/composables/useProfile.js:28-37`) |
-| 6 | 클립 삭제 `DELETE /clips` (`{names:[...]}` body) | 없음 | `src/composables/useClips.js:14-19` | — |
+| 6 | 클립 삭제 `DELETE /clips` (`{names:[...]}` body) | 보류 | `src/composables/useClips.js:14-19` | 사용자 결정으로 보류 — [DEFERRED_SETUP.md](DEFERRED_SETUP.md) §5 |
 | 7 | 분석 수동 시작/정지 `POST /analysis/start·stop` (409/502 detail 분기) | 부분 | `src/composables/useAnalysis.js:27,41` | 엔드포인트 정의 완료(`src/endpoints.js` `analysisStart/Stop`), `useAutoLifecycle`이 자동 호출. 수동 UI·409/502 detail 분기는 없음 |
 | 8 | 스트리밍 수동 시작/정지 `POST /streaming/start·stop` | 부분 | `src/components/CameraPanel.vue:126,142` | 엔드포인트 정의 완료(`src/endpoints.js` `streamingStart/Stop`), 자동 라이프사이클이 호출. 수동 토글 UI는 없음 |
 | 9 | 라벨 어휘·프리셋 주입 `POST /presets` (SSE `label_groups` 비면 자동 주입) | 없음 | `src/composables/analysisConfig.js:118`, `src/components/AnalysisPanel.vue:46` | — |
