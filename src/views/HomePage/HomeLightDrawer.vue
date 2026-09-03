@@ -75,8 +75,8 @@ function setBrightness(value) {
   position: relative;
   z-index: 90;
   width: 100%;
-  flex: 1 1 clamp(27.2rem, 58dvh, 31.8rem);
-  min-height: clamp(27.2rem, 58dvh, 31.8rem);
+  flex: 1 1 clamp(27.2rem, 62dvh, 34.8rem);
+  min-height: clamp(27.2rem, 62dvh, 34.8rem);
   margin-top: 2.4rem;
   border-radius: 2rem 2rem 0 0;
   background-color: var(--home-panel-bg);
@@ -119,7 +119,7 @@ function setBrightness(value) {
 
 .lampIcon {
   position: absolute;
-  top: 5.8rem;
+  top: 6.6rem;
   right: 3.2rem;
   width: 8.5rem;
   height: 10.96rem;
@@ -130,12 +130,12 @@ function setBrightness(value) {
 
 .contentFrame {
   position: absolute;
-  top: 6.5rem;
+  top: 7.3rem;
   left: 3.2rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 4.2rem;
+  gap: 5.4rem;
 }
 
 .titleFrame {
@@ -260,7 +260,7 @@ function setBrightness(value) {
 .lightControlFrame {
   position: absolute;
   left: 50%;
-  bottom: 4.4rem;
+  bottom: 5.2rem;
   width: min(calc(100% - 3.2rem), 33.3rem);
   transform: translateX(-50%);
   display: grid;

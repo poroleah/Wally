@@ -101,8 +101,8 @@ function toggleMode() {
   position: relative;
   z-index: 90;
   width: 100%;
-  flex: 1 1 clamp(27.2rem, 58dvh, 31.8rem);
-  min-height: clamp(27.2rem, 58dvh, 31.8rem);
+  flex: 1 1 clamp(27.2rem, 62dvh, 34.8rem);
+  min-height: clamp(27.2rem, 62dvh, 34.8rem);
   margin-top: 2.4rem;
   border-radius: 2rem 2rem 0 0;
   background-color: var(--home-panel-bg);
@@ -164,7 +164,7 @@ function toggleMode() {
 
 .temperature {
   position: absolute;
-  top: 5.8rem;
+  top: 6.6rem;
   left: 50%;
   width: min(32rem, calc(100% - 4rem));
   max-width: calc(100% - 4rem);
@@ -229,7 +229,7 @@ function toggleMode() {
 
 .titleHope {
   width: 6.2rem;
-  top: 14.8rem;
+  top: 16.2rem;
   left: 50%;
   height: 2.1rem;
   transform: translateX(-50%);
@@ -237,7 +237,7 @@ function toggleMode() {
 
 .temperatureTarget {
   position: absolute;
-  top: 17.5rem;
+  top: 18.9rem;
   left: 50%;
   width: 6.4rem;
   height: 3.1rem;
@@ -272,7 +272,7 @@ function toggleMode() {
 
 .adjustButton {
   position: absolute;
-  top: 18.2rem;
+  top: 19.6rem;
   width: 2.4rem;
   height: 2.4rem;
   padding: 0;
@@ -304,7 +304,7 @@ function toggleMode() {
 
 .titleCurrent {
   width: 5.4rem;
-  top: 22.8rem;
+  top: 24.8rem;
   left: 50%;
   height: 1.7rem;
   transform: translateX(-50%);
@@ -313,7 +313,7 @@ function toggleMode() {
 
 .temperatureCurrent {
   position: absolute;
-  top: 24.988rem;
+  top: 27.1rem;
   left: 50%;
   height: 2.51rem;
   transform: translateX(-50%);
