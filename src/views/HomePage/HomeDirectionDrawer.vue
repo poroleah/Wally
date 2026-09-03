@@ -257,6 +257,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { usePtz } from '@/composables/usePtz'
+import { usePresetMeta } from '@/composables/usePresetMeta'
 import { useRealtimeEvents } from '@/composables/useRealtimeEvents'
 import ptzCfg from '../../../config/ptz.json'
 
@@ -278,51 +279,12 @@ const zoomFill = computed(() => {
 })
 
 // ── 즐겨찾기 (PTZ 프리셋 slot 1–4) ──
-// 좌표는 백엔드(SSE ptz_preset_positions)가 진실, 표시 이름은 이 기기에만
-// 저장한다(백엔드에 이름 필드 없음).
+// 좌표는 백엔드(SSE ptz_preset_positions)가 진실. 표시 메타(이름·이모지·
+// 숨김)는 게이트웨이 클라이언트 저장소로 공유된다(usePresetMeta) —
+// 웹·앱 어느 기기에서 바꿔도 같은 목록이 보인다. 백엔드에 프리셋 삭제
+// API가 없어 관리 화면의 삭제는 숨김 목록으로 처리한다(다시 추가하면 해제).
 const PRESET_SLOTS = [1, 2, 3, 4]
-const NAMES_STORAGE_KEY = 'wally:ptzPresetNames'
-const presetNames = ref(loadPresetNames())
-
-function loadPresetNames() {
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(NAMES_STORAGE_KEY) || '{}')
-    return parsed && typeof parsed === 'object' ? parsed : {}
-  } catch {
-    return {}
-  }
-}
-
-function persistPresetNames() {
-  try {
-    window.localStorage.setItem(NAMES_STORAGE_KEY, JSON.stringify(presetNames.value))
-  } catch {
-    // 저장 실패 시에도 세션 내 표시는 유지된다.
-  }
-}
-
-// 저장 여부는 백엔드(SSE ptz_preset_positions)가 진실이고, SSE 반영 전의
-// 방금 저장분은 로컬 이름으로 보완한다. 백엔드에 프리셋 삭제 API가 없어
-// 관리 화면의 삭제는 로컬 숨김 목록으로 처리한다(다시 추가하면 해제).
-const HIDDEN_STORAGE_KEY = 'wally:ptzPresetHidden'
-const hiddenSlots = ref(loadHiddenSlots())
-
-function loadHiddenSlots() {
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(HIDDEN_STORAGE_KEY) || '[]')
-    return Array.isArray(parsed) ? parsed.filter((slot) => PRESET_SLOTS.includes(slot)) : []
-  } catch {
-    return []
-  }
-}
-
-function persistHiddenSlots() {
-  try {
-    window.localStorage.setItem(HIDDEN_STORAGE_KEY, JSON.stringify(hiddenSlots.value))
-  } catch {
-    // 저장 실패 시에도 세션 내 표시는 유지된다.
-  }
-}
+const { presetNames, presetEmojis, hiddenSlots } = usePresetMeta()
 
 function slotPosition(slot) {
   const positions = state.ptz_preset_positions
@@ -332,27 +294,6 @@ function slotPosition(slot) {
 function isSaved(slot) {
   if (hiddenSlots.value.includes(slot)) return false
   return !!(slotPosition(slot) || presetNames.value[slot])
-}
-
-// 슬롯별 이모지 — 이름과 같은 로컬 저장 방식, 기본 🏠
-const EMOJIS_STORAGE_KEY = 'wally:ptzPresetEmojis'
-const presetEmojis = ref(loadPresetEmojis())
-
-function loadPresetEmojis() {
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(EMOJIS_STORAGE_KEY) || '{}')
-    return parsed && typeof parsed === 'object' ? parsed : {}
-  } catch {
-    return {}
-  }
-}
-
-function persistPresetEmojis() {
-  try {
-    window.localStorage.setItem(EMOJIS_STORAGE_KEY, JSON.stringify(presetEmojis.value))
-  } catch {
-    // 저장 실패 시에도 세션 내 표시는 유지된다.
-  }
 }
 
 function emojiOf(slot) {
@@ -378,12 +319,19 @@ const PATROL_CHOICES = ptzCfg.patrolIntervalsSec.filter((sec) => sec > 0)
 const patrolPending = ref(null) // null | { enabled, intervalSec }
 let patrolPendingTimer = null
 
+// SSE가 ptz_patrol 필드를 실제로 실어 준 적이 있는가 — 없으면(구버전 백엔드)
+// 로컬 상태를 진실로 삼는다. 필드가 오는 백엔드에서는 서버가 진실.
+const hasServerPatrol = computed(() => state.ptz_patrol != null)
 const serverPatrolEnabled = computed(() => !!state.ptz_patrol?.enabled)
-const patrolEnabled = computed(() =>
-  patrolPending.value ? patrolPending.value.enabled : serverPatrolEnabled.value,
-)
+// 순회 이동 중 스냅숏이 enabled=false로 잠깐 내려오는 순단을 걸러낸 "실제 진행" 값
+const serverPatrolRunning = ref(serverPatrolEnabled.value)
+const patrolEnabled = computed(() => {
+  if (patrolPending.value) return patrolPending.value.enabled
+  if (hasServerPatrol.value) return serverPatrolRunning.value
+  return patrolArmed.value && !patrolPausedByUser.value
+})
 // 꺼짐 상태에서 미리 골라 둔 간격 — 다음 켜기에 사용 (서버에는 켤 때 전달)
-const offIntervalChoice = ref(null)
+const offIntervalChoice = ref(loadPatrolUi().intervalSec ?? null)
 const patrolIntervalSec = computed(() =>
   patrolPending.value?.intervalSec
   ?? (serverPatrolEnabled.value ? state.ptz_patrol?.interval_s : offIntervalChoice.value ?? state.ptz_patrol?.interval_s)
@@ -396,9 +344,16 @@ const patrolIntervalLabel = computed(() =>
 watch(() => state.ptz_patrol, (patrol) => {
   if (!patrolPending.value) return
   const applied = patrolPending.value.enabled
-    ? patrol?.enabled && patrol?.interval_s === patrolPending.value.intervalSec
-    : !patrol?.enabled
-  if (applied) clearPatrolPending()
+    ? patrol?.enabled && Number(patrol?.interval_s) === Number(patrolPending.value.intervalSec)
+    : patrol != null && !patrol.enabled
+  if (applied) {
+    // 사용자가 끈(일시정지 포함) 것이 확인되면 순단 필터를 기다리지 않고 즉시 반영
+    if (!patrolPending.value.enabled) {
+      clearTimeout(patrolOffTimer)
+      serverPatrolRunning.value = false
+    }
+    clearPatrolPending()
+  }
 }, { deep: true })
 
 // 순찰을 끄면 서버가 복귀 슬롯을 내려준다 — 하이라이팅 승계 (mewly 방침)
@@ -423,18 +378,52 @@ async function requestPatrol(enabled, intervalSec) {
 
 // 토글은 "둘러보기 사용" 여부(armed), 배너의 ⏸/▶는 그 안에서의 일시정지.
 // 일시정지는 서버 순찰만 멈추고 배너·토글은 켠 채 유지한다.
-const patrolArmed = ref(serverPatrolEnabled.value)
-const patrolPausedByUser = ref(false)
+// 드로어를 닫았다 열어도 유지되도록 로컬에 저장한다(SSE ptz_patrol이 오면 서버가 우선).
+const PATROL_UI_STORAGE_KEY = 'wally:ptzPatrolUi'
 
-// 서버 상태 동기화 — 다른 곳에서 켜지면 armed 승계, 사용자가 일시정지한
-// 게 아닌데 꺼지면 armed도 내린다.
+function loadPatrolUi() {
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(PATROL_UI_STORAGE_KEY) || '{}')
+    return parsed && typeof parsed === 'object' ? parsed : {}
+  } catch {
+    return {}
+  }
+}
+
+const patrolArmed = ref(hasServerPatrol.value ? serverPatrolEnabled.value : !!loadPatrolUi().armed)
+const patrolPausedByUser = ref(hasServerPatrol.value ? false : !!loadPatrolUi().paused)
+
+watch([patrolArmed, patrolPausedByUser, offIntervalChoice], () => {
+  try {
+    window.localStorage.setItem(PATROL_UI_STORAGE_KEY, JSON.stringify({
+      armed: patrolArmed.value,
+      paused: patrolPausedByUser.value,
+      intervalSec: offIntervalChoice.value,
+    }))
+  } catch {
+    // 저장 실패 시에도 세션 내 표시는 유지된다.
+  }
+})
+
+// 서버 상태 동기화 — 켜짐은 즉시 반영·armed 승계, 꺼짐은 순회 이동 중의
+// 순단(스냅숏이 잠깐 enabled=false)이 흔해서 4초 이상 유지될 때만 실제
+// 꺼짐으로 본다. SSE에 ptz_patrol이 없는 백엔드에서는 armed를 건드리지 않는다.
+let patrolOffTimer = null
+
 watch(serverPatrolEnabled, (on) => {
+  clearTimeout(patrolOffTimer)
   if (on) {
+    serverPatrolRunning.value = true
     patrolArmed.value = true
     patrolPausedByUser.value = false
-  } else if (!patrolPausedByUser.value && !patrolPending.value) {
-    patrolArmed.value = false
+    return
   }
+  patrolOffTimer = setTimeout(() => {
+    serverPatrolRunning.value = false
+    if (hasServerPatrol.value && !patrolPausedByUser.value && !patrolPending.value) {
+      patrolArmed.value = false
+    }
+  }, 4000)
 })
 
 function togglePatrol() {
@@ -449,10 +438,14 @@ function togglePatrol() {
   }
 }
 
-function togglePatrolPause() {
+async function togglePatrolPause() {
   if (patrolEnabled.value) {
     patrolPausedByUser.value = true
-    requestPatrol(false, patrolIntervalSec.value)
+    await requestPatrol(false, patrolIntervalSec.value)
+    // 서버는 순찰 종료 시 시작 위치로 복귀 이동을 건다 — 일시정지는 "그 자리에
+    // 멈춤"이므로 STOP으로 복귀 이동을 즉시 끊는다(지연 시작 대비 한 번 더).
+    stopMove()
+    setTimeout(stopMove, 500)
   } else {
     patrolPausedByUser.value = false
     requestPatrol(true, patrolIntervalSec.value)
@@ -561,15 +554,12 @@ function saveNewPreset() {
   }
   stop()
   // 좌표 저장은 서버가 처리하고 결과는 SSE ptz_preset_positions로 내려온다.
-  // 이름·이모지는 로컬 즉시 반영이라 카드가 바로 생긴다.
+  // 이름·이모지는 즉시 반영되고 usePresetMeta가 캐시·서버 저장을 처리한다.
   savePreset(slot)
   presetNames.value = { ...presetNames.value, [slot]: addName.value.trim() || `위치 ${slot}` }
-  persistPresetNames()
   presetEmojis.value = { ...presetEmojis.value, [slot]: addEmoji.value }
-  persistPresetEmojis()
   if (hiddenSlots.value.includes(slot)) {
     hiddenSlots.value = hiddenSlots.value.filter((item) => item !== slot)
-    persistHiddenSlots()
   }
   selectedPreset.value = slot
   if (addReturn.value === 'manage' && !manageDraft.value.includes(slot)) {
@@ -613,11 +603,8 @@ function commitManage() {
     }
     presetNames.value = nextNames
     presetEmojis.value = nextEmojis
-    persistPresetNames()
-    persistPresetEmojis()
     // 백엔드에 프리셋 삭제 API가 없다 — 서버 좌표는 남으므로 숨김 목록으로 가린다.
     hiddenSlots.value = [...new Set([...hiddenSlots.value, ...removed])]
-    persistHiddenSlots()
     if (removed.includes(selectedPreset.value)) selectedPreset.value = null
   }
   view.value = 'main'
@@ -655,6 +642,7 @@ function stop() {
 onBeforeUnmount(() => {
   stop()
   clearTimeout(patrolPendingTimer)
+  clearTimeout(patrolOffTimer)
 })
 </script>
 

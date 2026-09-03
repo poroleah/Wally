@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 백엔드(게이트웨이 8000)는 사설 PKI의 HTTPS다(mewly와 동일 구조:
+     제조사 Root CA → 기기별 Device CA → 서버 인증서). 신뢰 경로는 두 가지다.
+     - 동봉(@raw/babycat_ca): 제조사 Root CA 인증서. Root CA를 재생성하면
+       이 파일도 교체한다.
+     - 사용자 설치(user): 자체 CA로 기동 중인 개발 보드는 그 보드의 CA 인증서를
+       안드로이드 설정(CA 인증서 설치)으로 등록하면 접속된다.
+     Wally 앱 셸은 androidScheme http(capacitor.config.json)라 셸 origin이
+     http://localhost다 — cleartext는 허용을 유지한다(mewly는 https 셸이라 금지). -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+            <certificates src="@raw/babycat_ca" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
