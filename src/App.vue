@@ -175,6 +175,14 @@ html {
   font-size: clamp(8px, 2.778vw, 16px); /* 1rem = 10px @ 360px, scales with viewport */
 }
 
+/* 폰 폭(≤480px)에서만 뷰포트 비례로 키우고, 그보다 넓은 창(웹 브라우저, DevTools 에뮬레이션 포함)은
+   확대 없이 시안 픽셀 1:1(1rem = 10px)로 렌더링한다 — mewly와 동일한 정적 스케일. */
+@media (min-width: 481px) {
+  html {
+    font-size: 10px;
+  }
+}
+
 :root {
   --fluid-text-sm: clamp(1.2rem, 3.1vw, 2rem);
   --fluid-text-md: clamp(1.4rem, 3.5vw, 2rem);
