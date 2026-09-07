@@ -13,9 +13,6 @@
     <div class="barGroup" aria-hidden="true">
       <span v-for="(bar, i) in bars" :key="i" class="micBar" :style="bar"></span>
     </div>
-    <span v-if="isMicOn" class="statusChip">
-      <span class="statusChipDot"></span>전송 중
-    </span>
     <div class="volHead">
       <span class="volLabel">스피커 음량</span>
       <span class="volValue">{{ volume }}%</span>
@@ -127,7 +124,10 @@ const bars = computed(() => BAR_HEIGHTS.map((maxPx, i) => {
   if (!isMicOn.value) return { height: '0.4rem', opacity: 0.35 }
 
   const wobble = 0.5 + 0.5 * Math.sin(waveTime.value * (2.1 + (i % 4) * 0.55) + i * 1.7)
-  const strength = Math.min(currentAmplitude.value * (0.45 + wobble * 0.55) * 1.6, 1)
+  // 하이브리드: 무음에도 wobble이 직접 잔잔한 흔들림을 만들고, 목소리가 잡히면 그 위로 크게 반응
+  const voice = currentAmplitude.value * (0.45 + wobble * 0.55) * 1.12
+  const idle = 0.08 + wobble * 0.28
+  const strength = Math.min(Math.max(voice, idle), 1)
   return {
     height: `${(0.4 + (maxPx / 10 - 0.4) * strength).toFixed(2)}rem`,
     opacity: Number((0.55 + strength * 0.45).toFixed(2)),
@@ -376,29 +376,6 @@ body.theme-dark .micMiddle,
   border-radius: 0.2rem;
   background-color: #ffb085;
   transition: height 0.15s ease, opacity 0.15s ease;
-}
-
-.statusChip {
-  position: absolute;
-  top: 1.4rem;
-  right: 2rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  height: 2.6rem;
-  padding: 0 1.1rem;
-  border-radius: 0.8rem;
-  background-color: color-mix(in srgb, var(--home-accent) 18%, var(--home-panel-bg));
-  color: var(--home-accent);
-  font-size: 1.3rem;
-  font-weight: 700;
-}
-
-.statusChipDot {
-  width: 0.7rem;
-  height: 0.7rem;
-  border-radius: 50%;
-  background-color: currentColor;
 }
 
 .volHead {

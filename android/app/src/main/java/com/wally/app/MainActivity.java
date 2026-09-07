@@ -1,9 +1,11 @@
 package com.wally.app;
 
+import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.UiModeManager;
@@ -23,7 +25,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
 import androidx.core.graphics.Insets;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.splashscreen.SplashScreen;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
@@ -37,6 +41,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,6 +49,7 @@ import org.json.JSONObject;
 
 public class MainActivity extends BridgeActivity {
     private static final long SPLASH_DURATION_MS = 2500;
+    private static final int MEDIA_PERMISSION_REQUEST_CODE = 9001;
     private static final String THEME_PREFERENCES = "wally_theme";
     private static final String DARK_THEME_KEY = "dark_theme";
     private boolean immersiveStreamingMode = false;
@@ -85,6 +91,24 @@ public class MainActivity extends BridgeActivity {
                 parent.removeView(splashView);
             }
         }, SPLASH_DURATION_MS);
+
+        // 스플래시가 걷힌 뒤 첫 실행 시 마이크·카메라 시스템 권한 동의를 받는다
+        new Handler(Looper.getMainLooper()).postDelayed(
+            this::requestMediaPermissionsIfNeeded,
+            SPLASH_DURATION_MS
+        );
+    }
+
+    private void requestMediaPermissionsIfNeeded() {
+        ArrayList<String> needed = new ArrayList<>();
+        for (String permission : new String[] { Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA }) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                needed.add(permission);
+            }
+        }
+        if (!needed.isEmpty()) {
+            ActivityCompat.requestPermissions(this, needed.toArray(new String[0]), MEDIA_PERMISSION_REQUEST_CODE);
+        }
     }
 
     @Override

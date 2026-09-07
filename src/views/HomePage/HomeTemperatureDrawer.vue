@@ -204,7 +204,7 @@ const emit = defineEmits(['close'])
 
 const activeTab = ref('temperature')
 const isPowerOn = ref(false)
-const offScheduleOn = ref(true)
+const offScheduleOn = ref(false)
 const onScheduleOn = ref(false)
 const offScheduleHours = ref(3)
 const onScheduleHours = ref(3)
