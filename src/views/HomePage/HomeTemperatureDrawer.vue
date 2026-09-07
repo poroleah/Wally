@@ -117,7 +117,7 @@
           <span :class="$style.autoDot" aria-hidden="true"></span>
           <div :class="$style.autoTexts">
             <div :class="$style.autoTitle">{{ scheduleBanner.title }}</div>
-            <div v-if="scheduleBanner.sub" :class="$style.autoSub">{{ scheduleBanner.sub }}</div>
+            <div v-if="scheduleBanner.subs.length" :class="$style.autoSub">{{ scheduleBanner.subs.join(' · ') }}</div>
           </div>
         </div>
 
@@ -138,7 +138,7 @@
                 :class="[$style.miniToggle, offScheduleOn ? $style.miniToggleOn : '']"
                 :aria-pressed="offScheduleOn"
                 aria-label="꺼짐 예약"
-                @click="offScheduleOn = !offScheduleOn"
+                @click="toggleOffSchedule"
               >
                 <span :class="$style.miniToggleTrack"></span>
                 <span :class="$style.miniToggleThumb"></span>
@@ -173,7 +173,7 @@
                 :class="[$style.miniToggle, onScheduleOn ? $style.miniToggleOn : '']"
                 :aria-pressed="onScheduleOn"
                 aria-label="켜짐 예약"
-                @click="onScheduleOn = !onScheduleOn"
+                @click="toggleOnSchedule"
               >
                 <span :class="$style.miniToggleTrack"></span>
                 <span :class="$style.miniToggleThumb"></span>
@@ -208,9 +208,29 @@ const offScheduleOn = ref(true)
 const onScheduleOn = ref(false)
 const offScheduleHours = ref(3)
 const onScheduleHours = ref(3)
+// 예약 토글을 켠 순간을 기준으로 종료/시작 시각을 고정한다
+const offScheduleBase = ref(Date.now())
+const onScheduleBase = ref(Date.now())
 
-function formatClock(hoursLater) {
-  const d = new Date(Date.now() + hoursLater * 3600000)
+/* 꺼짐/켜짐 예약은 동시에 켤 수 없다 — 하나를 켜면 다른 쪽은 꺼진다 */
+function toggleOffSchedule() {
+  offScheduleOn.value = !offScheduleOn.value
+  if (offScheduleOn.value) {
+    offScheduleBase.value = Date.now()
+    onScheduleOn.value = false
+  }
+}
+
+function toggleOnSchedule() {
+  onScheduleOn.value = !onScheduleOn.value
+  if (onScheduleOn.value) {
+    onScheduleBase.value = Date.now()
+    offScheduleOn.value = false
+  }
+}
+
+function formatClock(baseTime, hoursLater) {
+  const d = new Date(baseTime + hoursLater * 3600000)
   const hours = d.getHours()
   const period = hours < 12 ? '오전' : '오후'
   const hour12 = hours % 12 === 0 ? 12 : hours % 12
@@ -218,21 +238,23 @@ function formatClock(hoursLater) {
 }
 
 const scheduleBanner = computed(() => {
+  const offTime = formatClock(offScheduleBase.value, offScheduleHours.value)
+  const onTime = formatClock(onScheduleBase.value, onScheduleHours.value)
   if (offScheduleOn.value) {
     return {
       active: true,
       title: offScheduleHours.value + '시간 후 자동으로 꺼져요',
-      sub: '종료 시간 : ' + formatClock(offScheduleHours.value),
+      subs: ['시작 시간 : ' + formatClock(offScheduleBase.value, 0), '종료 시간 : ' + offTime],
     }
   }
   if (onScheduleOn.value) {
     return {
       active: true,
       title: onScheduleHours.value + '시간 후 자동으로 켜져요',
-      sub: '시작 시간 : ' + formatClock(onScheduleHours.value),
+      subs: ['시작 시간 : ' + formatClock(onScheduleBase.value, 0), '켜짐 시간 : ' + onTime],
     }
   }
-  return { active: false, title: '설정된 예약이 없어요', sub: '' }
+  return { active: false, title: '설정된 예약이 없어요', subs: [] }
 })
 const targetTemperature = ref(25)
 const currentTemperature = ref(22)
@@ -503,7 +525,7 @@ function toggleMode() {
 /* 예약 탭: 자동 꺼짐 안내 배너 (시안 320x40) */
 .autoInfo {
   flex: 0 0 auto;
-  /* 한 줄(중립)·두 줄(활성) 모두 같은 높이 — 상태 전환 시 카드가 움직이지 않는다 */
+  /* 두 줄(제목 + 시간 한 줄) 기준 고정 높이 — 상태 전환 시 카드가 움직이지 않는다 */
   height: 4.6rem;
   display: flex;
   align-items: center;
@@ -547,6 +569,9 @@ function toggleMode() {
 
 .autoSub {
   color: var(--home-muted);
+  /* 시작·종료를 한 줄에 담기 위한 크기/줄바꿈 고정 */
+  font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 /* 예약 카드 (시안 320x174) */
