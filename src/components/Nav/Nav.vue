@@ -16,14 +16,22 @@
 import { useRoute } from 'vue-router'
 import NavItem from '@/components/Nav/NavItem.vue'
 import { ROUTES } from '@/constants'
+import HomeOn from '@/assets/icons/nav/Home_On.svg'
+import HomeOff from '@/assets/icons/nav/Home_Off.svg'
+import CalendarOn from '@/assets/icons/nav/Calendar_On.svg'
+import CalendarOff from '@/assets/icons/nav/Calendar_Off.svg'
+import AnalysisOn from '@/assets/icons/nav/Analysis_On.svg'
+import AnalysisOff from '@/assets/icons/nav/Analysis_Off.svg'
+import SettingOn from '@/assets/icons/nav/Setting_On.svg'
+import SettingOff from '@/assets/icons/nav/Setting_Off.svg'
 
 const route = useRoute()
 
 const tabs = [
-  { label: '홈',     path: ROUTES.HOME,     iconOn: '/icons/Nav/Home_On.svg',     iconOff: '/icons/Nav/Home_Off.svg' },
-  { label: '캘린더', path: ROUTES.SCHEDULE, iconOn: '/icons/Nav/Calendar_On.svg', iconOff: '/icons/Nav/Calendar_Off.svg' },
-  { label: '챗봇',   path: ROUTES.CHAT,     iconOn: '/icons/Nav/Chatting_On.svg', iconOff: '/icons/Nav/Chatting_Off.svg' },
-  { label: '설정',   path: ROUTES.SETTINGS, iconOn: '/icons/Nav/Setting_On.svg',  iconOff: '/icons/Nav/Setting_Off.svg' },
+  { label: '홈',     path: ROUTES.HOME,     iconOn: HomeOn,     iconOff: HomeOff },
+  { label: '캘린더', path: ROUTES.SCHEDULE, iconOn: CalendarOn, iconOff: CalendarOff },
+  { label: '분석',   path: ROUTES.CHAT,     iconOn: AnalysisOn, iconOff: AnalysisOff },
+  { label: '설정',   path: ROUTES.SETTINGS, iconOn: SettingOn,  iconOff: SettingOff },
 ]
 
 </script>
