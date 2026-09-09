@@ -15,7 +15,7 @@
           <span :class="$style.toggleThumb"></span>
         </button>
       </div>
-      <div :class="$style.percentFrame">
+      <div :class="[$style.percentFrame, isOn ? '' : $style.percentOff]">
         <div :class="$style.number">
           <b :class="$style.percentValue">{{ brightness }}</b>
           <b :class="$style.percentUnit">%</b>
@@ -228,6 +228,11 @@ function setBrightness(value) {
   align-items: flex-start;
   text-align: left;
   font-size: 5rem;
+}
+
+/* 조명 꺼짐 — 숫자·% 를 비활성 색으로 */
+.percentOff {
+  color: var(--home-muted);
 }
 
 .number {
