@@ -1,6 +1,5 @@
 <template>
   <div :class="$style.page">
-    <AppLogo />
     <Calendar :selectedDate="selectedDate" warm-day-markers @selectDate="onSelectDate" />
     <PlanSection :selectedDate="selectedDate" />
   </div>
@@ -9,7 +8,6 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import AppLogo from '@/components/Brand/AppLogo.vue'
 import Calendar from '@/components/Calendar/Calendar.vue'
 import PlanSection from '@/views/PlanPage/PlanPage.vue'
 
@@ -41,6 +39,7 @@ watch(() => route.query.date, (value) => {
   min-height: 100%;
   display: flex;
   flex-direction: column;
+  padding-top: env(safe-area-inset-top, 0px);
   background-color: var(--calendar-surface);
   color: var(--calendar-text);
 }

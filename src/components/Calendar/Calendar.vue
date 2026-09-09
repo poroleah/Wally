@@ -237,7 +237,8 @@ function handleClickCapture(event) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0;
+  padding: 0.34rem 0;
+  gap: 0.67rem;
   box-sizing: border-box;
   text-align: center;
   font-size: 1.686rem;
@@ -254,7 +255,7 @@ function handleClickCapture(event) {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem 2.7rem;
+  padding: 1.35rem 2.7rem;
   gap: 0.84rem;
 }
 .chevronLeftIcon {
@@ -284,13 +285,14 @@ function handleClickCapture(event) {
   align-self: stretch;
   display: flex;
   flex-direction: column;
+  gap: 0.34rem;
   font-size: 1.2rem;
   color: var(--calendar-text);
 }
 .dayLine {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  padding: 0.4rem 2.7rem;
+  padding: 0.67rem 2.7rem;
 }
 .sun {
   display: flex;
@@ -314,7 +316,7 @@ function handleClickCapture(event) {
 .dateNumberLine01 {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  padding: 0.2rem 2.7rem;
+  padding: 0.34rem 2.7rem;
 }
 .date {
   position: relative;
@@ -484,10 +486,12 @@ function handleClickCapture(event) {
 @media (min-width: 48rem) and (orientation: portrait) {
   .calendar {
     font-size: 1.95rem;
+    padding: 0.5rem 0;
+    gap: 1rem;
   }
 
   .monthYearLine {
-    padding: 1.3rem 4rem;
+    padding: 2rem 4rem;
     gap: 1.2rem;
   }
 
@@ -505,7 +509,7 @@ function handleClickCapture(event) {
   }
 
   .dayLine {
-    padding: 0.65rem 4rem;
+    padding: 1rem 4rem;
   }
 
   .dateLine {
@@ -513,7 +517,7 @@ function handleClickCapture(event) {
   }
 
   .dateNumberLine01 {
-    padding: 0.25rem 4rem;
+    padding: 0.5rem 4rem;
   }
 
   .date,
