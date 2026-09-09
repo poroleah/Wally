@@ -219,8 +219,8 @@ onBeforeUnmount(() => {
   z-index: 90;
   width: 100%;
   flex: 1 1 auto;
-  /* 절대 배치된 스피커 음량 영역(~33.3rem)까지 항상 담기도록 최소 높이 고정 */
-  min-height: 34.6rem;
+  /* 절대 배치된 스피커 음량 영역(~31rem)까지 항상 담기도록 최소 높이 고정 */
+  min-height: 32rem;
   margin-top: 2.4rem;
   border-radius: 2rem 2rem 0 0;
   background-color: var(--home-panel-bg);
@@ -274,7 +274,7 @@ onBeforeUnmount(() => {
 
 .micGroup {
   position: absolute;
-  top: 7.2rem;
+  top: 6.4rem;
   left: 50%;
   width: 13rem;
   height: 13rem;
@@ -361,7 +361,7 @@ body.theme-dark .micMiddle,
 
 .barGroup {
   position: absolute;
-  top: 22.6rem;
+  top: 21rem;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -380,7 +380,7 @@ body.theme-dark .micMiddle,
 
 .volHead {
   position: absolute;
-  top: 28rem;
+  top: 25.7rem;
   right: 1.6rem;
   left: 1.6rem;
   display: flex;
@@ -392,7 +392,7 @@ body.theme-dark .micMiddle,
 
 .soundBar {
   position: absolute;
-  top: 29.3rem;
+  top: 27rem;
   right: 0;
   left: 0;
   display: flex;

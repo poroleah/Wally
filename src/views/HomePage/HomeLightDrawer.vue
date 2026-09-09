@@ -75,8 +75,9 @@ function setBrightness(value) {
   position: relative;
   z-index: 90;
   width: 100%;
-  flex: 1 1 clamp(27.2rem, 62dvh, 34.8rem);
-  min-height: clamp(27.2rem, 62dvh, 34.8rem);
+  /* 시안 고정 높이 316px — 절대 배치된 밝기 컨트롤(~25.1rem)을 항상 담는다 */
+  flex: 0 0 31.6rem;
+  min-height: 31.6rem;
   margin-top: 2.4rem;
   border-radius: 2rem 2rem 0 0;
   background-color: var(--home-panel-bg);
@@ -119,8 +120,8 @@ function setBrightness(value) {
 
 .lampIcon {
   position: absolute;
-  top: 6.6rem;
-  right: 3.2rem;
+  top: 6.5rem;
+  right: 3.1rem;
   width: 8.5rem;
   height: 10.96rem;
   display: block;
@@ -130,12 +131,12 @@ function setBrightness(value) {
 
 .contentFrame {
   position: absolute;
-  top: 7.3rem;
+  top: 6.5rem;
   left: 3.2rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 5.4rem;
+  gap: 2.6rem;
 }
 
 .titleFrame {
@@ -230,7 +231,7 @@ function setBrightness(value) {
 }
 
 .number {
-  min-width: 8.8rem;
+  min-width: 6.4rem;
   height: 4.3rem;
   display: flex;
   align-items: flex-end;
@@ -253,26 +254,25 @@ function setBrightness(value) {
   letter-spacing: 0.01em;
   line-height: 100%;
   flex-shrink: 0;
-  margin-left: 0.3rem;
+  margin-left: 0.2rem;
   font-family: 'MalangBold', 'Malang', 'Hancom MalangMalang', sans-serif;
 }
 
 .lightControlFrame {
+  /* 시안: 아이콘 30px @ x=20/309, 트랙 63~298px, 세로 중심 232px */
   position: absolute;
-  left: 50%;
-  bottom: 5.2rem;
-  width: min(calc(100% - 3.2rem), 33.3rem);
-  transform: translateX(-50%);
+  top: 21.7rem;
+  right: 2rem;
+  left: 2rem;
   display: grid;
-  grid-template-columns: 3.2rem minmax(0, 25.1rem) 3.2rem;
+  grid-template-columns: 3rem minmax(0, 1fr) 3rem;
   align-items: center;
-  justify-content: center;
-  gap: 0.9rem;
+  gap: 1.2rem;
 }
 
 .lightSettingIcon {
-  width: 3.2rem;
-  height: 3.2rem;
+  width: 3rem;
+  height: 3rem;
   display: block;
   object-fit: contain;
 }
@@ -309,8 +309,8 @@ function setBrightness(value) {
 .lightThumb {
   position: absolute;
   top: 50%;
-  width: 1.4rem;
-  height: 1.4rem;
+  width: 1.6rem;
+  height: 1.6rem;
   border: 0.2rem solid var(--home-panel-bg);
   border-radius: 50%;
   background-color: var(--home-accent);
@@ -387,8 +387,12 @@ function setBrightness(value) {
   }
 
   .lightControlFrame {
+    top: auto;
     bottom: 2.6rem;
+    left: 50%;
+    right: auto;
     width: min(calc(100% - 6.4rem), 40rem);
+    transform: translateX(-50%);
     grid-template-columns: 3.8rem minmax(0, 30rem) 3.8rem;
     gap: 1.2rem;
   }
