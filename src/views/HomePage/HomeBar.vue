@@ -27,8 +27,8 @@ const emit = defineEmits(['control'])
 const controlItems = [
   {
     label: '라이트',
-    iconOff: '/icons/Home/Bar/Bar_Light.svg',
-    iconOn: '/icons/Home/Bar/Bar_Light_On.svg',
+    iconOff: '/icons/Home/Bar/Bar_Light.svg?v=2',
+    iconOn: '/icons/Home/Bar/Bar_Light_On.svg?v=2',
     action: 'light',
   },
   {
