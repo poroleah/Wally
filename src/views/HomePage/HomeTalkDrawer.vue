@@ -8,7 +8,7 @@
       <img class="micLayer micOuter" src="/icons/Home/Bar/Mic/Ellipse 1.svg" alt="" />
       <img class="micLayer micMiddle" src="/icons/Home/Bar/Mic/Ellipse 2.svg" alt="" />
       <img class="micLayer micInner" src="/icons/Home/Bar/Mic/Ellipse 3.svg" alt="" />
-      <img class="micIcon" src="/icons/Home/Bar/Mic/Frame.svg" alt="" />
+      <span class="micIcon" aria-hidden="true"></span>
     </button>
     <div class="barGroup" aria-hidden="true">
       <span v-for="(bar, i) in bars" :key="i" class="micBar" :style="bar"></span>
@@ -356,7 +356,15 @@ body.theme-dark .micMiddle,
 .micIcon {
   width: 2.9rem;
   height: 4.4rem;
-  transition: transform 0.18s ease, filter 0.18s ease;
+  /* 마스크로 그려 색을 상태에 따라 바꿀 수 있게 — 꺼짐: 본문색, 말하기 중: 주황 */
+  background-color: var(--home-text);
+  mask: url('/icons/Home/Bar/Mic/Frame.svg') center / contain no-repeat;
+  -webkit-mask: url('/icons/Home/Bar/Mic/Frame.svg') center / contain no-repeat;
+  transition: transform 0.18s ease, background-color 0.18s ease;
+}
+
+.micGroupOn .micIcon {
+  background-color: var(--home-accent);
 }
 
 .barGroup {
