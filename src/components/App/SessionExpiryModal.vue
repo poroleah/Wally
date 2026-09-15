@@ -114,23 +114,23 @@ const timeLabel = computed(() => {
 .session-btn {
   width: 8.8rem;
   height: 3.2rem;
-  border: 0.05rem solid #eee8de;
+  border: 0.05rem solid var(--app-border);
   border-radius: 1rem;
-  background: #eee8de;
-  color: #84776e;
+  background: var(--app-border);
+  color: var(--app-text-muted);
   font-family: inherit;
   font-size: 1.2rem;
   cursor: pointer;
 }
 
-/* 다크: #eee8de의 팔레트 대응(#12100f)은 카드(#1c1918)에 묻혀 버려서,
-   세션 칩과 같은 웜 뉴트럴 톤으로 분리한다. */
+/* 다크: --app-border의 다크값(#12100f)은 카드(#1c1918)에 묻혀 버려서,
+   세션 칩 토큰과 같은 웜 뉴트럴 톤으로 분리한다. */
 :global(:root.theme-dark) .session-btn,
 :global(body.theme-dark) .session-btn,
 :global(#app.theme-dark) .session-btn {
-  border-color: #2c2723;
-  background: #2c2723;
-  color: #b0a59a;
+  border-color: var(--session-chip-bg);
+  background: var(--session-chip-bg);
+  color: var(--session-chip-text);
 }
 
 .session-btn.primary {

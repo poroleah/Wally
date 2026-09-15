@@ -391,15 +391,10 @@ function handleClickCapture(event) {
   width: 100%;
   height: 100%;
   box-sizing: border-box;
-  color: #2d2926;
+  color: var(--calendar-text);
   font-size: 1.518rem;
   line-height: 1;
   transition: font-size 0.18s ease;
-}
-:global(:root.theme-dark) .logDateNumber,
-:global(body.theme-dark) .logDateNumber,
-:global(#app.theme-dark) .logDateNumber {
-  color: var(--calendar-text);
 }
 .logDateFace .div23 {
   background-color: transparent;
@@ -413,7 +408,7 @@ function handleClickCapture(event) {
   height: 3.2rem;
   border-radius: 50%;
   font-size: 1.8rem;
-  color: var(--calendar-text);
+  /* 글자색은 지정하지 않는다 — 일요일 주황·토요일 파랑 등 요일 색을 셀에서 그대로 물려받아야 한다 */
   font-weight: 400;
 }
 .selected .div,

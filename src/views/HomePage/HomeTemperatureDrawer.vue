@@ -803,13 +803,7 @@ function toggleMode() {
 
 .heatTrack {
   /* 말하기 드로어 음량 슬라이더 트랙과 동일한 색 */
-  stroke: #eee8de;
-}
-
-:global(:root.theme-dark) .heatTrack,
-:global(body.theme-dark) .heatTrack,
-:global(#app.theme-dark) .heatTrack {
-  stroke: #12100f;
+  stroke: var(--home-panel-border);
 }
 
 .heatValue {
@@ -841,7 +835,7 @@ function toggleMode() {
 :global(body.theme-dark) .temperatureChild,
 :global(#app.theme-dark) .temperatureChild {
   /* 말하기 드로어 음량 토글과 동일한 룩 */
-  background-color: #fffbf5;
+  background-color: var(--home-slider-thumb);
   box-shadow: 0.2rem 0.2rem 0.4rem rgba(0, 0, 0, 0.25);
 }
 

@@ -63,7 +63,7 @@ watch(volume, (v) => {
   try { navigator.vibrate?.(8) } catch { /* noop */ }
 })
 const volumeFill = computed(() =>
-  `linear-gradient(to right, #ffb085 ${volume.value}%, #eee8de ${volume.value}%)`,
+  `linear-gradient(to right, var(--home-accent) ${volume.value}%, var(--home-panel-border) ${volume.value}%)`,
 )
 
 // 아이콘 버튼으로 0%/100% 이동 시 5%씩 드르륵 훑으며 이동
@@ -356,8 +356,9 @@ body.theme-dark .micMiddle,
 .micIcon {
   width: 2.9rem;
   height: 4.4rem;
-  /* 마스크로 그려 색을 상태에 따라 바꿀 수 있게 — 꺼짐: 본문색, 말하기 중: 주황 */
-  background-color: var(--home-text);
+  /* 마스크로 그려 색을 상태에 따라 바꿀 수 있게 — 꺼짐: 진갈색, 말하기 중: 주황.
+     뒤의 원(Ellipse 3)은 테마와 무관한 크림색 SVG라 본문색 대신 고정 진갈색 토큰을 쓴다. */
+  background-color: var(--home-mic-icon);
   mask: url('/icons/Home/Bar/Mic/Frame.svg') center / contain no-repeat;
   -webkit-mask: url('/icons/Home/Bar/Mic/Frame.svg') center / contain no-repeat;
   transition: transform 0.18s ease, background-color 0.18s ease;
@@ -382,7 +383,7 @@ body.theme-dark .micMiddle,
 .micBar {
   width: 0.4rem;
   border-radius: 0.2rem;
-  background-color: #ffb085;
+  background-color: var(--home-accent);
   transition: height 0.15s ease, opacity 0.15s ease;
 }
 
@@ -458,7 +459,7 @@ body.theme-dark .micMiddle,
   appearance: none;
   -webkit-appearance: none;
   border-radius: 0.4rem;
-  background-color: #eee8de;
+  background-color: var(--home-panel-border);
   outline: none;
   cursor: pointer;
 }
@@ -470,7 +471,7 @@ body.theme-dark .micMiddle,
   height: 1.6rem;
   border: 0;
   border-radius: 50%;
-  background-color: #fffbf5;
+  background-color: var(--home-slider-thumb);
   box-shadow: 0.2rem 0.2rem 0.4rem rgba(0, 0, 0, 0.25);
 }
 
@@ -479,7 +480,7 @@ body.theme-dark .micMiddle,
   height: 1.6rem;
   border: 0;
   border-radius: 50%;
-  background-color: #fffbf5;
+  background-color: var(--home-slider-thumb);
   box-shadow: 0.2rem 0.2rem 0.4rem rgba(0, 0, 0, 0.25);
 }
 

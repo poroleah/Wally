@@ -116,6 +116,8 @@
   --home-muted: #84776e;
   --home-accent: #ffb085;
   --home-accent-strong: #ff8f64;
+  --home-slider-thumb: #fffbf5;
+  --home-mic-icon: #2d2926;
   --home-cool: #82a2b1;
   --home-shadow: 0 0.22rem 0.9rem rgba(45, 41, 38, 0.07);
   --home-camera-border: rgba(238, 232, 222, 0.9);
@@ -266,6 +268,8 @@ body.theme-dark,
   --home-muted: #b0a59a;
   --home-accent: #ffb38a;
   --home-accent-strong: #ffb38a;
+  --home-slider-thumb: #fffbf5;
+  --home-mic-icon: #2d2926;
   --home-cool: #8fb8c8;
   --home-shadow: 0 0.24rem 1rem rgba(0, 0, 0, 0.3);
   --home-camera-border: rgba(18, 16, 15, 0.9);
@@ -404,6 +408,8 @@ body.theme-light,
   --home-muted: #84776e;
   --home-accent: #ffb085;
   --home-accent-strong: #ff8f64;
+  --home-slider-thumb: #fffbf5;
+  --home-mic-icon: #2d2926;
   --home-cool: #82a2b1;
   --home-shadow: 0 0.22rem 0.9rem rgba(45, 41, 38, 0.07);
   --home-camera-border: rgba(238, 232, 222, 0.9);

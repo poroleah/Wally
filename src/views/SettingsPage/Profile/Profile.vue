@@ -19,8 +19,7 @@
             <span :class="$style.title">이름</span>
             <div :class="$style.profileContent">
               <input
-                :class="$style.content2"
-                :style="{ color: nameHasValue ? 'var(--settings-text)' : 'var(--settings-muted)' }"
+                :class="[$style.content2, nameHasValue ? $style.filled : '']"
                 v-model="name"
                 @compositionstart="nameHasValue = true"
                 @compositionend="nameHasValue = $event.target.value.length > 0"
@@ -108,6 +107,7 @@ const nameHasValue = ref(false)
 watch(() => props.modelValue, (val) => {
   if (val) {
     name.value = profileName.value
+    nameHasValue.value = name.value.length > 0
     previewUrl.value = profileImg.value !== '/icons/Setting/Profile_Img.svg' ? profileImg.value : null
     selectedBreed.value = breed.value
     selectedDate.value = birthday.value
