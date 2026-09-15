@@ -466,7 +466,7 @@ function handleClickCapture(event) {
   height: 3.2rem;
   border-radius: 50%;
   font-size: 1.8rem;
-  color: var(--calendar-text);
+  /* 글자색은 지정하지 않는다 — 일요일 주황·토요일 파랑 등 요일 색을 셀에서 그대로 물려받아야 한다 */
   font-weight: 400;
 }
 .selected .div,
