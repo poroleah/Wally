@@ -449,7 +449,7 @@ function handleClickCapture(event) {
   width: 100%;
   height: 100%;
   box-sizing: border-box;
-  color: var(--calendar-text);
+  /* 글자색은 지정하지 않는다 — 뼈 아이콘 위에서도 토·일 요일 색을 셀에서 그대로 물려받아야 한다 */
   font-size: 1.518rem;
   line-height: 1;
   transition: font-size 0.18s ease;
