@@ -75,9 +75,9 @@ function setBrightness(value) {
   position: relative;
   z-index: 90;
   width: 100%;
-  /* 카메라 조작·온도·말하기 드로어와 동일한 높이(시안 434px). 작은 화면에서는 뷰포트에 맞춰 줄어든다 */
+  /* 홈 드로어 4종 공통 높이 38rem. 작은 화면에서는 뷰포트에 맞춰 줄어든다 */
   flex: 0 0 auto;
-  height: min(clamp(27.2rem, 72dvh, 43.4rem), calc(100dvh - 9rem));
+  height: min(clamp(27.2rem, 66dvh, 38rem), calc(100dvh - 9rem));
   margin-top: 2.4rem;
   border-radius: 2rem 2rem 0 0;
   background-color: var(--home-panel-bg);
@@ -133,7 +133,7 @@ function setBrightness(value) {
 .contentFrame {
   position: absolute;
   /* 이름·토글·퍼센트 블록(약 12rem)을 제목 아래~밝기 컨트롤 위 공간의 세로 중앙에.
-     시안 316px 카드에서는 6.5rem, 434px 카드에서는 13.2rem */
+     시안 316px 카드에서는 6.5rem, 공통 380px 카드에서는 10.1rem */
   top: clamp(6.5rem, calc(56.8% - 11.45rem), 13.2rem);
   left: 3.2rem;
   display: flex;

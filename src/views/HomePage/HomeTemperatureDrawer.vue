@@ -313,7 +313,7 @@ function toggleMode() {
   flex-direction: column;
   /* 다른 홈 드로어(조명·말하기 등)와 동일한 높이 — 탭 전환 시에도 고정.
      낮은 화면에서는 뷰포트에 맞춰 줄고 카드가 함께 줄어든다 */
-  height: min(clamp(27.2rem, 72dvh, 43.4rem), calc(100dvh - 9rem)); /* 카메라 조작 드로어(434px)와 동일 */
+  height: min(clamp(27.2rem, 66dvh, 38rem), calc(100dvh - 9rem)); /* 홈 드로어 4종 공통 높이 38rem */
   margin-top: 2.4rem;
   border-radius: 2rem 2rem 0 0;
   background-color: var(--home-panel-bg);

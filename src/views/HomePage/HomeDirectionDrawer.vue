@@ -651,9 +651,10 @@ onBeforeUnmount(() => {
   position: relative;
   z-index: 90;
   width: 100%;
-  /* 시안 카드 높이 434px = 43.4rem. 내비를 덮으므로 세로 여유가 있어 시안 높이까지 허용 */
-  flex: 1 1 clamp(27.2rem, 72dvh, 43.4rem);
-  min-height: clamp(27.2rem, 72dvh, 43.4rem);
+  /* 홈 드로어 4종 공통 높이 38rem. 시안(434px)보다 낮아 방향 패드가 약간 줄지만,
+     시안이 316~360px 인 조명·말하기·온도 드로어의 공백을 줄이기 위한 절충값 */
+  flex: 1 1 clamp(27.2rem, 66dvh, 38rem);
+  min-height: clamp(27.2rem, 66dvh, 38rem);
   margin-top: 2.4rem;
   padding: 0 2rem;
   box-sizing: border-box;
@@ -1162,7 +1163,7 @@ onBeforeUnmount(() => {
 .zoomFrame {
   position: relative;
   margin-top: 1.6rem; /* 시안 307px → 323px */
-  margin-bottom: 4.1rem; /* 시안 393px → 카드 하단 434px */
+  margin-bottom: 4.1rem; /* 시안 하단 여백 41px (393px → 434px) */
   flex: 0 0 7rem;
   height: 7rem;
   border-radius: 1rem;
