@@ -276,7 +276,7 @@ onBeforeUnmount(() => {
   position: absolute;
   /* 마이크(13rem)+파형 묶음(총 17.6rem)을 제목 아래~음량 영역 위 공간의 세로 중앙에.
      시안 320px 카드에서는 6.4rem, 공통 420px 카드에서는 7.4rem */
-  top: 6.2rem; /* 공통 콘텐츠 구역: 제목 아래 6.2rem 부터 카드 하단 4rem 까지 — 네 드로어 동일 */
+  top: 8.4rem; /* 시안 64px × 1.31 (320px 시안을 420px 카드에 비례 확대) */
   left: 50%;
   width: 17rem; /* 시안 130px × 1.31 */
   height: 17rem;
@@ -373,7 +373,7 @@ body.theme-dark .micMiddle,
 .barGroup {
   position: absolute;
   /* 마이크 하단 +1.6rem 을 따라간다 (320px: 21rem, 420px: 24rem) */
-  top: 25.3rem; /* 마이크 하단(23.2rem) + 2.1rem (시안 16px × 1.31) */
+  top: 27.6rem; /* 시안 210px × 1.31 */
   left: 50%;
   transform: translateX(-50%);
   display: flex;
