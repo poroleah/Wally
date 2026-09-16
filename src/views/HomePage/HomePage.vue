@@ -304,7 +304,8 @@ onBeforeUnmount(() => {
 
 /* 내비 자리까지 내려오므로 홈 인디케이터 안전 영역만큼 카드 하단 여백 확보 */
 .drawerMotion > :first-child {
-  padding-bottom: env(safe-area-inset-bottom);
+  /* Android WebView 는 env() 가 0 이라 MainActivity 가 주입하는 --wally-safe-bottom 을 함께 본다 */
+  padding-bottom: max(env(safe-area-inset-bottom), var(--wally-safe-bottom, 0px));
 }
 
 .drawerBackdrop {

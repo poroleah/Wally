@@ -121,7 +121,7 @@ function setBrightness(value) {
 .lampIcon {
   position: absolute;
   /* 좌측 콘텐츠 블록보다 1rem 아래 — 블록 세로 중앙에 램프 중심을 맞춘 값 */
-  top: clamp(7.5rem, calc(56.8% - 10.45rem), 14.2rem);
+  top: clamp(7.5rem, calc(50% - 5.8rem), 13.2rem); /* 블록 top + 1rem */
   right: 3.1rem;
   width: 8.5rem;
   height: 10.96rem;
@@ -132,9 +132,9 @@ function setBrightness(value) {
 
 .contentFrame {
   position: absolute;
-  /* 이름·토글·퍼센트 블록(약 12rem)을 제목 아래~밝기 컨트롤 위 공간의 세로 중앙에.
-     시안 316px 카드에서는 6.5rem, 공통 380px 카드에서는 10.1rem */
-  top: clamp(6.5rem, calc(56.8% - 11.45rem), 13.2rem);
+  /* 블록·램프·밝기 컨트롤을 시안 간격 그대로 한 묶음으로 카드 세로 중앙에 둔다.
+     (공통 380px 카드: 12.2rem, 시안 316px: 9rem) */
+  top: clamp(6.5rem, calc(50% - 6.8rem), 12.2rem);
   left: 3.2rem;
   display: flex;
   flex-direction: column;
@@ -269,8 +269,8 @@ function setBrightness(value) {
 .lightControlFrame {
   /* 시안: 아이콘 30px @ x=20/309, 트랙 63~298px, 세로 중심 232px */
   position: absolute;
-  /* 하단 기준 고정: 시안 컨트롤 박스(68px) 하단을 다른 드로어와 같은 4.1rem 여백에 맞추면 아이콘 행 하단은 4.5rem */
-  bottom: 4.5rem;
+  /* 블록 top + 15.2rem (시안: 블록 65px → 아이콘 행 top 217px) */
+  top: clamp(21.7rem, calc(50% + 8.4rem), 27.4rem);
   right: 2rem;
   left: 2rem;
   display: grid;
