@@ -276,10 +276,10 @@ onBeforeUnmount(() => {
   position: absolute;
   /* 마이크(13rem)+파형 묶음(총 17.6rem)을 제목 아래~음량 영역 위 공간의 세로 중앙에.
      시안 320px 카드에서는 6.4rem, 공통 420px 카드에서는 7.4rem */
-  top: clamp(6.4rem, calc(50% - 11.6rem), 10.1rem);
+  top: 8.4rem; /* 시안 64px × 1.31 (320px 시안을 420px 카드에 비례 확대) */
   left: 50%;
-  width: 13rem;
-  height: 13rem;
+  width: 17rem; /* 시안 130px × 1.31 */
+  height: 17rem;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -318,8 +318,8 @@ onBeforeUnmount(() => {
 }
 
 .micOuter {
-  width: 13rem;
-  height: 13rem;
+  width: 17rem;
+  height: 17rem;
   transition: filter 0.18s ease, opacity 0.18s ease;
 }
 
@@ -329,8 +329,8 @@ onBeforeUnmount(() => {
 }
 
 .micMiddle {
-  width: 11.5rem;
-  height: 11.5rem;
+  width: 15.1rem;
+  height: 15.1rem;
   opacity: 0.82;
 }
 
@@ -346,8 +346,8 @@ body.theme-dark .micMiddle,
 }
 
 .micInner {
-  width: 11rem;
-  height: 10.8rem;
+  width: 14.4rem;
+  height: 14.2rem;
   opacity: 0.9;
 }
 
@@ -356,8 +356,8 @@ body.theme-dark .micMiddle,
 }
 
 .micIcon {
-  width: 2.9rem;
-  height: 4.4rem;
+  width: 3.8rem;
+  height: 5.8rem;
   /* 마스크로 그려 색을 상태에 따라 바꿀 수 있게 — 꺼짐: 진갈색, 말하기 중: 주황.
      뒤의 원(Ellipse 3)은 테마와 무관한 크림색 SVG라 본문색 대신 고정 진갈색 토큰을 쓴다. */
   background-color: var(--home-mic-icon);
@@ -373,13 +373,13 @@ body.theme-dark .micMiddle,
 .barGroup {
   position: absolute;
   /* 마이크 하단 +1.6rem 을 따라간다 (320px: 21rem, 420px: 24rem) */
-  top: clamp(21rem, calc(50% + 3rem), 24.7rem);
+  top: 27.6rem; /* 시안 210px × 1.31 */
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: flex-end;
-  gap: 0.4rem;
-  height: 3rem;
+  gap: 0.5rem;
+  height: 3.9rem; /* 시안 30px × 1.31 */
   pointer-events: none;
 }
 
@@ -393,7 +393,7 @@ body.theme-dark .micMiddle,
 .volHead {
   position: absolute;
   /* 슬라이더(soundBar) 바로 위에 하단 기준으로 고정 — 시안 라벨 top 257px = soundBar top −1.3rem */
-  bottom: 8.6rem; /* soundBar bottom(4.5rem) + soundBar 높이(4rem) + 0.1rem */
+  bottom: 7.1rem; /* 시안 라벨 top 257px × 1.31 = 33.7rem (라벨 높이 1.2rem) */
   right: 1.6rem;
   left: 1.6rem;
   display: flex;
@@ -406,13 +406,13 @@ body.theme-dark .micMiddle,
 .soundBar {
   position: absolute;
   /* 하단 고정: 슬라이더 중심이 카드 하단에서 6.5rem — 조명 슬라이더·카메라 확대축소 슬라이더와 같은 선 */
-  bottom: 4.5rem;
+  bottom: 1.4rem; /* 시안 soundBar top 270px × 1.31 = 35.4rem, 높이 5.2rem */
   right: 0;
   left: 0;
   display: flex;
   align-items: center;
   gap: 0.8rem;
-  height: 4rem;
+  height: 5.2rem; /* 시안 40px × 1.31 */
   padding: 0 1.6rem;
 }
 
@@ -441,8 +441,8 @@ body.theme-dark .micMiddle,
 
 .soundIcon {
   display: block;
-  width: 2.4rem;
-  height: 2.4rem;
+  width: 3.1rem; /* 시안 24px × 1.31 */
+  height: 3.1rem;
   background-color: var(--home-text);
 }
 

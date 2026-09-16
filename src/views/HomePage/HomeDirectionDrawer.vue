@@ -971,7 +971,7 @@ onBeforeUnmount(() => {
 /* ── 조작/설정 세그먼트 토글 ── */
 .cameraToggle {
   position: relative;
-  margin-top: 5.9rem; /* 시안 탭 top 59px */
+  margin-top: 5.7rem; /* 시안 탭 top 59px × 0.97 (434px 시안을 420px 카드에 비례) */
   height: 3.2rem;
   flex: 0 0 3.2rem;
   border-radius: 10.2rem;
@@ -1023,7 +1023,7 @@ onBeforeUnmount(() => {
 /* ── 방향 제어 프레임 ── */
 .padFrame {
   position: relative;
-  margin-top: 1.6rem; /* 시안 탭 하단 91px → 프레임 top 107px */
+  margin-top: 1.55rem; /* 시안 16px × 0.97 */
   flex: 1 1 20rem;
   min-height: 8.4rem;
   border-radius: 1rem;
@@ -1162,10 +1162,10 @@ onBeforeUnmount(() => {
 /* ── 화면 확대·축소 프레임 ── */
 .zoomFrame {
   position: relative;
-  margin-top: 1.6rem; /* 시안 307px → 323px */
-  margin-bottom: 4.1rem; /* 시안 하단 여백 41px (393px → 434px) */
-  flex: 0 0 7rem;
-  height: 7rem;
+  margin-top: 1.55rem; /* 시안 16px × 0.97 */
+  margin-bottom: 4rem; /* 시안 41px × 0.97 */
+  flex: 0 0 6.8rem;
+  height: 6.8rem; /* 시안 70px × 0.97 */
   border-radius: 1rem;
   background-color: var(--home-bg);
   overflow: hidden;

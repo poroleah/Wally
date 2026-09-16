@@ -396,16 +396,16 @@ function toggleMode() {
 .content {
   flex: 1 1 auto; /* 드로어 높이를 채워 카드가 남는 공간을 가져갈 수 있게 */
   min-height: 0;
-  margin: 6.2rem 2rem 4.1rem; /* 하단 여백은 카메라 조작 드로어와 동일 */
+  margin: 7.2rem 2rem 4.9rem; /* 시안 62px/42px × 1.17 (360px 시안을 420px 카드에 비례 확대) */
   display: flex;
   flex-direction: column;
-  gap: 1.6rem;
+  gap: 1.9rem; /* 시안 16px × 1.17 */
 }
 
 .segment {
   position: relative;
   width: 100%;
-  height: 3.2rem;
+  height: 3.7rem; /* 시안 32px × 1.17 */
   flex: 0 0 auto;
   display: flex;
   padding: 0.2rem;
@@ -532,7 +532,7 @@ function toggleMode() {
 .cardInner {
   position: relative;
   width: 100%;
-  height: 16.8rem;
+  height: 19.6rem; /* 시안 168px × 1.17 */
   max-height: 100%;
 }
 
@@ -781,8 +781,8 @@ function toggleMode() {
 .offArc {
   position: absolute;
   left: 50%;
-  top: 1.6rem;
-  width: min(26rem, calc(100% - 5.6rem));
+  top: 1.9rem;
+  width: min(30.3rem, calc(100% - 1.6rem)); /* 시안 260px × 1.17 */
   aspect-ratio: 320 / 170;
   height: auto;
   transform: translateX(-50%);
@@ -792,9 +792,9 @@ function toggleMode() {
 
 .gaugeArea {
   position: absolute;
-  top: 1.6rem;
+  top: 1.9rem;
   left: 50%;
-  width: min(26rem, calc(100% - 5.6rem));
+  width: min(30.3rem, calc(100% - 1.6rem)) /* 시안 260px × 1.17 */;
   aspect-ratio: 320 / 170;
   height: auto;
   transform: translateX(-50%);

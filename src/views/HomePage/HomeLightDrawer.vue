@@ -269,8 +269,8 @@ function setBrightness(value) {
 .lightControlFrame {
   /* 시안: 아이콘 30px @ x=20/309, 트랙 63~298px, 세로 중심 232px */
   position: absolute;
-  /* 시안 아이콘 행 중심 232px × 1.33 = 30.8rem → 행 높이 4rem 의 top */
-  top: 28.8rem;
+  /* 시안 비율(행 중심 30.8rem)보다 2.7rem 아래 — 숫자와의 간격을 살리고 다른 드로어 하단 컴포넌트에 가깝게 */
+  top: 31.5rem;
   right: 2rem;
   left: 2rem;
   display: grid;
