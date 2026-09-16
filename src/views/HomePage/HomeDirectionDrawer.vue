@@ -651,8 +651,9 @@ onBeforeUnmount(() => {
   position: relative;
   z-index: 90;
   width: 100%;
-  flex: 1 1 clamp(27.2rem, 62dvh, 34.8rem);
-  min-height: clamp(27.2rem, 62dvh, 34.8rem);
+  /* 시안 카드 높이 434px = 43.4rem. 내비를 덮으므로 세로 여유가 있어 시안 높이까지 허용 */
+  flex: 1 1 clamp(27.2rem, 72dvh, 43.4rem);
+  min-height: clamp(27.2rem, 72dvh, 43.4rem);
   margin-top: 2.4rem;
   padding: 0 2rem;
   box-sizing: border-box;
@@ -969,7 +970,7 @@ onBeforeUnmount(() => {
 /* ── 조작/설정 세그먼트 토글 ── */
 .cameraToggle {
   position: relative;
-  margin-top: 5.2rem;
+  margin-top: 5.9rem; /* 시안 탭 top 59px */
   height: 3.2rem;
   flex: 0 0 3.2rem;
   border-radius: 10.2rem;
@@ -1021,7 +1022,7 @@ onBeforeUnmount(() => {
 /* ── 방향 제어 프레임 ── */
 .padFrame {
   position: relative;
-  margin-top: 1.2rem;
+  margin-top: 1.6rem; /* 시안 탭 하단 91px → 프레임 top 107px */
   flex: 1 1 20rem;
   min-height: 8.4rem;
   border-radius: 1rem;
@@ -1160,8 +1161,8 @@ onBeforeUnmount(() => {
 /* ── 화면 확대·축소 프레임 ── */
 .zoomFrame {
   position: relative;
-  margin-top: 1.4rem;
-  margin-bottom: 2rem;
+  margin-top: 1.6rem; /* 시안 307px → 323px */
+  margin-bottom: 4.1rem; /* 시안 393px → 카드 하단 434px */
   flex: 0 0 7rem;
   height: 7rem;
   border-radius: 1rem;
