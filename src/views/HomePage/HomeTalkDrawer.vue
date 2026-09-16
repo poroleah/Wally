@@ -393,7 +393,7 @@ body.theme-dark .micMiddle,
 .volHead {
   position: absolute;
   /* 슬라이더(soundBar) 바로 위에 하단 기준으로 고정 — 시안 라벨 top 257px = soundBar top −1.3rem */
-  bottom: 7.1rem; /* 시안 라벨 top 257px × 1.31 = 33.7rem (라벨 높이 1.2rem) */
+  bottom: 9.3rem; /* soundBar bottom(4rem) + 높이(5.2rem) + 0.1rem */
   right: 1.6rem;
   left: 1.6rem;
   display: flex;
@@ -406,7 +406,7 @@ body.theme-dark .micMiddle,
 .soundBar {
   position: absolute;
   /* 하단 고정: 슬라이더 중심이 카드 하단에서 6.5rem — 조명 슬라이더·카메라 확대축소 슬라이더와 같은 선 */
-  bottom: 1.4rem; /* 시안 soundBar top 270px × 1.31 = 35.4rem, 높이 5.2rem */
+  bottom: 4rem; /* 하단 정렬: 카메라·온도 프레임 하단(4rem)과 동일, 슬라이더 중심 6.6rem */
   right: 0;
   left: 0;
   display: flex;

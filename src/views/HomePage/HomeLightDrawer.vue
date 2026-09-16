@@ -269,8 +269,8 @@ function setBrightness(value) {
 .lightControlFrame {
   /* 시안: 아이콘 30px @ x=20/309, 트랙 63~298px, 세로 중심 232px */
   position: absolute;
-  /* 시안 비율(행 중심 30.8rem)보다 2.7rem 아래 — 숫자와의 간격을 살리고 다른 드로어 하단 컴포넌트에 가깝게 */
-  top: 31.5rem;
+  /* 하단 정렬: 슬라이더 중심이 카드 하단에서 6.5rem — 카메라 확대축소·말하기 슬라이더와 같은 선 */
+  top: 33.5rem;
   right: 2rem;
   left: 2rem;
   display: grid;
