@@ -121,10 +121,10 @@ function setBrightness(value) {
 .lampIcon {
   position: absolute;
   /* 좌측 콘텐츠 블록보다 1rem 아래 — 블록 세로 중앙에 램프 중심을 맞춘 값 */
-  top: clamp(7.5rem, calc(50% - 8.5rem), 12.5rem); /* 블록 top + 3rem — 늘어난 블록(약 17rem)의 세로 중앙 */
+  top: 8.6rem; /* 시안 65px × 1.33 — 콘텐츠 블록과 같은 높이에서 시작 */
   right: 3.1rem;
-  width: 8.5rem;
-  height: 10.96rem;
+  width: 11.3rem; /* 시안 85px × 1.33 */
+  height: 14.6rem; /* 시안 109.6px × 1.33 */
   display: block;
   object-fit: contain;
   pointer-events: none;
@@ -134,12 +134,12 @@ function setBrightness(value) {
   position: absolute;
   /* 블록·램프·밝기 컨트롤을 시안 간격 그대로 한 묶음으로 카드 세로 중앙에 둔다.
      (공통 420px 카드: 12.2rem, 시안 316px: 9rem) */
-  top: clamp(6.5rem, calc(50% - 11.5rem), 9.5rem); /* 제목 아래 가까이 붙여 위아래 빈 여백을 줄인다 (공통 420px 카드: 9.5rem) */
+  top: 8.6rem; /* 시안 65px × 1.33 (316px 시안을 420px 카드에 비례 확대) */
   left: 3.2rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 6.2rem; /* 시안 26px → 토글·숫자를 아래로 내려 슬라이더와의 간격을 줄임 */
+  gap: 3.5rem; /* 시안 26px × 1.33 */
 }
 
 .titleFrame {
@@ -148,7 +148,7 @@ function setBrightness(value) {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  gap: 2.6rem; /* 시안 12px → 이름은 그대로, 토글을 아래로 */
+  gap: 1.6rem; /* 시안 12px × 1.33 */
 }
 
 .homeName {
@@ -269,19 +269,19 @@ function setBrightness(value) {
 .lightControlFrame {
   /* 시안: 아이콘 30px @ x=20/309, 트랙 63~298px, 세로 중심 232px */
   position: absolute;
-  /* 하단 고정: 카메라 조작 프레임 하단(4.1rem)에 가깝게 */
-  bottom: 5rem;
+  /* 시안 아이콘 행 중심 232px × 1.33 = 30.8rem → 행 높이 4rem 의 top */
+  top: 28.8rem;
   right: 2rem;
   left: 2rem;
   display: grid;
-  grid-template-columns: 3rem minmax(0, 1fr) 3rem;
+  grid-template-columns: 4rem minmax(0, 1fr) 4rem; /* 전구 아이콘 30px × 1.33 */
   align-items: center;
   gap: 1.2rem;
 }
 
 .lightSettingIcon {
-  width: 3rem;
-  height: 3rem;
+  width: 4rem;
+  height: 4rem;
   display: block;
   object-fit: contain;
 }
