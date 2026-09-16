@@ -2,6 +2,7 @@ import { ref, watch } from 'vue'
 import { API_ENDPOINTS, getEditableWallyHost } from '@/endpoints'
 import { authFetch } from './useFetch'
 import { useAuth } from './useAuth'
+import { hasWindow } from '@/utils/env'
 
 // 원본은 접속 중인 게이트웨이의 클라이언트 저장소(/client/storage)이고,
 // localStorage는 표시용 캐시다(mewly 구조) — 조회 실패(오프라인 등) 시
@@ -11,10 +12,6 @@ const SERVER_STORAGE_KEY = 'pet_profile'
 const LEGACY_STORAGE_KEY = 'wally:profile'
 const DEFAULT_PROFILE_IMG = '/icons/Setting/Profile_Img.svg'
 const SERVER_SAVE_DEBOUNCE_MS = 1000
-
-function hasWindow() {
-  return typeof window !== 'undefined'
-}
 
 function cacheKey() {
   return `wally:profile.${getEditableWallyHost() || 'default'}`

@@ -13,6 +13,7 @@ import {
   ensureNotificationPermission,
   NOTIFICATION_CHANNELS,
 } from '@/utils/notifications'
+import { wait } from './env'
 
 let initialized = false
 const CLIP_LOOKUP_TIMEOUT_MS = 120_000
@@ -72,10 +73,6 @@ function thumbnailUrl(event, authToken) {
 
 function hasNotificationMedia(event) {
   return Boolean(thumbnailUrl(event, ''))
-}
-
-function wait(delay) {
-  return new Promise((resolve) => window.setTimeout(resolve, delay))
 }
 
 async function resolveNotificationClip(event) {

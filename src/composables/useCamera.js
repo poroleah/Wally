@@ -7,6 +7,7 @@ import {
   hasStreamCameraConfigChanged,
   normalizeCameraConfig,
 } from '@/utils/cameraConfig'
+import { hasWindow } from '@/utils/env'
 
 const CAMERA_ID = 'primary'
 const CAMERA_NAME_STORAGE_KEY = 'wally_camera_name'
@@ -20,10 +21,6 @@ const saveStatus = ref('')
 const loaded = ref(false)
 const reconnectKey = ref(0)
 let loadPromise = null
-
-function hasWindow() {
-  return typeof window !== 'undefined'
-}
 
 function getStoredCameraName() {
   if (!hasWindow()) return ''

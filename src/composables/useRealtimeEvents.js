@@ -116,10 +116,6 @@ function asArray(value) {
   return []
 }
 
-function hasWindow() {
-  return typeof window !== 'undefined'
-}
-
 function loadSavedEventKeys() {
   if (!hasWindow()) return []
   try {
@@ -519,3 +515,4 @@ export function useRealtimeEvents() {
   }
 }
 import { formatDateQuery, pad2 } from '@/utils/date'
+import { hasWindow } from '@/utils/env'

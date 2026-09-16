@@ -4,6 +4,7 @@ import { LOGIN_NOTICE_STORAGE_KEY, SESSION_EXPIRED_NOTICE } from '@/constants'
 import { SERVER_REQUEST_TIMEOUT_MS } from '@/constants/network'
 import { apiFetch, failureMessage } from './useFetch'
 import network from '../../config/network.json'
+import { hasWindow } from '@/utils/env'
 
 const SESSION_KIND_KEY = 'wally:sessionKind'
 const TOKEN_KEY = 'wally:token'
@@ -116,10 +117,6 @@ export class LoginRateLimitError extends Error {
     this.name = 'LoginRateLimitError'
     this.retryAfterSeconds = retryAfterSeconds
   }
-}
-
-function hasWindow() {
-  return typeof window !== 'undefined'
 }
 
 function getStorage(kind) {

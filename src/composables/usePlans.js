@@ -1,11 +1,8 @@
 import { ref } from 'vue'
 import { pad2 } from '@/utils/date'
+import { hasWindow } from '@/utils/env'
 
 const PLANS_STORAGE_KEY = 'wally:plans'
-
-function hasWindow() {
-  return typeof window !== 'undefined'
-}
 
 function loadStoredPlans() {
   if (!hasWindow()) return {}

@@ -2,6 +2,7 @@ import { ref, watch } from 'vue'
 import { API_ENDPOINTS, getEditableWallyHost } from '@/endpoints'
 import { authFetch } from './useFetch'
 import { useAuth } from './useAuth'
+import { hasWindow } from '@/utils/env'
 
 // PTZ 프리셋의 표시 메타(이름·이모지·숨김 슬롯) 공유 저장소.
 // 좌표는 SSE ptz_preset_positions(서버)가 진실이고, 이 메타도 게이트웨이의
@@ -14,10 +15,6 @@ const SERVER_SAVE_DEBOUNCE_MS = 1000
 const LEGACY_NAMES_KEY = 'wally:ptzPresetNames'
 const LEGACY_EMOJIS_KEY = 'wally:ptzPresetEmojis'
 const LEGACY_HIDDEN_KEY = 'wally:ptzPresetHidden'
-
-function hasWindow() {
-  return typeof window !== 'undefined'
-}
 
 function cacheKey() {
   return `wally:ptzPresetMeta.${getEditableWallyHost() || 'default'}`

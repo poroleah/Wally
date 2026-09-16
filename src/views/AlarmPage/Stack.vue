@@ -24,6 +24,7 @@ import { usePlans } from '@/composables/usePlans'
 import { useLogs } from '@/composables/useLogs'
 import { useAlarmSettings } from '@/composables/useAlarmSettings'
 import AlarmItem from './AlarmItem.vue'
+import { wait } from '@/utils/env'
 
 const props = defineProps({
   activeTab: String,
@@ -89,12 +90,6 @@ function openAlarm(alarm) {
 
 function sameAlarmList(a, b) {
   return a.length === b.length && a.every((item, index) => item.id === b[index]?.id)
-}
-
-function wait(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms)
-  })
 }
 
 function getClearTiming(count) {

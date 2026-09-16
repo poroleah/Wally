@@ -12,6 +12,7 @@ import { initNotificationActions } from '@/utils/notifications'
 import { ensureLabelGroupsInjected } from '@/composables/analysisConfig'
 import { initScheduleAlarmSync } from '@/utils/scheduleAlarmSync'
 import { initAbnormalNotifications } from '@/utils/abnormalNotifications'
+import { hasWindow } from '@/utils/env'
 
 const THEME_STORAGE_KEY = 'wally:theme'
 const THEME_LIGHT = 'light'
@@ -21,10 +22,6 @@ const themeSubscribers = new Set()
 function removeInitialSplash() {
   if (!hasWindow()) return
   document.getElementById('splash-init')?.remove()
-}
-
-function hasWindow() {
-  return typeof window !== 'undefined'
 }
 
 function getSystemTheme() {

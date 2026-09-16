@@ -3,6 +3,7 @@
 // REST, runtime controls, SSE, and the HLS/WHEP relays. Scheme and port live
 // in config/network.json (backendScheme/backendPort).
 import network from '../config/network.json'
+import { hasWindow } from './utils/env'
 
 const WALLY_HOST_STORAGE_KEY = 'wally_host'
 
@@ -12,10 +13,6 @@ let sessionWallyHost = ''
 
 const SCHEME = network.backendScheme
 const PORT = network.backendPort
-
-function hasWindow() {
-  return typeof window !== 'undefined'
-}
 
 function normalizeHost(value) {
   const raw = String(value || '').trim()

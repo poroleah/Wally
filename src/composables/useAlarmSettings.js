@@ -1,4 +1,5 @@
 import { computed, reactive, watch } from 'vue'
+import { hasWindow } from '@/utils/env'
 
 const ALARM_SETTINGS_STORAGE_KEY = 'wally:alarmSettings'
 
@@ -9,10 +10,6 @@ const DEFAULT_ALARM_SETTINGS = {
   schedule: true,
   chatbot: false,
   appInfo: false,
-}
-
-function hasWindow() {
-  return typeof window !== 'undefined'
 }
 
 function loadStoredSettings() {

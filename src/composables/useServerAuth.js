@@ -1,11 +1,8 @@
 import { computed, ref } from 'vue'
 import { applyWallyHost, getEditableWallyHost, persistWallyHost } from '@/endpoints'
+import { hasWindow } from '@/utils/env'
 
 const SERVER_AUTHENTICATED_KEY = 'wally:serverAuthenticated'
-
-function hasWindow() {
-  return typeof window !== 'undefined'
-}
 
 function loadServerAuthenticated() {
   if (!hasWindow()) return false
