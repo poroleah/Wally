@@ -396,7 +396,7 @@ function toggleMode() {
 .content {
   flex: 1 1 auto; /* 드로어 높이를 채워 카드가 남는 공간을 가져갈 수 있게 */
   min-height: 0;
-  margin: 7.2rem 2rem 4.9rem; /* 시안 62px/42px × 1.17 (360px 시안을 420px 카드에 비례 확대) */
+  margin: 6.2rem 2rem 4rem; /* 공통 콘텐츠 구역: 제목 아래 6.2rem 부터 카드 하단 4rem 까지 — 네 드로어 동일 */
   display: flex;
   flex-direction: column;
   gap: 1.9rem; /* 시안 16px × 1.17 */

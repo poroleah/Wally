@@ -971,7 +971,7 @@ onBeforeUnmount(() => {
 /* ── 조작/설정 세그먼트 토글 ── */
 .cameraToggle {
   position: relative;
-  margin-top: 5.7rem; /* 시안 탭 top 59px × 0.97 (434px 시안을 420px 카드에 비례) */
+  margin-top: 6.2rem; /* 공통 콘텐츠 구역: 제목 아래 6.2rem 부터 카드 하단 4rem 까지 — 네 드로어 동일 */
   height: 3.2rem;
   flex: 0 0 3.2rem;
   border-radius: 10.2rem;
@@ -1163,7 +1163,7 @@ onBeforeUnmount(() => {
 .zoomFrame {
   position: relative;
   margin-top: 1.55rem; /* 시안 16px × 0.97 */
-  margin-bottom: 4rem; /* 시안 41px × 0.97 */
+  margin-bottom: 4rem; /* 공통 콘텐츠 구역: 제목 아래 6.2rem 부터 카드 하단 4rem 까지 — 네 드로어 동일 */
   flex: 0 0 6.8rem;
   height: 6.8rem; /* 시안 70px × 0.97 */
   border-radius: 1rem;

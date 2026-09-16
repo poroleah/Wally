@@ -121,7 +121,7 @@ function setBrightness(value) {
 .lampIcon {
   position: absolute;
   /* 좌측 콘텐츠 블록보다 1rem 아래 — 블록 세로 중앙에 램프 중심을 맞춘 값 */
-  top: 8.6rem; /* 시안 65px × 1.33 — 콘텐츠 블록과 같은 높이에서 시작 */
+  top: 6.2rem; /* 콘텐츠 블록과 같은 높이에서 시작 */
   right: 3.1rem;
   width: 11.3rem; /* 시안 85px × 1.33 */
   height: 14.6rem; /* 시안 109.6px × 1.33 */
@@ -134,7 +134,7 @@ function setBrightness(value) {
   position: absolute;
   /* 블록·램프·밝기 컨트롤을 시안 간격 그대로 한 묶음으로 카드 세로 중앙에 둔다.
      (공통 420px 카드: 12.2rem, 시안 316px: 9rem) */
-  top: 8.6rem; /* 시안 65px × 1.33 (316px 시안을 420px 카드에 비례 확대) */
+  top: 6.2rem; /* 공통 콘텐츠 구역: 제목 아래 6.2rem 부터 카드 하단 4rem 까지 — 네 드로어 동일 */
   left: 3.2rem;
   display: flex;
   flex-direction: column;
@@ -269,8 +269,8 @@ function setBrightness(value) {
 .lightControlFrame {
   /* 시안: 아이콘 30px @ x=20/309, 트랙 63~298px, 세로 중심 232px */
   position: absolute;
-  /* 하단 정렬: 슬라이더 중심이 카드 하단에서 6.5rem — 카메라 확대축소·말하기 슬라이더와 같은 선 */
-  top: 33.5rem;
+  /* 공통 콘텐츠 구역: 제목 아래 6.2rem 부터 카드 하단 4rem 까지 — 네 드로어 동일 */
+  bottom: 4rem;
   right: 2rem;
   left: 2rem;
   display: grid;
