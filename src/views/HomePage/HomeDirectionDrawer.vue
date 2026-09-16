@@ -651,10 +651,10 @@ onBeforeUnmount(() => {
   position: relative;
   z-index: 90;
   width: 100%;
-  /* 홈 드로어 4종 공통 높이 38rem. 시안(434px)보다 낮아 방향 패드가 약간 줄지만,
+  /* 홈 드로어 4종 공통 높이 42rem. 시안(434px)보다 낮아 방향 패드가 약간 줄지만,
      시안이 316~360px 인 조명·말하기·온도 드로어의 공백을 줄이기 위한 절충값 */
-  flex: 1 1 clamp(27.2rem, 66dvh, 38rem);
-  min-height: clamp(27.2rem, 66dvh, 38rem);
+  flex: 1 1 clamp(27.2rem, 70dvh, 42rem);
+  min-height: clamp(27.2rem, 70dvh, 42rem);
   margin-top: 2.4rem;
   padding: 0 2rem;
   box-sizing: border-box;

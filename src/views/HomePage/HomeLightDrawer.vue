@@ -75,9 +75,9 @@ function setBrightness(value) {
   position: relative;
   z-index: 90;
   width: 100%;
-  /* 홈 드로어 4종 공통 높이 38rem. 작은 화면에서는 뷰포트에 맞춰 줄어든다 */
+  /* 홈 드로어 4종 공통 높이 42rem. 작은 화면에서는 뷰포트에 맞춰 줄어든다 */
   flex: 0 0 auto;
-  height: min(clamp(27.2rem, 66dvh, 38rem), calc(100dvh - 9rem));
+  height: min(clamp(27.2rem, 70dvh, 42rem), calc(100dvh - 9rem));
   margin-top: 2.4rem;
   border-radius: 2rem 2rem 0 0;
   background-color: var(--home-panel-bg);
@@ -133,7 +133,7 @@ function setBrightness(value) {
 .contentFrame {
   position: absolute;
   /* 블록·램프·밝기 컨트롤을 시안 간격 그대로 한 묶음으로 카드 세로 중앙에 둔다.
-     (공통 380px 카드: 12.2rem, 시안 316px: 9rem) */
+     (공통 420px 카드: 12.2rem, 시안 316px: 9rem) */
   top: clamp(6.5rem, calc(50% - 8.8rem), 12.2rem); /* 제목 영역·안전영역 패딩 만큼 2rem 위로 보정 */
   left: 3.2rem;
   display: flex;
