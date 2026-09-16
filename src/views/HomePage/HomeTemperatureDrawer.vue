@@ -63,6 +63,7 @@
       </div>
 
       <div v-if="activeTab === 'temperature' && !isPowerOn" :class="$style.card">
+        <div :class="$style.cardInner">
         <div :class="[$style.currentRow, $style.currentRowOff]">
           <span :class="$style.currentLabel">현재 온도</span>
           <span :class="$style.currentValueSmall">{{ currentTemperature }}</span>
@@ -72,9 +73,11 @@
         <svg :class="$style.offArc" viewBox="0 0 320 170" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path :class="$style.heatTrack" d="M20 155A140 140 0 0 1 300 155" />
         </svg>
+        </div>
       </div>
 
       <div v-else-if="activeTab === 'temperature'" :class="$style.card">
+        <div :class="$style.cardInner">
         <div :class="$style.gaugeArea" aria-hidden="true">
           <svg :class="[$style.heatGauge, isWarm ? $style.heatGaugeWarm : $style.heatGaugeCool]" viewBox="0 0 320 170" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path :class="$style.heatTrack" d="M20 155A140 140 0 0 1 300 155" />
@@ -110,6 +113,7 @@
         >
           <img :class="$style.adjustIcon" src="/icons/Home/Bar/Tem/Tem_Plus.svg" alt="" />
         </button>
+        </div>
       </div>
 
       <template v-else>
@@ -309,7 +313,7 @@ function toggleMode() {
   flex-direction: column;
   /* 다른 홈 드로어(조명·말하기 등)와 동일한 높이 — 탭 전환 시에도 고정.
      낮은 화면에서는 뷰포트에 맞춰 줄고 카드가 함께 줄어든다 */
-  height: min(clamp(27.2rem, 62dvh, 34.8rem), calc(100dvh - 9rem));
+  height: min(clamp(27.2rem, 72dvh, 43.4rem), calc(100dvh - 9rem)); /* 카메라 조작 드로어(434px)와 동일 */
   margin-top: 2.4rem;
   border-radius: 2rem 2rem 0 0;
   background-color: var(--home-panel-bg);
@@ -390,9 +394,9 @@ function toggleMode() {
 }
 
 .content {
-  flex: 0 1 auto;
+  flex: 1 1 auto; /* 드로어 높이를 채워 카드가 남는 공간을 가져갈 수 있게 */
   min-height: 0;
-  margin: 6.2rem 2rem 2rem;
+  margin: 6.2rem 2rem 4.1rem; /* 하단 여백은 카메라 조작 드로어와 동일 */
   display: flex;
   flex-direction: column;
   gap: 1.6rem;
@@ -512,14 +516,24 @@ function toggleMode() {
 
 .card {
   position: relative;
-  /* 시안의 168px 고정 카드 — 화면이 낮을 때만 10rem까지 줄어든다 */
-  flex: 0 1 16.8rem;
-  height: 16.8rem;
+  /* 드로어를 카메라 조작과 같은 높이로 키우면서 카드가 남는 세로 공간을 채운다.
+     시안의 168px 묶음(.cardInner)은 카드 안에서 세로 중앙에 놓인다 */
+  flex: 1 1 16.8rem;
   min-height: 10rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 1rem;
   background-color: var(--home-control-hover);
   overflow: hidden;
   color: var(--home-muted);
+}
+
+.cardInner {
+  position: relative;
+  width: 100%;
+  height: 16.8rem;
+  max-height: 100%;
 }
 
 /* 예약 탭: 자동 꺼짐 안내 배너 (시안 320x40) */
