@@ -290,7 +290,8 @@ onBeforeUnmount(() => {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(5.6rem + env(safe-area-inset-bottom));
+  /* 카메라 조작 카드처럼 하단 내비(z-index 100)까지 덮고 화면 맨 아래에 붙인다 */
+  bottom: 0;
   z-index: 105;
   display: flex;
   flex-direction: column;
@@ -301,13 +302,19 @@ onBeforeUnmount(() => {
   pointer-events: auto;
 }
 
+/* 내비 자리까지 내려오므로 홈 인디케이터 안전 영역만큼 카드 하단 여백 확보 */
+.drawerMotion > :first-child {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 .drawerBackdrop {
   position: fixed;
   top: 0;
   right: 0;
-  bottom: calc(5.6rem + env(safe-area-inset-bottom));
+  bottom: 0;
   left: 0;
-  z-index: 95;
+  /* 하단 내비(z-index 100)보다 위에 깔려 드로어가 열린 동안 내비를 가린다 */
+  z-index: 102;
   padding: 0;
   border: 0;
   background: rgba(45, 41, 38, 0.34);
