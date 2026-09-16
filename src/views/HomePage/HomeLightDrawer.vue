@@ -120,7 +120,8 @@ function setBrightness(value) {
 
 .lampIcon {
   position: absolute;
-  top: 6.5rem;
+  /* 좌측 이름·토글·퍼센트 블록(약 12rem)의 세로 중앙에 램프 중심을 맞춘 값 */
+  top: 7.5rem;
   right: 3.1rem;
   width: 8.5rem;
   height: 10.96rem;
