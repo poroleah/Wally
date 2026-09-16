@@ -121,7 +121,7 @@ function setBrightness(value) {
 .lampIcon {
   position: absolute;
   /* 좌측 콘텐츠 블록보다 1rem 아래 — 블록 세로 중앙에 램프 중심을 맞춘 값 */
-  top: clamp(7.5rem, calc(50% - 10.5rem), 10.5rem); /* 블록 top + 1rem */
+  top: clamp(7.5rem, calc(50% - 8.5rem), 12.5rem); /* 블록 top + 3rem — 늘어난 블록(약 17rem)의 세로 중앙 */
   right: 3.1rem;
   width: 8.5rem;
   height: 10.96rem;
@@ -139,7 +139,7 @@ function setBrightness(value) {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2.6rem;
+  gap: 6.2rem; /* 시안 26px → 토글·숫자를 아래로 내려 슬라이더와의 간격을 줄임 */
 }
 
 .titleFrame {
@@ -148,7 +148,7 @@ function setBrightness(value) {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  gap: 1.2rem;
+  gap: 2.6rem; /* 시안 12px → 이름은 그대로, 토글을 아래로 */
 }
 
 .homeName {
