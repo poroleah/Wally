@@ -218,9 +218,9 @@ onBeforeUnmount(() => {
   position: relative;
   z-index: 90;
   width: 100%;
-  flex: 1 1 auto;
-  /* 절대 배치된 스피커 음량 영역(~31rem)까지 항상 담기도록 최소 높이 고정 */
-  min-height: 32rem;
+  flex: 0 0 auto;
+  /* 카메라 조작·온도 드로어와 동일한 높이(시안 434px). 작은 화면에서는 뷰포트에 맞춰 줄어든다 */
+  height: min(clamp(27.2rem, 72dvh, 43.4rem), calc(100dvh - 9rem));
   margin-top: 2.4rem;
   border-radius: 2rem 2rem 0 0;
   background-color: var(--home-panel-bg);
@@ -274,7 +274,9 @@ onBeforeUnmount(() => {
 
 .micGroup {
   position: absolute;
-  top: 6.4rem;
+  /* 마이크(13rem)+파형 묶음(총 17.6rem)을 제목 아래~음량 영역 위 공간의 세로 중앙에.
+     시안 320px 카드에서는 6.4rem, 434px 카드에서는 10.1rem */
+  top: clamp(6.4rem, calc(50% - 11.6rem), 10.1rem);
   left: 50%;
   width: 13rem;
   height: 13rem;
@@ -370,7 +372,8 @@ body.theme-dark .micMiddle,
 
 .barGroup {
   position: absolute;
-  top: 21rem;
+  /* 마이크 하단 +1.6rem 을 따라간다 (320px: 21rem, 434px: 24.7rem) */
+  top: clamp(21rem, calc(50% + 3rem), 24.7rem);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -389,7 +392,8 @@ body.theme-dark .micMiddle,
 
 .volHead {
   position: absolute;
-  top: 25.7rem;
+  /* 슬라이더(soundBar) 바로 위에 하단 기준으로 고정 — 시안 라벨 top 257px = soundBar top −1.3rem */
+  bottom: 8.2rem;
   right: 1.6rem;
   left: 1.6rem;
   display: flex;
@@ -401,7 +405,8 @@ body.theme-dark .micMiddle,
 
 .soundBar {
   position: absolute;
-  top: 27rem;
+  /* 하단 여백 4.1rem 은 카메라 조작·온도 드로어와 동일 */
+  bottom: 4.1rem;
   right: 0;
   left: 0;
   display: flex;
