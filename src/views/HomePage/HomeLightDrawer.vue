@@ -273,7 +273,7 @@ function setBrightness(value) {
   display: grid;
   grid-template-columns: 3rem minmax(0, 1fr) 3rem;
   align-items: center;
-  gap: 0.5rem; /* 시안: 전구 아이콘(30px)과 트랙 박스(left 35px) 사이 5px */
+  gap: 1.2rem;
 }
 
 .lightSettingIcon {
