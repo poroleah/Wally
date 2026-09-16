@@ -302,10 +302,22 @@ onBeforeUnmount(() => {
   pointer-events: auto;
 }
 
-/* 내비 자리까지 내려오므로 홈 인디케이터 안전 영역만큼 카드 하단 여백 확보 */
-.drawerMotion > :first-child {
-  /* Android WebView 는 env() 가 0 이라 MainActivity 가 주입하는 --wally-safe-bottom 을 함께 본다 */
+/* 내비 자리까지 내려오므로 시스템 바 안전 영역만큼 드로어를 위로 올린다.
+   드로어 자체에 padding 을 주면 border-box 라 고정 높이(38rem) 안쪽이 줄어들어 카드가 잘리므로
+   래퍼(.drawerMotion)에 패딩을 두고, 그 빈 자리는 ::after 로 드로어와 같은 배경을 깐다.
+   Android WebView 는 env() 가 0 이라 MainActivity 가 주입하는 --wally-safe-bottom 을 함께 본다 */
+.drawerMotion {
   padding-bottom: max(env(safe-area-inset-bottom), var(--wally-safe-bottom, 0px));
+}
+
+.drawerMotion::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: max(env(safe-area-inset-bottom), var(--wally-safe-bottom, 0px));
+  background-color: var(--home-panel-bg);
 }
 
 .drawerBackdrop {
