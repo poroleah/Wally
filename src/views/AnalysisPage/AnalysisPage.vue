@@ -25,8 +25,8 @@
     <template v-if="mode === 'state'">
       <AnalysisToday
         :class="$style.today"
-        :score="today.score"
-        :hourly="today.hourly"
+        :score="score"
+        :hourly="hourly"
         :activityCount="today.activityCount"
         :activityMinutes="today.activityMinutes"
         :postures="postures"
@@ -131,10 +131,21 @@ const statusLabel = computed(() => {
 })
 const statusAlert = computed(() => Array.isArray(rhythm.value) && rhythm.value.length > 0)
 
-// 3·4단계 전까지 남는 시안 값: 활동 지수, 시간대별 막대, 활동량, 활동시간
+// 활동 지수(0~100): 그날 라벨 표본 중 비누움(앉기+서기) 비율. 표본이 없으면 null.
+const score = computed(() => {
+  const st = dayStates.value
+  if (!st?.labeled) return null
+  const active = st.hours.reduce((a, h) => a + h.counts.sitting + h.counts.standing, 0)
+  return Math.round((active / st.labeled) * 100)
+})
+
+// 시간대별 활동 지수 — 같은 정의를 시간 단위로. 표본 없는 시간(아직 안 온 시간 포함)은 null.
+const hourly = computed(() =>
+  dayStates.value ? dayStates.value.activity.map((a) => (a == null ? null : Math.round(a * 100))) : Array(24).fill(null),
+)
+
+// 4단계 전까지 남는 시안 값: 활동량, 활동시간
 const today = ref({
-  score: 90,
-  hourly: [50, 35, 44, 27, 41, 69, 72, 83, 64, 52, 50, 90, null, null, null, null, null, null, null, null, null, null, null, null],
   activityCount: 42,
   activityMinutes: 326,
 })

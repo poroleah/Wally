@@ -9,7 +9,7 @@
     </div>
 
     <div :class="$style.scoreBox">
-      <b :class="$style.score">{{ score }}</b>
+      <b :class="$style.score">{{ score == null ? '-' : score }}</b>
       <div :class="$style.scoreText">
         <span :class="$style.scoreLabel">활동 지수</span>
         <span :class="$style.scoreHint">100에 가까울수록 활발해요</span>
@@ -73,7 +73,7 @@ import { computed, ref } from 'vue'
 
 // 시간대별 활동 지수(0~100). null은 아직 오지 않은 시간.
 const props = defineProps({
-  score: { type: Number, default: 0 },
+  score: { type: Number, default: null }, // 활동 지수 0~100, null이면 표본 없음
   statusLabel: { type: String, default: '' },
   statusAlert: { type: Boolean, default: false }, // 편차 감지 시 점을 강조색으로
   hourly: { type: Array, default: () => Array(24).fill(null) },
