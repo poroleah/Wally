@@ -82,6 +82,20 @@ const baseline = ref(null) // fetchBaseline 반환값
 const statesError = ref(false)
 let statesSeq = 0
 
+// 지난 날짜의 집계·기준선은 바뀌지 않으므로 세션 안에서 캐시한다(오늘은 계속 갱신되니 제외).
+const statesCache = new Map()
+const baselineCache = new Map()
+
+function cachedOrFetch(cache, iso, fetcher, cacheable) {
+  if (cacheable && cache.has(iso)) return cache.get(iso)
+  const p = fetcher(iso)
+  if (cacheable) {
+    cache.set(iso, p)
+    p.catch(() => cache.delete(iso)) // 실패는 캐시하지 않는다
+  }
+  return p
+}
+
 async function loadStates() {
   const mySeq = ++statesSeq
   statesError.value = false
@@ -89,18 +103,24 @@ async function loadStates() {
   dayStates.value = null
   baseline.value = null
   const iso = toIsoDate(current.value)
+  const isPast = iso < toIsoDate(new Date())
+  // 두 요청을 동시에 보내고 먼저 오는 것부터 반영한다 — 기준선(14일치)이 더 느리다.
+  const statesP = cachedOrFetch(statesCache, iso, fetchDayStates, isPast)
+  const baselineP = cachedOrFetch(baselineCache, iso, fetchBaseline, true)
   try {
-    const st = await fetchDayStates(iso)
+    const st = await statesP
     if (mySeq !== statesSeq) return
     dayStates.value = st
-    const bl = await fetchBaseline(iso)
+  } catch {
+    if (mySeq !== statesSeq) return
+    statesError.value = true
+  }
+  try {
+    const bl = await baselineP
     if (mySeq !== statesSeq) return
     baseline.value = bl
   } catch {
-    if (mySeq !== statesSeq) return
-    dayStates.value = null
-    baseline.value = null
-    statesError.value = true
+    // fetchBaseline은 실패 시 빈 기준선을 돌려주므로 여기 오는 일은 드물다 — 그대로 null
   }
 }
 watch(current, loadStates, { immediate: true })
