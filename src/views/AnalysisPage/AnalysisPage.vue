@@ -27,8 +27,8 @@
         :class="$style.today"
         :score="score"
         :hourly="hourly"
-        :activityCount="today.activityCount"
-        :activityMinutes="today.activityMinutes"
+        :activityCount="activityCount"
+        :activityMinutes="activityMinutes"
         :postures="postures"
         :statusLabel="statusLabel"
         :statusAlert="statusAlert"
@@ -144,10 +144,15 @@ const hourly = computed(() =>
   dayStates.value ? dayStates.value.activity.map((a) => (a == null ? null : Math.round(a * 100))) : Array(24).fill(null),
 )
 
-// 4단계 전까지 남는 시안 값: 활동량, 활동시간
-const today = ref({
-  activityCount: 42,
-  activityMinutes: 326,
+// 활동량(N회): 그날 눕기·앉기·서기로 관측된 횟수의 합 — 자세 비율의 분모와 같다.
+const activityCount = computed(() => dayStates.value?.labeled ?? 0)
+
+// 활동시간(분): 시간대별 비누움 비율 × 60분의 합. 표본 없는 시간은 0으로 본다.
+const activityMinutes = computed(() => {
+  const st = dayStates.value
+  if (!st) return 0
+  const minutes = st.activity.reduce((a, share) => a + (share == null ? 0 : share * 60), 0)
+  return Math.round(minutes)
 })
 // 요일별 활동 지수(월~일), null은 아직 오지 않은 날.
 const week = ref({
