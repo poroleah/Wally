@@ -38,11 +38,18 @@
         <div :class="$style.legendItem">
           <img :class="$style.legendIcon" src="/icons/Analysis/Moon_Fill.svg" alt="" />
           <span :class="$style.legendLabel">야간 뒤척임</span>
+          <!-- 야간(주간 구간 밖) 라벨 표본 중 비누움 비율. 기준선 평균은 표본이 있을 때만 -->
+          <span :class="$style.legendValue">
+            {{ restless.value == null ? '-' : `${restless.value}%` }}
+            <small v-if="restless.average != null" :class="$style.legendAvg">평균 {{ restless.average }}%</small>
+          </span>
         </div>
         <div :class="$style.legendDivider" />
         <div :class="$style.legendItem">
           <img :class="$style.legendIcon" src="/icons/Calendar/Bone.svg" alt="" />
           <span :class="$style.legendLabel">기타 활동</span>
+          <!-- 정의 미확정 — 임시로 0% 고정 -->
+          <span :class="$style.legendValue">0%</span>
         </div>
       </div>
 
@@ -109,6 +116,16 @@ const postures = computed(() =>
     }
   }),
 )
+
+// 야간 뒤척임: 야간 라벨 표본 중 비누움 비율(%)과 기준선 평균
+const restless = computed(() => {
+  const share = dayStates.value?.metrics?.restless
+  const n = baseline.value?.n?.restless ?? 0
+  return {
+    value: share == null ? null : Math.round(share * 100),
+    average: n > 0 ? Math.round(baseline.value.mean.restless * 100) : null,
+  }
+})
 
 // 리듬 판정: null=기준선 부족, []=이상 없음, [{label, direction}]=편차
 const rhythm = computed(() => {
@@ -329,6 +346,21 @@ const nextDate = () => shiftDate(1)
   font-size: 1.2rem;
   line-height: 1;
   color: var(--log-text);
+}
+/* 오른쪽 값: 오늘의 활동 행 값과 같은 톤(0.8rem, 80%) */
+.legendValue {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  line-height: 1;
+  color: var(--log-text);
+  opacity: 0.8;
+}
+.legendAvg {
+  font-size: 0.6rem;
+  color: var(--log-muted);
 }
 .legendDivider {
   position: absolute;
