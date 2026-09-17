@@ -57,7 +57,9 @@ const H = 300
 
 // 시안처럼 각 요일 눈금 중앙에 점을 찍는다.
 const xOf = (i) => ((i + 0.5) / DAYS.length) * W
-const yOf = (v) => H - (Math.min(100, Math.max(0, v)) / 100) * H
+// 0·100이 그래프 가장자리에 붙지 않도록 위아래 8% 여백 안에서 매핑한다(점·선 두께 확보)
+const PAD = H * 0.08
+const yOf = (v) => H - PAD - (Math.min(100, Math.max(0, v)) / 100) * (H - PAD * 2)
 
 const points = computed(() =>
   props.daily
