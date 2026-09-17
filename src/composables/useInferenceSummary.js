@@ -94,11 +94,83 @@ function computeMetrics(hours) {
 }
 
 // 지정 일자의 집계. 반환: { total, labeled, unlabeled, hours[24], metrics, activity[24] }
+// ── 지난 날짜 시간별 집계의 영구 캐시 ──
+// 지난 날의 /summary 결과는 바뀌지 않으므로 날짜별 hours를 localStorage에 둔다.
+// 기준선(14일)은 매번 336버킷 범위 질의라 느린데, 캐시가 있으면 빠진 날짜 구간만 받는다.
+// 오늘은 계속 갱신되므로 저장하지 않는다. 최근 DAY_CACHE_LIMIT일만 남긴다.
+const DAY_CACHE_KEY = 'wally.summaryDayCache'
+const DAY_CACHE_LIMIT = 30
+
+function loadDayCache() {
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(DAY_CACHE_KEY))
+    return parsed && typeof parsed === 'object' ? parsed : {}
+  } catch {
+    return {}
+  }
+}
+
+function saveDayCache(cache) {
+  try {
+    const keys = Object.keys(cache).sort().slice(-DAY_CACHE_LIMIT)
+    window.localStorage.setItem(DAY_CACHE_KEY, JSON.stringify(Object.fromEntries(keys.map((k) => [k, cache[k]]))))
+  } catch {
+    // 저장 실패는 무시 — 다음에 다시 받으면 된다
+  }
+}
+
+// 버킷 목록을 날짜별 hours로 재구성한다 (bucket_start는 로컬 시각).
+function bucketsByDay(buckets) {
+  const byDay = new Map()
+  for (const b of buckets) {
+    const parsed = new Date(b.bucket_start)
+    if (Number.isNaN(parsed.getTime())) continue
+    const day = toIsoDate(parsed)
+    if (!byDay.has(day)) byDay.set(day, emptyHours())
+    accumulate(byDay.get(day), b)
+  }
+  return byDay
+}
+
+function listDates(fromIso, toIso) {
+  const out = []
+  const end = parseIsoDate(toIso)
+  for (let d = parseIsoDate(fromIso); d <= end; d.setDate(d.getDate() + 1)) out.push(toIsoDate(d))
+  return out
+}
+
+// [fromIso, toIso] 구간의 날짜별 hours를 돌려준다. 캐시에 없는 날짜만 한 번의 범위 질의로 받는다.
+// 데이터가 없는 날도 빈 hours로 캐시해 다음에 다시 묻지 않는다. 오늘(이후)은 캐시하지 않는다.
+async function fetchDaysHours(fromIso, toIso) {
+  const todayIso = toIsoDate()
+  const cache = loadDayCache()
+  const dates = listDates(fromIso, toIso)
+  const missing = dates.filter((d) => d >= todayIso || !cache[d])
+  if (missing.length) {
+    const buckets = await fetchSummary(missing[0], missing[missing.length - 1], 'hour')
+    const byDay = bucketsByDay(buckets)
+    let dirty = false
+    for (const d of listDates(missing[0], missing[missing.length - 1])) {
+      const hours = byDay.get(d) ?? emptyHours()
+      if (d < todayIso) {
+        cache[d] = hours
+        dirty = true
+      } else if (dates.includes(d)) {
+        cache[d] = hours // 오늘은 반환용으로만 — 저장은 하지 않는다
+      }
+    }
+    if (dirty) {
+      const persist = { ...cache }
+      for (const d of Object.keys(persist)) if (d >= todayIso) delete persist[d]
+      saveDayCache(persist)
+    }
+  }
+  return new Map(dates.map((d) => [d, cache[d] ?? emptyHours()]))
+}
+
 export async function fetchDayStates(dateIso) {
-  const buckets = await fetchSummary(dateIso, dateIso, 'hour')
-  const hours = emptyHours()
-  let total = 0
-  for (const b of buckets) total += accumulate(hours, b)
+  const hours = (await fetchDaysHours(dateIso, dateIso)).get(dateIso)
+  const total = hours.reduce((a, h) => a + h.total, 0)
 
   const labeled = hours.reduce(
     (a, h) => a + STATE_LABELS.reduce((s, l) => s + h.counts[l], 0), 0,
@@ -127,22 +199,14 @@ export async function fetchBaseline(dateIso, days = analysis.baseline.days) {
 
   const empty = { days: 0, n: {}, mean: {}, sd: {}, history: [] }
   if (from > to) return empty
-  let buckets
+  let byDay
   try {
-    buckets = await fetchSummary(from, to, 'hour')
+    byDay = await fetchDaysHours(from, to)
   } catch {
     return empty
   }
-
-  // 날짜별 hours 재구성 (bucket_start는 로컬 시각)
-  const byDay = new Map()
-  for (const b of buckets) {
-    const parsed = new Date(b.bucket_start)
-    if (Number.isNaN(parsed.getTime())) continue
-    const day = toIsoDate(parsed)
-    if (!byDay.has(day)) byDay.set(day, emptyHours())
-    accumulate(byDay.get(day), b)
-  }
+  // 데이터가 없는 날은 이력·통계에서 제외한다(원래 버킷이 없던 날과 같은 취급)
+  for (const [day, hours] of byDay) if (!hours.some((h) => h.total > 0)) byDay.delete(day)
 
   // 일별 이력 (최신일 우선) — 주간 카드가 요일별 활동도로 쓴다
   const history = [...byDay.entries()]

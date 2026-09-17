@@ -205,6 +205,8 @@ const activityMinutes = computed(() => {
 // 선택일은 오늘 집계, 그 이전 날은 기준선 이력(activeShare)에서 가져온다.
 // 선택일 이후 요일과 표본 없는 날은 null → 선 없이 비운다.
 const week = computed(() => {
+  // 기준선이 오기 전에는 오늘 점만 먼저 찍히지 않도록 아무것도 그리지 않는다
+  if (!baseline.value) return { daily: Array(7).fill(null), average: null }
   const base = new Date(current.value)
   const monday = new Date(base)
   monday.setDate(base.getDate() - ((base.getDay() + 6) % 7))
