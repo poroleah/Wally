@@ -7,7 +7,7 @@ import { useAuth } from '@/composables/useAuth'
 const ALLOWED_NOTIFICATION_ROUTES = new Set([
   ROUTES.SCHEDULE,
   ROUTES.FOOTPRINT,
-  ROUTES.CHAT,
+  ROUTES.ANALYSIS,
   ROUTES.SETTINGS,
 ])
 

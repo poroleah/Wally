@@ -5,7 +5,7 @@ export const ROUTES = {
   LOGIN:         '/login',
   HOME:          '/home',
   SCHEDULE:      '/schedule',
-  CHAT:          '/chat',
+  ANALYSIS:      '/analysis',
   SETTINGS:      '/settings',
   FOOTPRINT:     '/footprint',
   ALARM:         '/alarm',

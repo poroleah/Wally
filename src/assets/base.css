@@ -23,7 +23,6 @@
   --splash-bg: #fffbf5;
   --splash-logo-shadow: none;
 
-
   --login-bg: #fffbf5;
   --login-surface: #fffbf5;
   --login-text: #2d2926;
@@ -79,23 +78,6 @@
   --calendar-close-icon-filter: none;
   --calendar-close-icon-shadow: drop-shadow(0 0.08rem 0.12rem rgba(45, 41, 38, 0.08));
 
-
-
-  --chat-bg: #f5f0e9;
-  --chat-page-bg: #fffbf5;
-  --chat-surface: #fffbf5;
-  --chat-surface-soft: #f5f0e9;
-  --chat-text: #2d2926;
-  --chat-muted: #84776e;
-  --chat-user-bg: #84776e;
-  --chat-user-text: #fffbf5;
-  --chat-accent: #ffb085;
-  --chat-accent-soft: #ffddcb;
-  --chat-border: #eee8de;
-  --chat-shadow: 0 0.18rem 0.7rem rgba(45, 41, 38, 0.06);
-  --chat-input-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.25);
-  --chat-icon-filter: none;
-
   --log-bg: #f5f0e9;
   --log-surface: #fffbf5;
   --log-surface-soft: #eee8de;
@@ -104,6 +86,7 @@
   --log-border: #eee8de;
   --log-accent: #ffb085;
   --log-accent-soft: rgba(255, 176, 133, 0.18);
+  --log-on-accent: #fffbf5; /* 강조색 위 글자 */
   --log-shadow: 0 0.18rem 0.7rem rgba(45, 41, 38, 0.06);
   --log-icon-filter: none;
   --log-close-icon-filter: none;
@@ -175,7 +158,6 @@ body.theme-dark,
   --splash-bg: #1c1918;
   --splash-logo-shadow: drop-shadow(0 0.28rem 0.8rem rgba(0, 0, 0, 0.28));
 
-
   --login-bg: #1c1918;
   --login-surface: #1c1918;
   --login-text: #fff9f3;
@@ -231,23 +213,6 @@ body.theme-dark,
   --calendar-close-icon-filter: brightness(0) invert(1) sepia(0.14) saturate(1.4) hue-rotate(335deg);
   --calendar-close-icon-shadow: drop-shadow(0 0.1rem 0.2rem rgba(0, 0, 0, 0.65)) drop-shadow(0 0 0.18rem rgba(244, 244, 245, 0.18));
 
-
-
-  --chat-bg: #181513;
-  --chat-page-bg: #1c1918;
-  --chat-surface: #1c1918;
-  --chat-surface-soft: #181513;
-  --chat-text: #fff9f3;
-  --chat-muted: #b0a59a;
-  --chat-user-bg: #b0a59a;
-  --chat-user-text: #1c1918;
-  --chat-accent: #ffb38a;
-  --chat-accent-soft: rgba(255, 179, 138, 0.18);
-  --chat-border: #12100f;
-  --chat-shadow: 0 0.22rem 0.9rem rgba(0, 0, 0, 0.28);
-  --chat-input-shadow: inset 0 0 0 0.06rem #12100f, 0 0.22rem 0.9rem rgba(0, 0, 0, 0.28);
-  --chat-icon-filter: brightness(0) invert(0.94);
-
   --log-bg: #181513;
   --log-surface: #1c1918;
   --log-surface-soft: #12100f;
@@ -256,6 +221,7 @@ body.theme-dark,
   --log-border: #12100f;
   --log-accent: #ffb38a;
   --log-accent-soft: rgba(255, 179, 138, 0.16);
+  --log-on-accent: #2d2926;
   --log-shadow: 0 0.22rem 0.9rem rgba(0, 0, 0, 0.28);
   --log-icon-filter: brightness(0) invert(0.94);
   --log-close-icon-filter: brightness(0) invert(1) sepia(0.14) saturate(1.4) hue-rotate(335deg);
@@ -315,7 +281,6 @@ body.theme-light,
   --session-chip-bg: #efe8df;
   --session-chip-text: #6b5f55;
 
-
   --login-bg: #fffbf5;
   --login-surface: #fffbf5;
   --login-text: #2d2926;
@@ -371,23 +336,6 @@ body.theme-light,
   --calendar-close-icon-filter: none;
   --calendar-close-icon-shadow: drop-shadow(0 0.08rem 0.12rem rgba(45, 41, 38, 0.08));
 
-
-
-  --chat-bg: #f5f0e9;
-  --chat-page-bg: #fffbf5;
-  --chat-surface: #fffbf5;
-  --chat-surface-soft: #f5f0e9;
-  --chat-text: #2d2926;
-  --chat-muted: #84776e;
-  --chat-user-bg: #84776e;
-  --chat-user-text: #fffbf5;
-  --chat-accent: #ffb085;
-  --chat-accent-soft: #ffddcb;
-  --chat-border: #eee8de;
-  --chat-shadow: 0 0.18rem 0.7rem rgba(45, 41, 38, 0.06);
-  --chat-input-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.25);
-  --chat-icon-filter: none;
-
   --log-bg: #f5f0e9;
   --log-surface: #fffbf5;
   --log-surface-soft: #eee8de;
@@ -396,6 +344,7 @@ body.theme-light,
   --log-border: #eee8de;
   --log-accent: #ffb085;
   --log-accent-soft: rgba(255, 176, 133, 0.18);
+  --log-on-accent: #fffbf5;
   --log-shadow: 0 0.18rem 0.7rem rgba(45, 41, 38, 0.06);
   --log-icon-filter: none;
   --log-close-icon-filter: none;

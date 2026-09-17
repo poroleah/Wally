@@ -59,7 +59,6 @@ const camItems = [
 ]
 const appItems = [
   { key: 'schedule', label: '일정' },
-  { key: 'chatbot',  label: '챗봇' },
   { key: 'appInfo',  label: '앱 정보 수신' },
 ]
 const { settings, toggleAlarmSetting } = useAlarmSettings()

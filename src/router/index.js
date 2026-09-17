@@ -5,7 +5,7 @@ import LoginPage from '@/views/LoginPage/LoginPage.vue'
 import HomePage from '@/views/HomePage/HomePage.vue'
 import CalendarPage from '@/views/CalendarPage/CalendarPage.vue'
 import AlarmPage from '@/views/AlarmPage/AlarmPage.vue'
-import ChatPage from '@/views/ChatBotPage/BotPage.vue'
+import AnalysisPage from '@/views/AnalysisPage/AnalysisPage.vue'
 import SettingsPage from '@/views/SettingsPage/SettingsPage.vue'
 import LogPage from '@/views/LogPage/LogPage.vue'
 import { LOGIN_NOTICE_STORAGE_KEY, ROUTES } from '@/constants'
@@ -21,7 +21,7 @@ const router = createRouter({
     { path: ROUTES.HOME,          component: HomePage },
     { path: ROUTES.SCHEDULE,  component: CalendarPage },
     { path: ROUTES.ALARM,     component: AlarmPage },
-    { path: ROUTES.CHAT,      component: ChatPage },
+    { path: ROUTES.ANALYSIS,  component: AnalysisPage },
     { path: ROUTES.SETTINGS,  component: SettingsPage },
     { path: ROUTES.FOOTPRINT, component: LogPage },
   ]

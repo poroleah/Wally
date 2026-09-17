@@ -8,7 +8,6 @@ const DEFAULT_ALARM_SETTINGS = {
   motion: true,
   camError: true,
   schedule: true,
-  chatbot: false,
   appInfo: false,
 }
 
