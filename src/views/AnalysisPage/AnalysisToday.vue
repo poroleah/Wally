@@ -28,7 +28,7 @@
           :style="value == null ? null : { height: `${value}%` }"
           :title="value == null ? '' : `${hour + 1}h · ${value}`"
         >
-          <b v-if="hour === peakHour" :class="$style.peak">{{ value }}</b>
+          <b v-if="hour === peakHour" :class="[$style.peak, hour === 0 && $style.peakFirst]">{{ value }}</b>
         </div>
       </div>
       <div :class="$style.xAxis">
@@ -95,10 +95,11 @@ const expanded = ref(false)
 
 const X_TICKS = [1, 6, 12, 18, 24]
 
+// 최고값 막대. 동점이면 가장 최근 시간을 택한다(첫 막대에 붙어 세로축과 겹치는 일을 줄인다).
 const peakHour = computed(() => {
   let idx = -1
   props.hourly.forEach((v, i) => {
-    if (v != null && (idx === -1 || v > props.hourly[idx])) idx = i
+    if (v != null && (idx === -1 || v >= props.hourly[idx])) idx = i
   })
   return idx
 })
@@ -246,6 +247,11 @@ const activityTimeLabel = computed(() => {
   font-size: 0.6rem;
   line-height: 1;
   font-family: 'MalangBold', sans-serif;
+}
+/* 첫 시간 막대가 최고값이면 세로축 "100"과 겹치므로 막대 왼쪽 끝에 맞춰 오른쪽으로 붙인다 */
+.peakFirst {
+  left: 0;
+  transform: none;
 }
 .xAxis {
   position: absolute;
