@@ -29,7 +29,9 @@
         :hourly="today.hourly"
         :activityCount="today.activityCount"
         :activityMinutes="today.activityMinutes"
-        :postures="today.postures"
+        :postures="postures"
+        :statusLabel="statusLabel"
+        :statusAlert="statusAlert"
       />
 
       <div :class="$style.legendCard">
@@ -52,10 +54,12 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import AnalysisToday from './AnalysisToday.vue'
 import AnalysisWeek from './AnalysisWeek.vue'
 import AnalysisEvents from './AnalysisEvents.vue'
+import { toIsoDate } from '@/utils/date'
+import { fetchDayStates, fetchBaseline, judgeRhythm, BASELINE_MIN_DAYS } from '@/composables/useInferenceSummary'
 
 const MODE_OPTIONS = [
   { key: 'state', label: '상태' },
@@ -65,17 +69,74 @@ const mode = ref('state')
 
 const current = ref(new Date())
 
-// 데이터 연동 전 시안 값. 시간대별 활동 지수(0~100), null은 아직 오지 않은 시간.
+// ── 그날의 상태 집계와 기준선 (useInferenceSummary) ──
+const dayStates = ref(null) // fetchDayStates 반환값
+const baseline = ref(null) // fetchBaseline 반환값
+const statesError = ref(false)
+let statesSeq = 0
+
+async function loadStates() {
+  const mySeq = ++statesSeq
+  statesError.value = false
+  const iso = toIsoDate(current.value)
+  try {
+    const st = await fetchDayStates(iso)
+    if (mySeq !== statesSeq) return
+    dayStates.value = st
+    const bl = await fetchBaseline(iso)
+    if (mySeq !== statesSeq) return
+    baseline.value = bl
+  } catch {
+    if (mySeq !== statesSeq) return
+    dayStates.value = null
+    baseline.value = null
+    statesError.value = true
+  }
+}
+watch(current, loadStates, { immediate: true })
+
+const STATE_NAMES = { lying: '눕기', sitting: '앉기', standing: '서기', restless: '야간 뒤척임' }
+
+// 자세 비율 펼침: 오늘 값과 기준선 평균(%). 표본이 없으면 null → 카드가 '-'로 보인다.
+const postures = computed(() =>
+  ['lying', 'sitting', 'standing'].map((key) => {
+    const share = dayStates.value?.metrics?.[key]
+    const n = baseline.value?.n?.[key] ?? 0
+    return {
+      label: STATE_NAMES[key],
+      value: share == null ? null : Math.round(share * 100),
+      average: n > 0 ? Math.round(baseline.value.mean[key] * 100) : null,
+    }
+  }),
+)
+
+// 리듬 판정: null=기준선 부족, []=이상 없음, [{label, direction}]=편차
+const rhythm = computed(() => {
+  const st = dayStates.value
+  if (!st?.total) return null
+  return judgeRhythm(st.metrics, baseline.value)
+})
+
+// 상단 배지 문구 — 자리가 좁아 편차는 첫 항목만 짧게, 나머지는 건수로 줄인다
+const statusLabel = computed(() => {
+  if (statesError.value) return '불러오지 못했어요'
+  const st = dayStates.value
+  if (!st) return ''
+  if (!st.total) return '추론 데이터 없음'
+  if (rhythm.value === null) return `기준선 수집 중 ${baseline.value?.days ?? 0}/${BASELINE_MIN_DAYS}일`
+  if (rhythm.value.length === 0) return '이상 없음'
+  const [first] = rhythm.value
+  const rest = rhythm.value.length - 1
+  return `${STATE_NAMES[first.label]} ${first.direction === 'high' ? '많음' : '적음'}${rest ? ` 외 ${rest}건` : ''}`
+})
+const statusAlert = computed(() => Array.isArray(rhythm.value) && rhythm.value.length > 0)
+
+// 3·4단계 전까지 남는 시안 값: 활동 지수, 시간대별 막대, 활동량, 활동시간
 const today = ref({
   score: 90,
   hourly: [50, 35, 44, 27, 41, 69, 72, 83, 64, 52, 50, 90, null, null, null, null, null, null, null, null, null, null, null, null],
   activityCount: 42,
   activityMinutes: 326,
-  postures: [
-    { label: '눕기', value: 0, average: 2 },
-    { label: '앉기', value: 100, average: 93 },
-    { label: '서기', value: 0, average: 5 },
-  ],
 })
 // 요일별 활동 지수(월~일), null은 아직 오지 않은 날.
 const week = ref({

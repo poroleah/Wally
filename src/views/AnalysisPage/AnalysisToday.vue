@@ -2,8 +2,8 @@
   <section :class="$style.card">
     <div :class="$style.head">
       <span :class="$style.title">오늘의 활동</span>
-      <span :class="$style.status">
-        <i :class="$style.statusDot" />
+      <span v-if="statusLabel" :class="$style.status">
+        <i :class="[$style.statusDot, statusAlert && $style.statusDotAlert]" />
         {{ statusLabel }}
       </span>
     </div>
@@ -51,8 +51,8 @@
         <div :class="$style.postures">
           <div v-for="p in postures" :key="p.label" :class="$style.posture">
             <span :class="$style.postureLabel">{{ p.label }}</span>
-            <span :class="$style.postureValue">{{ p.value }}%</span>
-            <span :class="$style.postureAvg">평균 {{ p.average }}%</span>
+            <span :class="$style.postureValue">{{ p.value == null ? '-' : `${p.value}%` }}</span>
+            <span :class="$style.postureAvg">{{ p.average == null ? '평균 -' : `평균 ${p.average}%` }}</span>
           </div>
         </div>
       </div>
@@ -74,17 +74,18 @@ import { computed, ref } from 'vue'
 // 시간대별 활동 지수(0~100). null은 아직 오지 않은 시간.
 const props = defineProps({
   score: { type: Number, default: 0 },
-  statusLabel: { type: String, default: '이상 없음' },
+  statusLabel: { type: String, default: '' },
+  statusAlert: { type: Boolean, default: false }, // 편차 감지 시 점을 강조색으로
   hourly: { type: Array, default: () => Array(24).fill(null) },
   activityCount: { type: Number, default: 0 },
   activityMinutes: { type: Number, default: 0 },
-  // 자세별 오늘 비율과 평균 비율(%). [{ label, value, average }]
+  // 자세별 오늘 비율과 평균 비율(%). [{ label, value, average }] — null은 표본 없음
   postures: {
     type: Array,
     default: () => [
-      { label: '눕기', value: 0, average: 0 },
-      { label: '앉기', value: 0, average: 0 },
-      { label: '서기', value: 0, average: 0 },
+      { label: '눕기', value: null, average: null },
+      { label: '앉기', value: null, average: null },
+      { label: '서기', value: null, average: null },
     ],
   },
 })
@@ -141,16 +142,24 @@ const activityTimeLabel = computed(() => {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  max-width: 60%; /* 편차 문구가 길어져도 제목을 덮지 않게 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 1rem;
   line-height: 1;
   color: var(--log-muted);
 }
 .statusDot {
+  flex-shrink: 0;
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 50%;
   background-color: #8e735b;
   filter: blur(0.05rem);
+}
+.statusDotAlert {
+  background-color: var(--log-accent);
 }
 
 .scoreBox {
