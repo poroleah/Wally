@@ -46,8 +46,8 @@
 
       <AnalysisWeek :class="$style.week" :daily="week.daily" :average="week.average" />
     </template>
-    <!-- 이벤트 탭 시각화 자리 — 시안 확정 시 채운다 -->
-    <div v-else :class="$style.chartArea" />
+    <!-- 이벤트 탭: 타임라인 페이지와 같은 그날의 이벤트 목록 -->
+    <AnalysisEvents v-else :date="current" />
   </div>
 </template>
 
@@ -55,6 +55,7 @@
 import { computed, ref } from 'vue'
 import AnalysisToday from './AnalysisToday.vue'
 import AnalysisWeek from './AnalysisWeek.vue'
+import AnalysisEvents from './AnalysisEvents.vue'
 
 const MODE_OPTIONS = [
   { key: 'state', label: '상태' },
@@ -198,10 +199,6 @@ const nextDate = () => shiftDate(1)
 .week {
   margin-top: 1.6rem;
   margin-bottom: 1.6rem;
-}
-.chartArea {
-  flex: 1;
-  min-height: 8rem;
 }
 
 /* 시안 좌표(px ÷ 31.72): 1행 top 50.7(1.6rem), 구분선 top 180.8(5.7rem), 2행 top 231.5(7.3rem),
