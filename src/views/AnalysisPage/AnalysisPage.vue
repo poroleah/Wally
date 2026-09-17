@@ -85,6 +85,9 @@ let statesSeq = 0
 async function loadStates() {
   const mySeq = ++statesSeq
   statesError.value = false
+  // 이전 날 값이 새 응답 전까지 남지 않도록 먼저 비운다 → 카드는 '-'로 보인다
+  dayStates.value = null
+  baseline.value = null
   const iso = toIsoDate(current.value)
   try {
     const st = await fetchDayStates(iso)
@@ -168,13 +171,13 @@ const hourly = computed(() =>
   dayStates.value ? dayStates.value.activity.map((a) => (a == null ? null : Math.round(a * 100))) : Array(24).fill(null),
 )
 
-// 활동량(N회): 그날 눕기·앉기·서기로 관측된 횟수의 합 — 자세 비율의 분모와 같다.
-const activityCount = computed(() => dayStates.value?.labeled ?? 0)
+// 활동량(N회): 그날 눕기·앉기·서기로 관측된 횟수의 합 — 자세 비율의 분모와 같다. 집계 없으면 null('-').
+const activityCount = computed(() => dayStates.value?.labeled ?? null)
 
-// 활동시간(분): 시간대별 비누움 비율 × 60분의 합. 표본 없는 시간은 0으로 본다.
+// 활동시간(분): 시간대별 비누움 비율 × 60분의 합. 표본 없는 시간은 0으로 본다. 집계 없으면 null('-').
 const activityMinutes = computed(() => {
   const st = dayStates.value
-  if (!st) return 0
+  if (!st) return null
   const minutes = st.activity.reduce((a, share) => a + (share == null ? 0 : share * 60), 0)
   return Math.round(minutes)
 })

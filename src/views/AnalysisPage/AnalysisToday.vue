@@ -42,7 +42,7 @@
         <img :class="$style.rowIconImg" src="/icons/Analysis/Dogfoot.svg" alt="" />
       </span>
       <span :class="$style.rowLabel">활동량</span>
-      <span :class="$style.rowValue">{{ activityCount }}회</span>
+      <span :class="$style.rowValue">{{ activityCount == null ? '-' : `${activityCount}회` }}</span>
       <img :class="[$style.rowArrow, expanded && $style.rowArrowOpen]" src="/icons/Analysis/Arrow_Thin.svg" alt="" />
     </div>
     <!-- 화살표를 누르면 자세별 비율(눕기/앉기/서기)이 펼쳐진다 -->
@@ -71,14 +71,15 @@
 <script setup>
 import { computed, ref } from 'vue'
 
-// 시간대별 활동 지수(0~100). null은 아직 오지 않은 시간.
+// 오늘의 활동 카드 — 값은 모두 AnalysisPage가 useInferenceSummary로 계산해 넘긴다.
+// hourly: 시간대별 활동 지수(0~100), null은 표본 없음(아직 오지 않은 시간 포함).
 const props = defineProps({
   score: { type: Number, default: null }, // 활동 지수 0~100, null이면 표본 없음
   statusLabel: { type: String, default: '' },
   statusAlert: { type: Boolean, default: false }, // 편차 감지 시 점을 강조색으로
   hourly: { type: Array, default: () => Array(24).fill(null) },
-  activityCount: { type: Number, default: 0 },
-  activityMinutes: { type: Number, default: 0 },
+  activityCount: { type: Number, default: null }, // null이면 집계 없음('-')
+  activityMinutes: { type: Number, default: null },
   // 자세별 오늘 비율과 평균 비율(%). [{ label, value, average }] — null은 표본 없음
   postures: {
     type: Array,
@@ -103,6 +104,7 @@ const peakHour = computed(() => {
 })
 
 const activityTimeLabel = computed(() => {
+  if (props.activityMinutes == null) return '-'
   const h = Math.floor(props.activityMinutes / 60)
   const m = props.activityMinutes % 60
   return h > 0 ? `${h}시간 ${m}분` : `${m}분`
