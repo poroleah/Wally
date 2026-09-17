@@ -154,10 +154,27 @@ const activityMinutes = computed(() => {
   const minutes = st.activity.reduce((a, share) => a + (share == null ? 0 : share * 60), 0)
   return Math.round(minutes)
 })
-// 요일별 활동 지수(월~일), null은 아직 오지 않은 날.
-const week = ref({
-  daily: [55, 68, 30, null, null, null, null],
-  average: 50,
+// ── 주간 활동: 선택한 날이 속한 주(월~일)의 요일별 활동 지수 ──
+// 선택일은 오늘 집계, 그 이전 날은 기준선 이력(activeShare)에서 가져온다.
+// 선택일 이후 요일과 표본 없는 날은 null → 선 없이 비운다.
+const week = computed(() => {
+  const base = new Date(current.value)
+  const monday = new Date(base)
+  monday.setDate(base.getDate() - ((base.getDay() + 6) % 7))
+  const currentIso = toIsoDate(current.value)
+  const history = new Map((baseline.value?.history ?? []).map((d) => [d.date, d.activeShare]))
+
+  const daily = Array.from({ length: 7 }, (_, i) => {
+    const iso = toIsoDate(monday, i)
+    if (iso === currentIso) return score.value
+    const share = history.get(iso)
+    return share == null ? null : Math.round(share * 100)
+  })
+
+  // 평균선: 기준선 기간(최근 14일) 일별 활동 지수의 평균
+  const shares = [...history.values()].filter((v) => v != null)
+  const average = shares.length ? Math.round((shares.reduce((a, b) => a + b, 0) / shares.length) * 100) : null
+  return { daily, average }
 })
 
 const displayDate = computed(() => {

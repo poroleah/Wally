@@ -68,6 +68,17 @@ export function hourActivity(h) {
   return denom ? (h.counts.sitting + h.counts.standing) / denom : null
 }
 
+// 하루 활동 지수의 원값: 라벨 표본 중 비누움(앉기+서기) 비율. 표본이 없으면 null.
+export function dayActiveShare(hours) {
+  let labeled = 0
+  let active = 0
+  for (const h of hours) {
+    for (const l of STATE_LABELS) labeled += h.counts[l]
+    active += h.counts.sitting + h.counts.standing
+  }
+  return labeled ? active / labeled : null
+}
+
 // 주간 3종 점유율 + 야간 뒤척임(비누움 비율). 분모 없는 지표는 null로 둔다.
 function computeMetrics(hours) {
   const day = segmentCounts(hours, true)
@@ -106,7 +117,7 @@ export async function fetchDayStates(dateIso) {
 // 야간 지표가 필요하므로 bucket=hour 범위 질의 1회로 받아 날짜별로 재구성한다
 // (14일 = 336버킷). 프리셋 구성 변경일(presetEpoch) 이전의 날은 비교 가능성이
 // 없어 제외한다.
-// 반환: { days, n{key}, mean{key}, sd{key}, history[{ date, activity[24], metrics }] }
+// 반환: { days, n{key}, mean{key}, sd{key}, history[{ date, activity[24], metrics, activeShare }] }
 export async function fetchBaseline(dateIso, days = analysis.baseline.days) {
   const base = parseIsoDate(dateIso)
   let from = toIsoDate(base, -days)
@@ -136,7 +147,12 @@ export async function fetchBaseline(dateIso, days = analysis.baseline.days) {
   // 일별 이력 (최신일 우선) — 주간 카드가 요일별 활동도로 쓴다
   const history = [...byDay.entries()]
     .sort((a, b) => (a[0] < b[0] ? 1 : -1))
-    .map(([date, hours]) => ({ date, activity: hours.map(hourActivity), metrics: computeMetrics(hours) }))
+    .map(([date, hours]) => ({
+      date,
+      activity: hours.map(hourActivity),
+      metrics: computeMetrics(hours),
+      activeShare: dayActiveShare(hours), // 주간 카드의 요일별 활동 지수 원값
+    }))
 
   const perDay = [...byDay.values()].map(computeMetrics)
   const n = {}
