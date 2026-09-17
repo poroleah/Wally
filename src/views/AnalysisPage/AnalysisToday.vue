@@ -36,16 +36,32 @@
       </div>
     </div>
 
-    <div :class="[$style.row, $style.rowToggle]" role="button" :aria-expanded="expanded" @click="expanded = !expanded">
+    <div :class="$style.row">
       <span :class="$style.rowIcon">
         <img :class="$style.rowIconBg" src="/icons/Analysis/Ellipse.svg" alt="" />
         <img :class="$style.rowIconImg" src="/icons/Analysis/Dogfoot.svg" alt="" />
       </span>
       <span :class="$style.rowLabel">활동량</span>
       <span :class="$style.rowValue">{{ activityCount }}회</span>
+    </div>
+    <div :class="$style.row">
+      <span :class="$style.rowIcon">
+        <img :class="$style.rowIconBg" src="/icons/Analysis/Ellipse.svg" alt="" />
+        <img :class="$style.rowIconImg" src="/icons/Analysis/Time.svg" alt="" />
+      </span>
+      <span :class="$style.rowLabel">활동시간</span>
+      <span :class="$style.rowValue">{{ activityTimeLabel }}</span>
+    </div>
+    <!-- 자세 비율: 눕기는 활동이 아니므로 활동량과 분리한 별도 행. 화살표를 누르면 눕기/앉기/서기가 펼쳐진다 -->
+    <div :class="[$style.row, $style.rowToggle]" role="button" :aria-expanded="expanded" @click="expanded = !expanded">
+      <span :class="$style.rowIcon">
+        <img :class="$style.rowIconBg" src="/icons/Analysis/Ellipse.svg" alt="" />
+        <!-- TODO: 자세 비율 전용 아이콘 확정 전 임시(뼈) -->
+        <img :class="$style.rowIconImg" src="/icons/Calendar/Bone.svg" alt="" />
+      </span>
+      <span :class="$style.rowLabel">자세 비율</span>
       <img :class="[$style.rowArrow, expanded && $style.rowArrowOpen]" src="/icons/Analysis/Arrow_Thin.svg" alt="" />
     </div>
-    <!-- 화살표를 누르면 자세별 비율(눕기/앉기/서기)이 펼쳐진다 -->
     <div :class="[$style.posturesWrap, expanded && $style.posturesWrapOpen]">
       <div :class="$style.posturesClip">
         <div :class="$style.postures">
@@ -56,14 +72,6 @@
           </div>
         </div>
       </div>
-    </div>
-    <div :class="$style.row">
-      <span :class="$style.rowIcon">
-        <img :class="$style.rowIconBg" src="/icons/Analysis/Ellipse.svg" alt="" />
-        <img :class="$style.rowIconImg" src="/icons/Analysis/Time.svg" alt="" />
-      </span>
-      <span :class="$style.rowLabel">활동시간</span>
-      <span :class="$style.rowValue">{{ activityTimeLabel }}</span>
     </div>
   </section>
 </template>
@@ -114,7 +122,7 @@ const activityTimeLabel = computed(() => {
 .card {
   position: relative;
   flex-shrink: 0;
-  /* 접힘 27.6rem / 펼침 32.8rem — 내용 높이 + 하단 1.6rem으로 맞는다 */
+  /* 높이는 내용 + 하단 1.6rem. 시안(2행) 27.6rem에 자세 비율 행이 추가되어 3.2rem 더 길다 */
   padding: 0 2rem 1.6rem;
   box-sizing: border-box;
   border-radius: 1rem;
@@ -309,7 +317,7 @@ const activityTimeLabel = computed(() => {
 .rowArrow {
   width: 1rem;
   height: 1rem;
-  margin-left: 0.4rem;
+  margin-left: auto; /* 값 없이 화살표만 있는 행에서 오른쪽 끝으로 */
   transform: rotate(90deg); /* 시안은 아래 방향 쉐브론 */
   transition: transform 0.18s ease;
   filter: var(--log-icon-filter);
