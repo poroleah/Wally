@@ -48,8 +48,8 @@
         <div :class="$style.legendItem">
           <img :class="$style.legendIcon" src="/icons/Calendar/Bone.svg" alt="" />
           <span :class="$style.legendLabel">기타 활동</span>
-          <!-- 정의 미확정 — 임시로 0% 고정 -->
-          <span :class="$style.legendValue">0%</span>
+          <!-- mewly의 "레이블 없음": 그날 추론 중 자세 라벨이 붙지 않은 비율. 기준선 비교는 없다 -->
+          <span :class="$style.legendValue">{{ unlabeled == null ? '-' : `${unlabeled}%` }}</span>
         </div>
       </div>
 
@@ -125,6 +125,13 @@ const restless = computed(() => {
     value: share == null ? null : Math.round(share * 100),
     average: n > 0 ? Math.round(baseline.value.mean.restless * 100) : null,
   }
+})
+
+// 기타 활동 = 레이블 없음 비율(%). 추론이 하나도 없으면 null.
+const unlabeled = computed(() => {
+  const st = dayStates.value
+  if (!st?.total) return null
+  return Math.round(st.unlabeled * 100)
 })
 
 // 리듬 판정: null=기준선 부족, []=이상 없음, [{label, direction}]=편차
