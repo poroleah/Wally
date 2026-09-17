@@ -9,7 +9,7 @@
           <div :class="$style.timelineDot" />
         </template>
         <div v-if="hasStateText" :class="$style.stateText">
-          {{ error || '발견된 이벤트가 없어요..' }}
+          발견된 이벤트가 없어요..
         </div>
         <template v-else>
           <LogItem
@@ -39,7 +39,7 @@ const props = defineProps({
   date: { type: Date, required: true },
 })
 
-const { logs, error, loadLogs } = useLogs()
+const { logs, loadLogs } = useLogs()
 
 const hasStateText = computed(() => logs.value.length === 0)
 
