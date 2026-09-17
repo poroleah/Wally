@@ -15,7 +15,7 @@
           @dblclick="selectAndClose(item)"
         >
           <div :class="$style.content">{{ item }}</div>
-          <img v-if="selected === item" :class="$style.iconCheck" src="/icons/Calender/Plan/Check.svg" alt="" />
+          <img v-if="selected === item" :class="$style.iconCheck" src="/icons/Calendar/Plan/Check.svg" alt="" />
         </div>
       </div>
     </Transition>
