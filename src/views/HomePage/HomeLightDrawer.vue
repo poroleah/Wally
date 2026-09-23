@@ -51,7 +51,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useProfile } from '@/composables/useProfile'
 import { useDevices } from '@/composables/useDevices'
 
@@ -63,22 +63,30 @@ const { name } = useProfile()
 const { device, refresh, apply } = useDevices()
 onMounted(() => { refresh() })
 
-const isOn = ref(true)
 const brightnessSteps = [0, 20, 40, 60, 80, 100]
-const brightness = ref(60)
 
-// 서버가 알려 준 값만 반영 — null(미확인)은 로컬 값을 유지한다
-watch(() => device.power, (power) => { if (power != null) isOn.value = power }, { immediate: true })
-watch(() => device.brightness, (value) => {
-  if (value == null) return
-  // 시안 단계(0~100, 20 간격) 중 가장 가까운 값으로 손잡이를 둔다
-  brightness.value = brightnessSteps.reduce((best, step) =>
-    Math.abs(step - value) < Math.abs(best - value) ? step : best, brightnessSteps[0])
-}, { immediate: true })
+// ── 목업 상태: 서버가 /device를 한 번도 알려 주지 않은 동안(미배포 205 등)만 쓴다 ──
+const mockOn = ref(true)
+const mockBrightness = ref(60)
 
+// ── 서버 상태: connected가 되면 목업은 완전히 배제하고 서버 값만 표시한다 ──
+const connected = computed(() => device.connected)
+const isOn = computed(() => (connected.value ? device.power === true : mockOn.value))
+// 서버 밝기(0~100)를 시안 단계 중 가장 가까운 값으로 표시. 미확인(null)·꺼짐은 0
+const brightness = computed(() => {
+  if (!connected.value) return mockBrightness.value
+  if (device.brightness == null || device.power !== true) return 0
+  return brightnessSteps.reduce((best, step) =>
+    Math.abs(step - device.brightness) < Math.abs(best - device.brightness) ? step : best, brightnessSteps[0])
+})
+
+// 보드 연결 시: 화면을 직접 바꾸지 않고 서버에만 보낸다. 응답값이 computed로 반영된다.
 function togglePower() {
-  isOn.value = !isOn.value
-  apply({ power: isOn.value })
+  if (connected.value) {
+    apply({ power: !isOn.value })
+    return
+  }
+  mockOn.value = !mockOn.value
 }
 const houseName = computed(() => (name.value || '반려동물') + ' 하우스')
 const lampIconSrc = computed(() => "/icons/Home/Bar/Light/Light_" + brightness.value + ".svg")
@@ -89,14 +97,12 @@ const lampIconDarkSrc = computed(() => [20, 40, 60, 80].includes(brightness.valu
 // 0%는 보드에 밝기 0이 없을 수 있어(uart-handoff §8) 전원 끄기로 보낸다.
 // 그 외 단계는 밝기로 보내며, 전원이 꺼져 있었다면 함께 켜진다(apply가 power:true 동봉).
 function setBrightness(value) {
-  brightness.value = value
-  if (value === 0) {
-    isOn.value = false
-    apply({ power: false })
+  if (connected.value) {
+    if (value === 0) apply({ power: false })
+    else apply({ brightness: value })
     return
   }
-  isOn.value = true
-  apply({ brightness: value })
+  mockBrightness.value = value
 }
 </script>
 

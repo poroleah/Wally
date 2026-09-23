@@ -93,7 +93,7 @@
         </div>
         <b :class="$style.titleHope">희망 온도</b>
         <div :class="$style.temperatureTarget" aria-live="polite">
-          <b :class="$style.targetValue">{{ targetTemperature }}</b>
+          <b :class="$style.targetValue">{{ targetTemperature ?? '-' }}</b>
           <span :class="$style.iconCelsius" aria-hidden="true"></span>
         </div>
 
@@ -213,7 +213,8 @@ const { device, refresh, apply } = useDevices()
 onMounted(() => { refresh() })
 
 const activeTab = ref('temperature')
-const isPowerOn = ref(false)
+const mockPower = ref(false)
+const isPowerOn = computed(() => (device.connected ? device.power === true : mockPower.value))
 const offScheduleOn = ref(false)
 const onScheduleOn = ref(false)
 const offScheduleHours = ref(3)
@@ -266,29 +267,33 @@ const scheduleBanner = computed(() => {
   }
   return { active: false, title: '설정된 예약이 없어요', subs: [] }
 })
-const targetTemperature = ref(25)
-const currentTemperature = ref(22)
-const isWarm = ref(true)
+// ── 목업 상태: 서버가 /device를 한 번도 알려 주지 않은 동안(미배포 205 등)만 쓴다 ──
+const mockTarget = ref(25)
+const mockCurrent = ref(22)
+const mockWarm = ref(true)
 
-// 서버가 알려 준 값만 반영 — null(미확인)은 로컬 값을 유지한다
-watch(() => device.power, (power) => { if (power != null) isPowerOn.value = power }, { immediate: true })
-watch(() => device.mode, (mode) => { if (mode != null) isWarm.value = mode !== 'cool' }, { immediate: true })
-watch(() => device.setTemp, (value) => { if (value != null) targetTemperature.value = value }, { immediate: true })
-watch(() => device.roomTemp, (value) => { if (value != null) currentTemperature.value = value }, { immediate: true })
+// ── 서버 상태: connected가 되면 목업은 완전히 배제하고 서버 값만 표시한다 ──
+const connected = computed(() => device.connected)
+// 전원이 꺼지면 mode가 null로 오므로 마지막 모드 색을 유지한다
+const lastMode = ref('heat')
+watch(() => device.mode, (mode) => { if (mode != null) lastMode.value = mode }, { immediate: true })
+
+const isWarm = computed(() => (connected.value ? lastMode.value !== 'cool' : mockWarm.value))
+// null = 보드가 아직 알려 주지 않음(재기동 직후·미통지) → 화면에는 '-'
+const targetTemperature = computed(() => (connected.value ? device.setTemp : mockTarget.value))
+const currentTemperature = computed(() => (connected.value ? device.roomTemp : mockCurrent.value))
 
 const statusTitle = computed(() => {
   const mode = isWarm.value ? '난방' : '냉방'
   return isPowerOn.value ? mode + ' 가동 중' : mode + ' 꺼짐'
 })
 
-// 서버(보드)에 붙어 있으면 config/device.json의 모드별 범위(난방 20~40, 냉방 10~30),
-// 아니면 이식 전 목업 범위를 쓴다
-const boardConnected = computed(() => device.mode != null)
+// 보드 연결 시 config/device.json의 모드별 범위(난방 20~40, 냉방 10~30), 목업은 이식 전 범위
 const temperatureRange = computed(() => {
-  if (boardConnected.value) return tempRangeOf(isWarm.value ? 'heat' : 'cool')
+  if (connected.value) return tempRangeOf(isWarm.value ? 'heat' : 'cool')
   return isWarm.value ? { min: 20, max: 34 } : { min: 18, max: 24 }
 })
-const currentTemperatureRatio = computed(() => Math.min(Math.max(currentTemperature.value / 50, 0), 1))
+const currentTemperatureRatio = computed(() => Math.min(Math.max((currentTemperature.value ?? 0) / 50, 0), 1))
 const heatValueOffset = computed(() => String(100 - currentTemperatureRatio.value * 100))
 const temperatureKnobStyle = computed(() => {
   const angle = Math.PI * (1 - currentTemperatureRatio.value)
@@ -302,35 +307,48 @@ const temperatureKnobStyle = computed(() => {
 
 const apiMode = computed(() => (isWarm.value ? 'heat' : 'cool'))
 
+// 보드 연결 시: 화면을 직접 바꾸지 않고 서버에만 보낸다. 응답값(보드가 실제로
+// 알려 준 값)이 오면 computed가 그 값을 보여 준다. 목업일 때만 로컬 값을 바꾼다.
 function togglePower() {
-  isPowerOn.value = !isPowerOn.value
-  apply({ power: isPowerOn.value })
+  if (connected.value) {
+    apply({ power: !isPowerOn.value })
+    return
+  }
+  mockPower.value = !mockPower.value
 }
 
 // 희망 온도는 모드를 같이 담아 보낸다 — 모드 없는 온도 요청은 400이고, 저장값과
-// 같으면 명령이 나가지 않는다. 화면은 이전처럼 즉시 바뀌고 응답값으로 다시 맞춘다.
+// 같으면 명령이 나가지 않는다.
+function stepTemperature(delta) {
+  const { min, max } = temperatureRange.value
+  if (connected.value) {
+    if (device.setTemp == null || device.mode == null) return
+    const next = Math.min(max, Math.max(min, device.setTemp + delta))
+    if (next !== device.setTemp) apply({ mode: device.mode, setTemp: next })
+    return
+  }
+  mockTarget.value = Math.min(max, Math.max(min, mockTarget.value + delta))
+  mockCurrent.value = mockTarget.value
+}
+
 function raiseTemperature() {
-  targetTemperature.value = Math.min(targetTemperature.value + 1, temperatureRange.value.max)
-  if (device.roomTemp == null) currentTemperature.value = targetTemperature.value
-  apply({ mode: apiMode.value, setTemp: targetTemperature.value })
+  stepTemperature(1)
 }
 
 function lowerTemperature() {
-  targetTemperature.value = Math.max(targetTemperature.value - 1, temperatureRange.value.min)
-  if (device.roomTemp == null) currentTemperature.value = targetTemperature.value
-  apply({ mode: apiMode.value, setTemp: targetTemperature.value })
+  stepTemperature(-1)
 }
 
-// 모드만 보낸다 — 보드가 그 모드의 기본 설정 온도로 되돌리고 그 값이 응답으로 온다
+// 모드만 보낸다 — 보드가 그 모드의 기본 설정 온도(난방 30, 냉방 20)로 되돌리고
+// 그 값이 응답으로 온다. 화면은 응답값만 표시한다.
 function toggleMode() {
-  isWarm.value = !isWarm.value
-  // 보드는 모드 전환 시 설정 온도를 그 모드 기본값(난방 30, 냉방 20)으로 되돌린다.
-  // 응답이 오기 전에 목업값(25/22)을 보이면 값이 두 번 바뀌므로 처음부터 기본값을 쓴다.
-  targetTemperature.value = boardConnected.value
-    ? tempRangeOf(apiMode.value).default
-    : (isWarm.value ? 25 : 22)
-  if (device.roomTemp == null) currentTemperature.value = isWarm.value ? 23 : 25
-  apply({ mode: apiMode.value })
+  if (connected.value) {
+    apply({ mode: isWarm.value ? 'cool' : 'heat' })
+    return
+  }
+  mockWarm.value = !mockWarm.value
+  mockTarget.value = mockWarm.value ? 25 : 22
+  mockCurrent.value = mockWarm.value ? 23 : 25
 }
 </script>
 

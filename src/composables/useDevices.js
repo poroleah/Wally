@@ -59,10 +59,15 @@ const device = reactive({
   brightness: null,    // 0~100 정수 | null
   roomTemp: null,      // 정수 ℃ | null(보드가 보낸 적 없음)
   busy: false,         // 제어 요청 진행 중 — 두 드로어가 같은 잠금을 본다
+  // 서버가 /device 상태를 한 번이라도 알려 줬는가. true가 되면 드로어는 목업을
+  // 버리고 서버 값만 쓴다(null 항목은 값 없음으로 표시). false면 /device 미배포·
+  // 미응답이라 이식 전 목업으로 동작한다.
+  connected: false,
 })
 let lastAppliedAt = 0
 
 function applyBody(body) {
+  device.connected = true
   device.link = body.link ?? device.link
   device.power = body.power ?? null
   device.mode = fromApiMode(body.mode ?? null)
@@ -72,6 +77,7 @@ function applyBody(body) {
 }
 
 function applySnapshot(state) {
+  if ('device_link' in state) device.connected = true
   device.link = state.device_link ?? 'unknown'
   device.power = state.device_power ?? null
   device.mode = fromApiMode(state.device_mode ?? null)
@@ -101,7 +107,9 @@ function bindSse() {
     const { state, snapshotSeq } = useRealtimeEvents()
     watch(snapshotSeq, (seq) => {
       if (seq === 0) {
+        // 로그아웃·재접속 — 이전 세션 값을 지우고 목업 상태로 돌아간다
         applySnapshot({})
+        device.connected = false
         return
       }
       if (device.busy || Date.now() - lastAppliedAt < SSE_HOLD_MS) return
