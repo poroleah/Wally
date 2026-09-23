@@ -203,7 +203,7 @@
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { useDevices } from '@/composables/useDevices'
+import { useDevices, tempRangeOf } from '@/composables/useDevices'
 
 // UI는 Wally 시안 그대로 두고, 전원·모드·희망 온도만 babycat /device(보드)에 보낸다.
 // 화면 값은 로컬 상태가 기준이고, 서버가 값을 알려 주면(응답·SSE) 그때 덮어쓴다.
@@ -281,7 +281,13 @@ const statusTitle = computed(() => {
   return isPowerOn.value ? mode + ' 가동 중' : mode + ' 꺼짐'
 })
 
-const temperatureRange = computed(() => (isWarm.value ? { min: 20, max: 34 } : { min: 18, max: 24 }))
+// 서버(보드)에 붙어 있으면 config/device.json의 모드별 범위(난방 20~40, 냉방 10~30),
+// 아니면 이식 전 목업 범위를 쓴다
+const boardConnected = computed(() => device.mode != null)
+const temperatureRange = computed(() => {
+  if (boardConnected.value) return tempRangeOf(isWarm.value ? 'heat' : 'cool')
+  return isWarm.value ? { min: 20, max: 34 } : { min: 18, max: 24 }
+})
 const currentTemperatureRatio = computed(() => Math.min(Math.max(currentTemperature.value / 50, 0), 1))
 const heatValueOffset = computed(() => String(100 - currentTemperatureRatio.value * 100))
 const temperatureKnobStyle = computed(() => {
@@ -318,7 +324,11 @@ function lowerTemperature() {
 // 모드만 보낸다 — 보드가 그 모드의 기본 설정 온도로 되돌리고 그 값이 응답으로 온다
 function toggleMode() {
   isWarm.value = !isWarm.value
-  targetTemperature.value = isWarm.value ? 25 : 22
+  // 보드는 모드 전환 시 설정 온도를 그 모드 기본값(난방 30, 냉방 20)으로 되돌린다.
+  // 응답이 오기 전에 목업값(25/22)을 보이면 값이 두 번 바뀌므로 처음부터 기본값을 쓴다.
+  targetTemperature.value = boardConnected.value
+    ? tempRangeOf(apiMode.value).default
+    : (isWarm.value ? 25 : 22)
   if (device.roomTemp == null) currentTemperature.value = isWarm.value ? 23 : 25
   apply({ mode: apiMode.value })
 }
