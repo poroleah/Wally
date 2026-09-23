@@ -32,14 +32,12 @@
         </button>
       </div>
 
-      <div v-if="activeTab === 'temperature' && warning" :class="$style.warning" role="alert">{{ warning }}</div>
-      <div v-if="activeTab === 'temperature'" :class="[$style.statusRow, locked ? $style.rowLocked : '']">
+      <div v-if="activeTab === 'temperature'" :class="$style.statusRow">
         <button
           type="button"
           :class="[$style.powerButton, isPowerOn ? $style.powerButtonOn : '']"
           :aria-pressed="isPowerOn"
           :aria-label="isPowerOn ? '냉난방 끄기' : '냉난방 켜기'"
-          :disabled="locked"
           @click="togglePower"
         >
           <svg :class="$style.powerIcon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -56,7 +54,6 @@
           :class="[$style.toggle, isWarm ? $style.toggleWarm : $style.toggleCool, !isPowerOn ? $style.toggleOff : '']"
           :aria-pressed="isWarm"
           :aria-label="isWarm ? '난방 모드' : '냉방 모드'"
-          :disabled="locked || !isPowerOn"
           @click="toggleMode"
         >
           <span :class="$style.toggleChild"></span>
@@ -69,7 +66,7 @@
         <div :class="$style.cardInner">
         <div :class="[$style.currentRow, $style.currentRowOff]">
           <span :class="$style.currentLabel">현재 온도</span>
-          <span :class="$style.currentValueSmall">{{ currentTemperature ?? '-' }}</span>
+          <span :class="$style.currentValueSmall">{{ currentTemperature }}</span>
           <span :class="$style.iconCelsiusSmall" aria-hidden="true"></span>
         </div>
         <b :class="$style.offMessage">냉난방이 꺼져 있어요</b>
@@ -91,23 +88,19 @@
 
         <div :class="$style.currentRow">
           <span :class="$style.currentLabel">현재 온도</span>
-          <span :class="$style.currentValueSmall">{{ currentTemperature ?? '-' }}</span>
+          <span :class="$style.currentValueSmall">{{ currentTemperature }}</span>
           <span :class="$style.iconCelsiusSmall" aria-hidden="true"></span>
         </div>
         <b :class="$style.titleHope">희망 온도</b>
         <div :class="$style.temperatureTarget" aria-live="polite">
-          <template v-if="targetKnown">
-            <b :class="$style.targetValue">{{ targetTemperature }}</b>
-            <span :class="$style.iconCelsius" aria-hidden="true"></span>
-          </template>
-          <b v-else :class="$style.targetUnknown">확인 중</b>
+          <b :class="$style.targetValue">{{ targetTemperature }}</b>
+          <span :class="$style.iconCelsius" aria-hidden="true"></span>
         </div>
 
         <button
           type="button"
           :class="[$style.adjustButton, $style.iconMinus]"
           aria-label="희망 온도 내리기"
-          :disabled="locked || !modeKnown || !targetKnown"
           @click="lowerTemperature"
         >
           <img :class="$style.adjustIcon" src="/icons/Home/Bar/Tem/Tem_Minus.svg" alt="" />
@@ -116,7 +109,6 @@
           type="button"
           :class="[$style.adjustButton, $style.iconPlus]"
           aria-label="희망 온도 올리기"
-          :disabled="locked || !modeKnown || !targetKnown"
           @click="raiseTemperature"
         >
           <img :class="$style.adjustIcon" src="/icons/Home/Bar/Tem/Tem_Plus.svg" alt="" />
@@ -210,12 +202,18 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { useDevices, tempRangeOf } from '@/composables/useDevices'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useDevices } from '@/composables/useDevices'
 
+// UI는 Wally 시안 그대로 두고, 전원·모드·희망 온도만 babycat /device(보드)에 보낸다.
+// 화면 값은 로컬 상태가 기준이고, 서버가 값을 알려 주면(응답·SSE) 그때 덮어쓴다.
+// 예약 탭은 서버 미지원이라 로컬 동작만 한다. 전원은 조명과 공용(보드 전체)이다.
 const emit = defineEmits(['close'])
+const { device, refresh, apply } = useDevices()
+onMounted(() => { refresh() })
 
 const activeTab = ref('temperature')
+const isPowerOn = ref(false)
 const offScheduleOn = ref(false)
 const onScheduleOn = ref(false)
 const offScheduleHours = ref(3)
@@ -268,40 +266,23 @@ const scheduleBanner = computed(() => {
   }
   return { active: false, title: '설정된 예약이 없어요', subs: [] }
 })
-// ── 보드 상태 (mewly TempSheet 이식) ──
-// 전원·모드·설정 온도·실내 온도는 babycat /device(보드)가 진실이고, 위의 예약은
-// 서버 미지원이라 로컬 상태로 남긴다. 전원은 조명과 공용이다(끄면 조명도 꺼진다).
-// 설정 온도 범위는 모드마다 다르다(config/device.json). 모드만 바꾸면 보드가
-// 설정 온도를 그 모드의 기본값으로 되돌리며, 그 값이 응답으로 온다.
-const { device, locked, linkDown, controllerDown, refresh, apply } = useDevices()
-onMounted(() => { refresh() })
+const targetTemperature = ref(25)
+const currentTemperature = ref(22)
+const isWarm = ref(true)
 
-const isPowerOn = computed(() => device.power === true)
-const modeKnown = computed(() => device.mode != null)
-// 모드 미확인이면 난방 색으로 자리를 채운다(기존 기본값 유지)
-const isWarm = computed(() => device.mode !== 'cool')
-const targetTemperature = computed(() => device.setTemp)
-const targetKnown = computed(() => targetTemperature.value != null)
-const currentTemperature = computed(() => device.roomTemp)
-const warning = computed(() => {
-  if (controllerDown.value) return '기기 제어 서비스가 응답하지 않아요'
-  if (linkDown.value) return '기기와 통신할 수 없어요'
-  return ''
-})
+// 서버가 알려 준 값만 반영 — null(미확인)은 로컬 값을 유지한다
+watch(() => device.power, (power) => { if (power != null) isPowerOn.value = power }, { immediate: true })
+watch(() => device.mode, (mode) => { if (mode != null) isWarm.value = mode !== 'cool' }, { immediate: true })
+watch(() => device.setTemp, (value) => { if (value != null) targetTemperature.value = value }, { immediate: true })
+watch(() => device.roomTemp, (value) => { if (value != null) currentTemperature.value = value }, { immediate: true })
 
 const statusTitle = computed(() => {
-  if (!isPowerOn.value) return device.power == null ? '전원 확인 중' : '냉난방 꺼짐'
-  if (!modeKnown.value) return '모드 확인 중'
-  return (isWarm.value ? '난방' : '냉방') + ' 가동 중'
+  const mode = isWarm.value ? '난방' : '냉방'
+  return isPowerOn.value ? mode + ' 가동 중' : mode + ' 꺼짐'
 })
 
-const temperatureRange = computed(() => tempRangeOf(device.mode))
-// 게이지는 설정 온도를 모드 범위 안의 비율로 그린다 (실내 온도는 보드가 안 줄 수 있음)
-const currentTemperatureRatio = computed(() => {
-  const { min, max } = temperatureRange.value
-  const value = targetTemperature.value ?? min
-  return Math.min(Math.max((value - min) / (max - min), 0), 1)
-})
+const temperatureRange = computed(() => (isWarm.value ? { min: 20, max: 34 } : { min: 18, max: 24 }))
+const currentTemperatureRatio = computed(() => Math.min(Math.max(currentTemperature.value / 50, 0), 1))
 const heatValueOffset = computed(() => String(100 - currentTemperatureRatio.value * 100))
 const temperatureKnobStyle = computed(() => {
   const angle = Math.PI * (1 - currentTemperatureRatio.value)
@@ -313,33 +294,33 @@ const temperatureKnobStyle = computed(() => {
   }
 })
 
+const apiMode = computed(() => (isWarm.value ? 'heat' : 'cool'))
+
 function togglePower() {
-  if (locked.value) return
-  apply({ power: !isPowerOn.value })
+  isPowerOn.value = !isPowerOn.value
+  apply({ power: isPowerOn.value })
 }
 
-// ±1은 모드를 같이 담아 보낸다 — 모드 없는 온도 요청(400)을 피하고, 저장값과
-// 같으면 명령이 나가지 않는다. 모드 미확인이면 범위를 몰라 조작을 막는다.
-function stepTemperature(delta) {
-  if (locked.value || !modeKnown.value || !targetKnown.value) return
-  const { min, max } = temperatureRange.value
-  const next = Math.min(max, Math.max(min, targetTemperature.value + delta))
-  if (next === targetTemperature.value) return
-  apply({ mode: device.mode, setTemp: next })
-}
-
+// 희망 온도는 모드를 같이 담아 보낸다 — 모드 없는 온도 요청은 400이고, 저장값과
+// 같으면 명령이 나가지 않는다. 화면은 이전처럼 즉시 바뀌고 응답값으로 다시 맞춘다.
 function raiseTemperature() {
-  stepTemperature(1)
+  targetTemperature.value = Math.min(targetTemperature.value + 1, temperatureRange.value.max)
+  if (device.roomTemp == null) currentTemperature.value = targetTemperature.value
+  apply({ mode: apiMode.value, setTemp: targetTemperature.value })
 }
 
 function lowerTemperature() {
-  stepTemperature(-1)
+  targetTemperature.value = Math.max(targetTemperature.value - 1, temperatureRange.value.min)
+  if (device.roomTemp == null) currentTemperature.value = targetTemperature.value
+  apply({ mode: apiMode.value, setTemp: targetTemperature.value })
 }
 
-// 모드만 보낸다 — 보드가 기본 설정 온도로 되돌린 값이 응답으로 온다
+// 모드만 보낸다 — 보드가 그 모드의 기본 설정 온도로 되돌리고 그 값이 응답으로 온다
 function toggleMode() {
-  if (locked.value || !isPowerOn.value) return
-  apply({ mode: isWarm.value ? 'cool' : 'heat' })
+  isWarm.value = !isWarm.value
+  targetTemperature.value = isWarm.value ? 25 : 22
+  if (device.roomTemp == null) currentTemperature.value = isWarm.value ? 23 : 25
+  apply({ mode: apiMode.value })
 }
 </script>
 
@@ -494,28 +475,6 @@ function toggleMode() {
 .segmentLabel {
   line-height: 2.2rem;
   font-family: 'MalangBold', 'Malang', 'Hancom MalangMalang', sans-serif;
-}
-
-/* 보드·제어 서비스 통신 불가 경고 */
-.warning {
-  flex: 0 0 auto;
-  font-size: 1.2rem;
-  line-height: 1.4;
-  color: var(--home-muted);
-  text-align: center;
-}
-
-/* 요청 진행 중이거나 통신 불가 — 조작 잠금 */
-.rowLocked {
-  opacity: 0.4;
-  pointer-events: none;
-}
-
-/* 설정 온도 미확인(재기동 직후 등) */
-.targetUnknown {
-  font-size: 1.6rem;
-  line-height: 3.1rem;
-  color: var(--home-muted);
 }
 
 .statusRow {

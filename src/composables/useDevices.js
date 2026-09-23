@@ -153,6 +153,9 @@ async function apply(patch) {
       return true
     }
     if (res.status === 401) return false
+    // /device 미배포 서버(운영 205, 2026-09-21 기준) — 화면은 로컬 값으로 이전처럼
+    // 동작하므로 매 조작마다 알리지 않는다.
+    if (res.status === 404) return false
     const detail = await failureDetail(res, '')
     showToast(toastKindFor(res.status, detail))
     if (res.status === 409) await refresh()

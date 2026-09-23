@@ -10,23 +10,19 @@
         <div :class="$style.homeName">
           <div :class="$style.nameText">{{ houseName }}</div>
         </div>
-        <button type="button" :class="[$style.toggle, isOn ? $style.toggleOn : '']" :aria-pressed="isOn" aria-label="조명 켜기/끄기" :disabled="locked" @click="togglePower">
+        <button type="button" :class="[$style.toggle, isOn ? $style.toggleOn : '']" :aria-pressed="isOn" aria-label="조명 켜기/끄기" @click="togglePower">
           <span :class="$style.toggleTrack"></span>
           <span :class="$style.toggleThumb"></span>
         </button>
       </div>
       <div :class="[$style.percentFrame, isOn ? '' : $style.percentOff]">
         <div :class="$style.number">
-          <template v-if="brightnessKnown">
-            <b :class="$style.percentValue">{{ brightness }}</b>
-            <b :class="$style.percentUnit">%</b>
-          </template>
-          <b v-else :class="$style.percentUnknown">확인 중</b>
+          <b :class="$style.percentValue">{{ brightness }}</b>
+          <b :class="$style.percentUnit">%</b>
         </div>
       </div>
     </div>
-    <div v-if="warning" :class="$style.warning" role="alert">{{ warning }}</div>
-    <div :class="[$style.lightControlFrame, locked ? $style.controlLocked : '']" aria-label="조명 밝기">
+    <div :class="$style.lightControlFrame" aria-label="조명 밝기">
       <img :class="$style.lightSettingIcon" src="/icons/Home/Bar/Light/Bar_Light_Off_Setting.svg" alt="" />
       <div :class="$style.lightControl" role="group" aria-label="조명 밝기 선택">
               <span :class="$style.lightTrack" aria-hidden="true"></span>
@@ -37,7 +33,7 @@
                 :style="{ left: step + '%' }"
                 aria-hidden="true"
               ></span>
-              <span :class="$style.lightThumb" :style="{ left: thumbPercent + '%' }" aria-hidden="true"></span>
+              <span :class="$style.lightThumb" :style="{ left: brightness + '%' }" aria-hidden="true"></span>
               <button
                 v-for="step in brightnessSteps"
                 :key="'button-' + step"
@@ -46,7 +42,6 @@
                 :style="{ left: step + '%' }"
                 :aria-label="step + '%'"
                 :aria-pressed="step === brightness"
-                :disabled="locked"
                 @click="setBrightness(step)"
               ></button>
             </div>
@@ -56,50 +51,51 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useProfile } from '@/composables/useProfile'
-import { useDevices, brightnessSteps as configSteps } from '@/composables/useDevices'
+import { useDevices } from '@/composables/useDevices'
 
-// 조명 — 전원·밝기는 babycat /device(보드)가 진실이다 (mewly LightSheet 이식).
-// 전원은 보드 전체의 것이라 냉난방과 공용이다(끄면 냉난방도 꺼진다).
-// 밝기 단계는 config/device.json 목록에만 멈추고, 응답값이 목록에 없으면 값은
-// 그대로 표시하며 손잡이는 가장 가까운 단계에 둔다.
+// UI는 Wally 시안 그대로 두고, 전원·밝기만 babycat /device(보드)에 보낸다.
+// 화면 값은 로컬 상태가 기준이고, 서버가 값을 알려 주면(응답·SSE) 그때 덮어쓴다.
+// 서버에 /device가 없거나(404) 응답이 없어도 화면은 이전처럼 동작한다.
 const emit = defineEmits(['close'])
 const { name } = useProfile()
-const { device, locked, linkDown, controllerDown, refresh, apply } = useDevices()
+const { device, refresh, apply } = useDevices()
 onMounted(() => { refresh() })
 
-const brightnessSteps = configSteps()
-const isOn = computed(() => device.power === true)
-const brightness = computed(() => device.brightness)
-const brightnessKnown = computed(() => brightness.value != null)
-// 손잡이 위치 — 미확인이면 첫 단계에 둔다
-const thumbPercent = computed(() => {
-  if (!brightnessKnown.value) return brightnessSteps[0]
-  return brightnessSteps.reduce((best, step) =>
-    Math.abs(step - brightness.value) < Math.abs(best - brightness.value) ? step : best,
-  brightnessSteps[0])
-})
-const warning = computed(() => {
-  if (controllerDown.value) return '기기 제어 서비스가 응답하지 않아요'
-  if (linkDown.value) return '기기와 통신할 수 없어요'
-  return ''
-})
-const houseName = computed(() => (name.value || '반려동물') + ' 하우스')
-// 램프 아이콘은 20~100 단계 파일만 있으므로 꺼짐·미확인·목록 밖 값은 가장 가까운 단계로
-const lampLevel = computed(() => (isOn.value && brightnessKnown.value ? thumbPercent.value : 0))
-const lampIconSrc = computed(() => "/icons/Home/Bar/Light/Light_" + lampLevel.value + ".svg")
-const lampIconDarkSrc = computed(() => [20, 40, 60, 80].includes(lampLevel.value)
-  ? "/icons/Home/Bar/Light/Light_" + lampLevel.value + "_Dark.svg"
-  : lampIconSrc.value)
+const isOn = ref(true)
+const brightnessSteps = [0, 20, 40, 60, 80, 100]
+const brightness = ref(60)
+
+// 서버가 알려 준 값만 반영 — null(미확인)은 로컬 값을 유지한다
+watch(() => device.power, (power) => { if (power != null) isOn.value = power }, { immediate: true })
+watch(() => device.brightness, (value) => {
+  if (value == null) return
+  // 시안 단계(0~100, 20 간격) 중 가장 가까운 값으로 손잡이를 둔다
+  brightness.value = brightnessSteps.reduce((best, step) =>
+    Math.abs(step - value) < Math.abs(best - value) ? step : best, brightnessSteps[0])
+}, { immediate: true })
 
 function togglePower() {
-  if (locked.value) return
-  apply({ power: !isOn.value })
+  isOn.value = !isOn.value
+  apply({ power: isOn.value })
 }
+const houseName = computed(() => (name.value || '반려동물') + ' 하우스')
+const lampIconSrc = computed(() => "/icons/Home/Bar/Light/Light_" + brightness.value + ".svg")
+const lampIconDarkSrc = computed(() => [20, 40, 60, 80].includes(brightness.value)
+  ? "/icons/Home/Bar/Light/Light_" + brightness.value + "_Dark.svg"
+  : lampIconSrc.value)
 
+// 0%는 보드에 밝기 0이 없을 수 있어(uart-handoff §8) 전원 끄기로 보낸다.
+// 그 외 단계는 밝기로 보내며, 전원이 꺼져 있었다면 함께 켜진다(apply가 power:true 동봉).
 function setBrightness(value) {
-  if (locked.value) return
+  brightness.value = value
+  if (value === 0) {
+    isOn.value = false
+    apply({ power: false })
+    return
+  }
+  isOn.value = true
   apply({ brightness: value })
 }
 </script>
@@ -298,30 +294,6 @@ function setBrightness(value) {
   flex-shrink: 0;
   margin-left: 0.2rem;
   font-family: 'MalangBold', 'Malang', 'Hancom MalangMalang', sans-serif;
-}
-
-/* 밝기 미확인(재기동 직후 등) — 큰 숫자 대신 안내 문구 */
-.percentUnknown {
-  font-size: 1.6rem;
-  line-height: 4.5rem;
-  color: var(--home-muted);
-}
-
-/* 보드·제어 서비스 통신 불가 경고 — 밝기 컨트롤 바로 위 */
-.warning {
-  position: absolute;
-  top: 27.6rem;
-  right: 2rem;
-  left: 2rem;
-  font-size: 1.2rem;
-  line-height: 1.4;
-  color: var(--home-muted);
-}
-
-/* 요청 진행 중이거나 통신 불가 — 조작 잠금 */
-.controlLocked {
-  opacity: 0.4;
-  pointer-events: none;
 }
 
 .lightControlFrame {
