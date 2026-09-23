@@ -159,6 +159,11 @@ export const APP_ENDPOINTS = {
   get presets() {
     return getAppUrl('/presets')
   },
+  // 주변 장치(조명·냉난방 보드) 제어 — GET은 보관 상태 조회, POST는 목표 상태
+  // 적용. mewly docs/babycat-correspondence.md 4부(uart-handoff) 참조.
+  get device() {
+    return getAppUrl('/device')
+  },
 }
 
 export function getStreamHost() {

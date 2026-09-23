@@ -1,0 +1,8 @@
+{
+  "brightnessSteps": [20, 40, 60, 80, 100],
+  "tempRange": {
+    "warm": { "min": 20, "max": 40, "default": 30 },
+    "cool": { "min": 10, "max": 30, "default": 20 }
+  },
+  "sseHoldMs": 2500
+}
