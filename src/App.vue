@@ -15,7 +15,14 @@
       </div>
     </Transition>
     <Transition name="app-toast">
-      <div v-if="toastMessage" class="app-toast" role="status" aria-live="polite">
+      <div
+        v-if="toastMessage"
+        ref="toastElement"
+        class="app-toast"
+        :style="{ '--toast-font-size': toastFontSize }"
+        role="status"
+        aria-live="polite"
+      >
         {{ toastMessage }}
       </div>
     </Transition>
@@ -32,7 +39,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import Nav from '@/components/Nav/Nav.vue'
 import SessionExpiryModal from '@/components/App/SessionExpiryModal.vue'
@@ -52,8 +59,11 @@ const isLandscape = ref(false)
 const forceHomePortrait = ref(false)
 const themeClass = ref('theme-light')
 const toastMessage = ref('')
+const toastElement = ref(null)
+const toastFontSize = ref('1.4rem')
 let unsubscribeTheme = null
 let toastTimer = null
+let toastResizeFrame = null
 let orientationTimer = null
 let focusedElementTimer = null
 
@@ -80,16 +90,45 @@ const keepFocusedElementVisible = () => {
 const handleViewportChange = () => {
   updateOrientation()
   keepFocusedElementVisible()
+  resizeToastToFit()
 }
 
 const updateForceHomePortrait = (event) => {
   forceHomePortrait.value = Boolean(event.detail)
 }
 
-const showToast = (event) => {
+const resizeToastToFit = () => {
+  window.cancelAnimationFrame(toastResizeFrame)
+  toastResizeFrame = window.requestAnimationFrame(() => {
+    const toast = toastElement.value
+    if (!toast) return
+
+    // Measure at the normal size first so a wider viewport can restore it.
+    toastFontSize.value = '1.4rem'
+    window.requestAnimationFrame(() => {
+      const currentToast = toastElement.value
+      if (!currentToast) return
+
+      const styles = window.getComputedStyle(currentToast)
+      const horizontalPadding = Number.parseFloat(styles.paddingLeft) + Number.parseFloat(styles.paddingRight)
+      const availableTextWidth = currentToast.clientWidth - horizontalPadding
+      const requiredTextWidth = currentToast.scrollWidth - horizontalPadding
+      if (requiredTextWidth <= availableTextWidth) return
+
+      const baseFontSize = 1.4
+      const fittedSize = Math.max(0.85, baseFontSize * (availableTextWidth / requiredTextWidth))
+      toastFontSize.value = `${fittedSize}rem`
+    })
+  })
+}
+
+const showToast = async (event) => {
   window.clearTimeout(toastTimer)
   toastMessage.value = event.detail?.message || ''
   if (!toastMessage.value) return
+  toastFontSize.value = '1.4rem'
+  await nextTick()
+  resizeToastToFit()
 
   toastTimer = window.setTimeout(() => {
     toastMessage.value = ''
@@ -119,6 +158,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('wally:home-force-portrait', updateForceHomePortrait)
   window.removeEventListener('wally:show-toast', showToast)
   window.clearTimeout(toastTimer)
+  window.cancelAnimationFrame(toastResizeFrame)
   window.clearTimeout(orientationTimer)
   window.clearTimeout(focusedElementTimer)
   unsubscribeTheme?.()
@@ -313,12 +353,12 @@ html:not(.wally-native) .page-content:not(.page-content--fullscreen) {
   background: var(--app-surface);
   color: var(--app-text);
   font-family: 'Malang', sans-serif;
-  font-size: 1.4rem;
+  font-size: var(--toast-font-size, 1.4rem);
   line-height: 1.4;
   text-align: center;
-  white-space: normal;
-  overflow-wrap: break-word;
-  word-break: keep-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   box-shadow: 0 0.4rem 1.4rem var(--app-shadow);
   transform: translateX(-50%);
   pointer-events: none;
