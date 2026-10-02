@@ -303,7 +303,10 @@ html:not(.wally-native) .page-content:not(.page-content--fullscreen) {
   left: 50%;
   bottom: calc(7.2rem + env(safe-area-inset-bottom, 0px));
   z-index: 10000;
-  max-width: calc(100vw - 4rem);
+  /* Long device-status messages must remain inside the phone viewport. */
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: calc(100vw - 2rem);
   padding: 1.1rem 1.8rem;
   border-radius: 2.4rem;
   border: 1px solid var(--app-border);
@@ -313,7 +316,9 @@ html:not(.wally-native) .page-content:not(.page-content--fullscreen) {
   font-size: 1.4rem;
   line-height: 1.4;
   text-align: center;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: keep-all;
   box-shadow: 0 0.4rem 1.4rem var(--app-shadow);
   transform: translateX(-50%);
   pointer-events: none;
