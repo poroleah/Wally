@@ -111,15 +111,15 @@
         <button
           type="button"
           role="switch"
-          :aria-checked="isFast"
-          aria-label="고속 이동"
+          :aria-checked="directionEnabled"
+          aria-label="방향 제어"
           :disabled="patrolEnabled"
-          :class="[$style.speedToggle, isFast ? $style.speedToggleOn : '', patrolEnabled ? $style.locked : '']"
-          @click="toggleFast"
+          :class="[$style.speedToggle, directionEnabled ? $style.speedToggleOn : '', patrolEnabled ? $style.locked : '']"
+          @click="toggleDirection"
         >
           <span :class="$style.speedKnob" aria-hidden="true"></span>
         </button>
-        <div :class="[$style.iconDpad, isDirectionPressed ? $style.iconDpadPressed : '', patrolEnabled ? $style.locked : '']">
+        <div :class="[$style.iconDpad, isDirectionPressed ? $style.iconDpadPressed : '', !directionEnabled || patrolEnabled ? $style.locked : '']">
           <!-- Dpad.svg 원본 — 다크 대응을 위해 색만 팔레트 토큰으로 치환한 인라인 사본 -->
           <svg :class="$style.dpadArt" viewBox="0 0 150 150" aria-hidden="true" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M66.875 1H83.125C93.6184 1 102.125 9.50659 102.125 20V41.875C102.125 45.1887 104.811 47.875 108.125 47.875H130C140.493 47.875 149 56.3816 149 66.875V83.125C149 93.6184 140.493 102.125 130 102.125H108.125C104.811 102.125 102.125 104.811 102.125 108.125V130C102.125 140.493 93.6184 149 83.125 149H66.875C56.3816 149 47.875 140.493 47.875 130V113.125C47.875 107.05 42.9501 102.125 36.875 102.125H20C9.50659 102.125 1 93.6184 1 83.125V66.875C1 56.3816 9.50659 47.875 20 47.875H41.875C45.1887 47.875 47.875 45.1887 47.875 41.875V20C47.875 9.50659 56.3816 1 66.875 1Z" fill="var(--home-panel-bg)" stroke="var(--home-panel-border)" stroke-width="2"/>
@@ -262,14 +262,14 @@ import { useRealtimeEvents } from '@/composables/useRealtimeEvents'
 import ptzCfg from '../../../config/ptz.json'
 
 const emit = defineEmits(['close'])
-const { speedLevel, setSpeedLevel, startMove, stopMove, savePreset, gotoPreset, setPatrol } = usePtz()
+const { startMove, stopMove, savePreset, gotoPreset, setPatrol } = usePtz()
 const { state } = useRealtimeEvents()
 let moving = false
 const isDirectionPressed = ref(false)
 const tab = ref('control')
 
-// 방향 제어의 2단 속도 토글 — usePtz 3단 중 보통(1)·고속(2)에 대응 (mewly 방침)
-const isFast = computed(() => speedLevel.value >= 2)
+// 방향 제어 스위치가 꺼져 있으면 패드에서 PTZ 명령을 보내지 않는다.
+const directionEnabled = ref(true)
 
 // 줌 — 백엔드 미지원, 로컬 값 표시만 (mewly PtzSheet과 같은 방침, ×1.0–8.0 / 0.5 단위)
 const zoom = ref(1)
@@ -616,8 +616,10 @@ function switchTab(next) {
   tab.value = next
 }
 
-function toggleFast() {
-  setSpeedLevel(isFast.value ? 1 : 2)
+function toggleDirection() {
+  if (patrolEnabled.value) return
+  directionEnabled.value = !directionEnabled.value
+  if (!directionEnabled.value) stop()
 }
 
 function close() {
@@ -626,7 +628,7 @@ function close() {
 }
 
 function move(pan, tilt) {
-  if (patrolEnabled.value) return // 순찰 중에는 수동 팬·틸트 차단 (mewly 방침)
+  if (patrolEnabled.value || (view.value === 'main' && !directionEnabled.value)) return
   moving = true
   isDirectionPressed.value = true
   startMove(pan, tilt)
