@@ -49,18 +49,15 @@ const VOLUME_STORAGE_KEY = 'wally:speakerVolume'
 function loadStoredVolume() {
   try {
     const stored = Number(localStorage.getItem(VOLUME_STORAGE_KEY))
-    if (Number.isFinite(stored) && stored >= 0 && stored <= 100) {
-      return Math.round(stored / 5) * 5
-    }
-  } catch { /* 저장소 접근 불가 시 기본값 */ }
-  return 50
+    if (Number.isFinite(stored) && stored >= 0 && stored <= 100) return Math.round(stored / 5) * 5
+  } catch { /* Storage may be unavailable. */ }
+  return 0
 }
 
+// A first-time visitor starts at 0%; later openings restore the user's choice.
 const volume = ref(loadStoredVolume())
-watch(volume, (v) => {
-  try { localStorage.setItem(VOLUME_STORAGE_KEY, String(v)) } catch { /* noop */ }
-  // 단계 이동마다 짧은 진동 틱 — 드르륵 감각 (지원 기기 한정)
-  try { navigator.vibrate?.(8) } catch { /* noop */ }
+watch(volume, (value) => {
+  try { localStorage.setItem(VOLUME_STORAGE_KEY, String(value)) } catch { /* noop */ }
 })
 const volumeFill = computed(() =>
   `linear-gradient(to right, var(--home-accent) ${volume.value}%, var(--home-panel-border) ${volume.value}%)`,

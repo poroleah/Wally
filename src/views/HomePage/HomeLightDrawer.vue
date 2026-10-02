@@ -192,12 +192,11 @@ const dialMarker = computed(() => {
     y: 89.459 + radius * Math.sin(angle),
   }
 })
-// 0%는 보드에 밝기 0이 없을 수 있어(uart-handoff §8) 전원 끄기로 보낸다.
-// 그 외 단계는 밝기로 보내며, 전원이 꺼져 있었다면 함께 켜진다(apply가 power:true 동봉).
+// Brightness and device power are independent: 0% darkens the lamp without
+// disabling the light/sensor device. Only the main toggle sends power:false.
 function setBrightness(value) {
   if (!connected.value) return
-  if (value === 0) apply({ power: false })
-  else apply({ brightness: value })
+  apply({ brightness: value })
 }
 </script>
 
@@ -322,6 +321,18 @@ function setBrightness(value) {
   border-color: var(--settings-toggle-on);
   background-color: var(--settings-toggle-on);
   box-shadow: inset 0 0 0.2rem rgba(255, 255, 255, 0.18), 0 0.1rem 0.35rem rgba(255, 176, 133, 0.28);
+}
+
+/* Match the camera control in dark mode: a plain dark track, without the
+   light outline contributed by the shared settings-toggle tokens. */
+:global(:root.theme-dark) .toggleTrack,
+:global(body.theme-dark) .toggleTrack,
+:global(#app.theme-dark) .toggleTrack,
+:global(:root.theme-dark) .toggleOn .toggleTrack,
+:global(body.theme-dark) .toggleOn .toggleTrack,
+:global(#app.theme-dark) .toggleOn .toggleTrack {
+  border: 0;
+  box-shadow: none;
 }
 
 .toggleThumb {

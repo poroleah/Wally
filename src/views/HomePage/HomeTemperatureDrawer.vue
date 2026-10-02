@@ -45,10 +45,10 @@
             <path d="M11.6 3.6a5.4 5.4 0 1 1-7.2 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
           </svg>
         </button>
-        <div :class="$style.statusText">
+        <button type="button" :class="$style.statusText" :aria-label="isPowerOn ? '냉난방 끄기' : '냉난방 켜기'" @click="togglePower">
           <div :class="$style.statusTitle">{{ statusTitle }}</div>
           <div :class="$style.statusHint">{{ isPowerOn ? '탭 하여 끄기' : '탭 하여 켜기' }}</div>
-        </div>
+        </button>
         <button
           type="button"
           :class="[$style.toggle, isWarm ? $style.toggleWarm : $style.toggleCool, !isPowerOn ? $style.toggleOff : '']"
@@ -268,20 +268,25 @@ const scheduleBanner = computed(() => {
   return { active: false, title: '설정된 예약이 없어요', subs: [] }
 })
 // ── 목업 상태: 서버가 /device를 한 번도 알려 주지 않은 동안(미배포 205 등)만 쓴다 ──
-const mockTarget = ref(25)
-const mockCurrent = ref(22)
-const mockWarm = ref(true)
+// A device snapshot is the source of truth. Until one arrives, keep the
+// controls in a safe inactive state rather than showing made-up readings.
+const mockTarget = ref(null)
+const mockCurrent = ref(null)
+const mockWarm = ref(false)
 
 // ── 서버 상태: connected가 되면 목업은 완전히 배제하고 서버 값만 표시한다 ──
 const connected = computed(() => device.connected)
 // 전원이 꺼지면 mode가 null로 오므로 마지막 모드 색을 유지한다
-const lastMode = ref('heat')
+const lastMode = ref('cool')
 watch(() => device.mode, (mode) => { if (mode != null) lastMode.value = mode }, { immediate: true })
+// Keep a mode selected while power is off. Sending a mode to the device API
+// also turns power on, so it is sent only with an explicit power-on action.
+const modeOverride = ref(null)
 
-const isWarm = computed(() => (connected.value ? lastMode.value !== 'cool' : mockWarm.value))
+const isWarm = computed(() => (connected.value ? (modeOverride.value ?? lastMode.value) !== 'cool' : mockWarm.value))
 // null = 보드가 아직 알려 주지 않음(재기동 직후·미통지) → 화면에는 '-'
 const targetTemperature = computed(() => (connected.value ? device.setTemp : mockTarget.value))
-const currentTemperature = computed(() => (connected.value ? device.roomTemp : mockCurrent.value))
+const currentTemperature = computed(() => (connected.value ? device.roomTemp : mockCurrent.value) ?? '-')
 
 const statusTitle = computed(() => {
   const mode = isWarm.value ? '난방' : '냉방'
@@ -293,7 +298,10 @@ const temperatureRange = computed(() => {
   if (connected.value) return tempRangeOf(isWarm.value ? 'heat' : 'cool')
   return isWarm.value ? { min: 20, max: 34 } : { min: 18, max: 24 }
 })
-const currentTemperatureRatio = computed(() => Math.min(Math.max((currentTemperature.value ?? 0) / 50, 0), 1))
+const currentTemperatureRatio = computed(() => {
+  const value = Number(currentTemperature.value)
+  return Number.isFinite(value) ? Math.min(Math.max(value / 50, 0), 1) : 0
+})
 const heatValueOffset = computed(() => String(100 - currentTemperatureRatio.value * 100))
 const temperatureKnobStyle = computed(() => {
   const angle = Math.PI * (1 - currentTemperatureRatio.value)
@@ -309,9 +317,13 @@ const apiMode = computed(() => (isWarm.value ? 'heat' : 'cool'))
 
 // 보드 연결 시: 화면을 직접 바꾸지 않고 서버에만 보낸다. 응답값(보드가 실제로
 // 알려 준 값)이 오면 computed가 그 값을 보여 준다. 목업일 때만 로컬 값을 바꾼다.
-function togglePower() {
+async function togglePower() {
   if (connected.value) {
-    apply({ power: !isPowerOn.value })
+    const turningOn = !isPowerOn.value
+    const applied = await apply(turningOn
+      ? { power: true, mode: apiMode.value }
+      : { power: false })
+    if (applied && turningOn) modeOverride.value = null
     return
   }
   mockPower.value = !mockPower.value
@@ -327,7 +339,8 @@ function stepTemperature(delta) {
     if (next !== device.setTemp) apply({ mode: device.mode, setTemp: next })
     return
   }
-  mockTarget.value = Math.min(max, Math.max(min, mockTarget.value + delta))
+  const current = Number.isFinite(mockTarget.value) ? mockTarget.value : min
+  mockTarget.value = Math.min(max, Math.max(min, current + delta))
   mockCurrent.value = mockTarget.value
 }
 
@@ -343,12 +356,14 @@ function lowerTemperature() {
 // 그 값이 응답으로 온다. 화면은 응답값만 표시한다.
 function toggleMode() {
   if (connected.value) {
+    if (!isPowerOn.value) {
+      modeOverride.value = isWarm.value ? 'cool' : 'heat'
+      return
+    }
     apply({ mode: isWarm.value ? 'cool' : 'heat' })
     return
   }
   mockWarm.value = !mockWarm.value
-  mockTarget.value = mockWarm.value ? 25 : 22
-  mockCurrent.value = mockWarm.value ? 23 : 25
 }
 </script>
 
@@ -551,6 +566,22 @@ function toggleMode() {
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.statusText:focus,
+.statusText:focus-visible {
+  outline: none;
+}
+
+.statusText:active {
+  transform: scale(0.98);
 }
 
 .statusTitle {
@@ -1020,6 +1051,17 @@ function toggleMode() {
   border-color: var(--settings-toggle-border);
   background-color: var(--settings-toggle-bg);
   box-shadow: var(--settings-toggle-shadow);
+}
+
+/* Use the borderless dark switch treatment from the camera controls. */
+:global(:root.theme-dark) .toggleChild,
+:global(body.theme-dark) .toggleChild,
+:global(#app.theme-dark) .toggleChild,
+:global(:root.theme-dark) .toggleOff .toggleChild,
+:global(body.theme-dark) .toggleOff .toggleChild,
+:global(#app.theme-dark) .toggleOff .toggleChild {
+  border: 0;
+  box-shadow: none;
 }
 
 .toggleItem {

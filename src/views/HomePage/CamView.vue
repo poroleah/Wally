@@ -224,12 +224,36 @@ import { usePtz } from '@/composables/usePtz'
 import { useWebRtcStream } from '@/composables/useWebRtcStream'
 import { getReliableLandscape, ORIENTATION_DEBOUNCE_MS } from '@/utils/viewportOrientation'
 
-const isMuted = ref(true)
+const CAMERA_CONTROL_STORAGE_KEY = 'wally:cameraControlState'
+
+function readCameraControlState() {
+  try {
+    const value = JSON.parse(window.localStorage.getItem(CAMERA_CONTROL_STORAGE_KEY) || '{}')
+    return {
+      muted: typeof value.muted === 'boolean' ? value.muted : true,
+      videoMode: typeof value.videoMode === 'boolean' ? value.videoMode : false,
+    }
+  } catch {
+    return { muted: true, videoMode: false }
+  }
+}
+
+function saveCameraControlState() {
+  try {
+    window.localStorage.setItem(CAMERA_CONTROL_STORAGE_KEY, JSON.stringify({
+      muted: isMuted.value,
+      videoMode: isVideoMode.value,
+    }))
+  } catch { /* Storage may be unavailable. */ }
+}
+
+const storedCameraControlState = readCameraControlState()
+const isMuted = ref(storedCameraControlState.muted)
 const isExpanded = ref(false)
 const isLandscape = ref(false)
 let webExpandedBeforeLandscape = false
 const isOrientationTransition = ref(false)
-const isVideoMode = ref(false)
+const isVideoMode = ref(storedCameraControlState.videoMode)
 const isRecording = ref(false)
 const captureFeedbackKey = ref(0)
 const captureModeFeedback = ref('')
@@ -1288,7 +1312,10 @@ watch(reconnectKey, async () => {
 watch(isMuted, () => {
   syncMutedState(inlineVideo.value)
   syncMutedState(expandedVideo.value)
+  saveCameraControlState()
 })
+
+watch(isVideoMode, saveCameraControlState)
 
 watch(isExpanded, async (expanded) => {
   setPortraitExpandedStatusBar(expanded)
